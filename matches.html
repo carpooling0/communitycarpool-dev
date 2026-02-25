@@ -992,6 +992,7 @@
     let activeJourneyIndex = 0
     let token = null
     let paginationState = {} // { submissionId: currentPage }
+    let pendingUndos = new Set() // matchIds where user clicked undo, awaiting new Yes/No choice
 
     // ============================================
     // INIT
@@ -1398,6 +1399,7 @@
     // UPDATE INTEREST (YES / NO)
     // ============================================
     async function updateInterest(matchId, submissionId, interest) {
+      pendingUndos.delete(matchId) // user made their choice — no longer pending undo
       try {
         const res = await fetch(`${SUPABASE_URL}/functions/v1/update-match-status`, {
           method: 'POST',
@@ -1520,6 +1522,20 @@
         if (!hasMatchChanges(data.journeys)) return
 
         journeys = data.journeys
+
+        // Re-apply any pending undo state — prevents poll from snapping back the UI
+        // when the user has clicked undo but hasn't yet chosen Yes or No
+        if (pendingUndos.size > 0) {
+          for (const journey of journeys) {
+            for (const match of journey.matches || []) {
+              if (pendingUndos.has(match.matchId)) {
+                match.myInterest = null
+                match.status = 'notified'
+              }
+            }
+          }
+        }
+
         recalcPendingCounts()
         renderTabs()
         renderAllPanels()
@@ -1651,6 +1667,7 @@
     // Undo a "No" decline — show Yes/No again
     function undoDecline(matchId, event) {
       event.stopPropagation()
+      pendingUndos.add(matchId)
       for (const journey of journeys) {
         const match = journey.matches.find(m => m.matchId === matchId)
         if (match) {
@@ -1667,6 +1684,7 @@
     // Undo an "Interested / Yes" — show Yes/No again
     function undoInterest(matchId, event) {
       event.stopPropagation()
+      pendingUndos.add(matchId)
       for (const journey of journeys) {
         const match = journey.matches.find(m => m.matchId === matchId)
         if (match) {
