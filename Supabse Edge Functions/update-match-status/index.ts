@@ -53,7 +53,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
 }
 
 // ── Build mutual match email HTML for one recipient ──
-function buildMutualEmail(recipientName: string, otherName: string, otherEmail: string, otherFrom: string, otherTo: string, myToken: string): string {
+function buildMutualEmail(recipientName: string, otherName: string, otherEmail: string, otherFrom: string, otherTo: string, myToken: string, mySubmissionId: number): string {
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
   <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,system-ui,sans-serif;">
   <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
@@ -77,7 +77,7 @@ function buildMutualEmail(recipientName: string, otherName: string, otherEmail: 
         <div style="font-size:14px;color:#374151;"><span style="color:#dc2626;font-size:12px;">&#9679;</span>&nbsp;${otherTo}</div>
       </div>
       <div style="text-align:center;">
-        <a href="${SITE_URL}/matches.html?token=${myToken}" style="display:inline-block;background:#16a34a;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">View My Matches &#x2192;</a>
+        <a href="${SITE_URL}/matches.html?token=${myToken}&journey=${mySubmissionId}" style="display:inline-block;background:#16a34a;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">View My Matches &#x2192;</a>
       </div>
     </div>
     <div style="text-align:center;margin-top:24px;color:#9ca3af;font-size:13px;">
@@ -160,7 +160,8 @@ Deno.serve(async (req) => {
             const htmlA = buildMutualEmail(
               userA.name, userB.name, userB.email,
               subB.from_location, subB.to_location,
-              userA.match_page_token
+              userA.match_page_token,
+              subA.submission_id
             )
             await sendEmail(userA.email, '🎉 You have a mutual match! Contact details revealed', htmlA)
             supabase.from('events').insert({ event_type: 'mutual_match_email_sent', match_id: matchId, metadata: { recipient: userA.email } })
@@ -172,7 +173,8 @@ Deno.serve(async (req) => {
             const htmlB = buildMutualEmail(
               userB.name, userA.name, userA.email,
               subA.from_location, subA.to_location,
-              userB.match_page_token
+              userB.match_page_token,
+              subB.submission_id
             )
             await sendEmail(userB.email, '🎉 You have a mutual match! Contact details revealed', htmlB)
             supabase.from('events').insert({ event_type: 'mutual_match_email_sent', match_id: matchId, metadata: { recipient: userB.email } })
