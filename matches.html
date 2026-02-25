@@ -1231,7 +1231,7 @@
         ? `<div class="match-name revealed" title="${escapeHtml(match.otherUser.name)}">✓ ${escapeHtml(truncName(match.otherUser.name))}</div>`
         : `<div class="match-name masked" title="${escapeHtml(match.otherUser.name)}">${escapeHtml(truncName(match.otherUser.name))}</div>`
 
-      const myStatusHtml = getMyStatusPill(match)
+      const myStatusHtml = getMyStatusPill(match, submissionId)
       const theirStatusHtml = getTheirStatusPill(match)
       const actionsHtml = getActionsHtml(match, submissionId)
 
@@ -1266,10 +1266,10 @@
       `
     }
 
-    function getMyStatusPill(match) {
+    function getMyStatusPill(match, submissionId) {
       if (match.isMutual) return `<span class="interest-pill pill-mutual">🎉 Mutual!</span>`
-      if (match.myInterest === 'yes') return `<span class="interest-pill pill-yes clickable" onclick="undoInterest(${match.matchId}, event)" title="Click to undo – show Yes/No again">✓ Interested  ↺</span>`
-      if (match.myInterest === 'no') return `<span class="interest-pill pill-no clickable" onclick="undoDecline(${match.matchId}, event)" title="Click to undo – show Yes/No again">✗ Declined  ↺</span>`
+      if (match.myInterest === 'yes') return `<span class="interest-pill pill-yes clickable" onclick="undoInterest(${match.matchId}, ${submissionId}, event)" title="Click to undo – show Yes/No again">✓ Interested  ↺</span>`
+      if (match.myInterest === 'no') return `<span class="interest-pill pill-no clickable" onclick="undoDecline(${match.matchId}, ${submissionId}, event)" title="Click to undo – show Yes/No again">✗ Declined  ↺</span>`
       if (match.theirInterest === 'yes') return `<span class="interest-pill pill-respond">⚡ Respond!</span>`
       return `<span class="interest-pill pill-pending">○ Pending</span>`
     }
@@ -1664,38 +1664,46 @@
       activateTab(activeJourneyIndex, false)
     }
 
-    // Undo a "No" decline — show Yes/No again
-    function undoDecline(matchId, event) {
+    // Undo a "No" decline — persist reset to DB then show Yes/No again
+    async function undoDecline(matchId, submissionId, event) {
       event.stopPropagation()
-      pendingUndos.add(matchId)
-      for (const journey of journeys) {
-        const match = journey.matches.find(m => m.matchId === matchId)
-        if (match) {
-          match.myInterest = null   // reset so Yes/No buttons reappear
-          match.status = 'notified' // treat as unresponded
-          break
-        }
-      }
-      renderAllPanels()
-      activateTab(activeJourneyIndex, false)
-      showToast('Reverted — please choose Yes or No.', '')
+      await resetInterest(matchId, submissionId)
     }
 
-    // Undo an "Interested / Yes" — show Yes/No again
-    function undoInterest(matchId, event) {
+    // Undo an "Interested / Yes" — persist reset to DB then show Yes/No again
+    async function undoInterest(matchId, submissionId, event) {
       event.stopPropagation()
-      pendingUndos.add(matchId)
-      for (const journey of journeys) {
-        const match = journey.matches.find(m => m.matchId === matchId)
-        if (match) {
-          match.myInterest = null   // reset so Yes/No buttons reappear
-          match.status = 'notified' // treat as unresponded
-          break
+      await resetInterest(matchId, submissionId)
+    }
+
+    // Shared logic: call API to reset interest to null, update local state, re-render
+    async function resetInterest(matchId, submissionId) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/update-match-status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ token, matchId, submissionId, interest: 'reset' })
+        })
+        const data = await res.json()
+        if (!data.success) { showToast(data.error || 'Could not undo. Please try again.', 'error'); return }
+
+        // Update local state immediately — no need to wait for next poll
+        for (const journey of journeys) {
+          const match = journey.matches.find(m => m.matchId === matchId)
+          if (match) {
+            match.myInterest = null
+            match.status = 'notified'
+            break
+          }
         }
+        pendingUndos.delete(matchId)
+        recalcPendingCounts()
+        renderAllPanels()
+        activateTab(activeJourneyIndex, false)
+        showToast('Reverted — please choose Yes or No.', '')
+      } catch (err) {
+        showToast('Error undoing. Please try again.', 'error')
       }
-      renderAllPanels()
-      activateTab(activeJourneyIndex, false)
-      showToast('Reverted — please choose Yes or No.', '')
     }
 
     // ============================================
