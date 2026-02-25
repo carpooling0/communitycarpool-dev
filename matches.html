@@ -1029,6 +1029,11 @@
         // Render page
         renderPage(journeyParam)
 
+        // Start background polling if configured (0 = disabled)
+        if (data.pollIntervalSeconds > 0) {
+          setInterval(pollForUpdates, data.pollIntervalSeconds * 1000)
+        }
+
         // Track event
         trackEvent('matches_page_viewed')
 
@@ -1086,11 +1091,6 @@
       renderTabs()
       renderAllPanels()
       activateTab(activeJourneyIndex)
-
-      // Start background polling if configured (0 = disabled)
-      if (data.pollIntervalSeconds > 0) {
-        setInterval(pollForUpdates, data.pollIntervalSeconds * 1000)
-      }
     }
 
     // ============================================
