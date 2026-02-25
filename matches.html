@@ -1687,6 +1687,7 @@
 
     // Shared logic: call API to reset interest to null, update local state, re-render
     async function resetInterest(matchId, submissionId) {
+      pendingUndos.add(matchId) // protect from poll snapping back during in-flight API call
       try {
         const res = await fetch(`${SUPABASE_URL}/functions/v1/update-match-status`, {
           method: 'POST',
@@ -1694,7 +1695,11 @@
           body: JSON.stringify({ token, matchId, submissionId, interest: 'reset' })
         })
         const data = await res.json()
-        if (!data.success) { showToast(data.error || 'Could not undo. Please try again.', 'error'); return }
+        if (!data.success) {
+          pendingUndos.delete(matchId) // failed — stop protecting
+          showToast(data.error || 'Could not undo. Please try again.', 'error')
+          return
+        }
 
         // Update local state immediately — no need to wait for next poll
         for (const journey of journeys) {
@@ -1705,12 +1710,13 @@
             break
           }
         }
-        pendingUndos.delete(matchId)
+        pendingUndos.delete(matchId) // success — stop protecting, local state is already correct
         recalcPendingCounts()
         renderAllPanels()
         activateTab(activeJourneyIndex, false)
         showToast('Reverted — please choose Yes or No.', '')
       } catch (err) {
+        pendingUndos.delete(matchId) // error — stop protecting
         showToast('Error undoing. Please try again.', 'error')
       }
     }
