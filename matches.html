@@ -1086,6 +1086,11 @@
       renderTabs()
       renderAllPanels()
       activateTab(activeJourneyIndex)
+
+      // Start background polling if configured (0 = disabled)
+      if (data.pollIntervalSeconds > 0) {
+        setInterval(pollForUpdates, data.pollIntervalSeconds * 1000)
+      }
     }
 
     // ============================================
@@ -1493,6 +1498,64 @@
       } catch (err) {
         console.error('Reload failed:', err)
       }
+    }
+
+    // ============================================
+    // BACKGROUND POLLING (picks up other user's actions)
+    // ============================================
+    async function pollForUpdates() {
+      // Skip poll when tab is hidden — no point refreshing what the user can't see
+      if (document.visibilityState === 'hidden') return
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/get-matches-page?token=${encodeURIComponent(token)}&poll=true`, {
+          headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+        })
+        const data = await res.json()
+        if (!data.success) return
+
+        // Detect new mutual matches BEFORE overwriting journeys
+        const newMutual = hasNewMutual(data.journeys)
+
+        // Only re-render if something actually changed — avoids unnecessary flicker
+        if (!hasMatchChanges(data.journeys)) return
+
+        journeys = data.journeys
+        recalcPendingCounts()
+        renderTabs()
+        renderAllPanels()
+        activateTab(activeJourneyIndex, false)
+
+        if (newMutual) showToast('🎉 Mutual match! Contact details revealed!', 'success')
+      } catch (e) {
+        // Silent fail — never surface polling errors to the user
+      }
+    }
+
+    function hasMatchChanges(newJourneys) {
+      for (const nj of newJourneys) {
+        const oj = journeys.find(j => j.submissionId === nj.submissionId)
+        if (!oj) return true
+        for (const nm of nj.matches || []) {
+          const om = (oj.matches || []).find(m => m.matchId === nm.matchId)
+          if (!om) return true
+          if (om.status !== nm.status || om.theirInterest !== nm.theirInterest) return true
+        }
+      }
+      return false
+    }
+
+    function hasNewMutual(newJourneys) {
+      for (const nj of newJourneys) {
+        const oj = journeys.find(j => j.submissionId === nj.submissionId)
+        if (!oj) continue
+        for (const nm of nj.matches || []) {
+          const om = (oj.matches || []).find(m => m.matchId === nm.matchId)
+          if (!om) continue
+          // Was not contact_revealed before, is now
+          if (om.status !== 'contact_revealed' && nm.status === 'contact_revealed') return true
+        }
+      }
+      return false
     }
 
     // ============================================
