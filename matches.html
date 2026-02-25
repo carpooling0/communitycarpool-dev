@@ -1563,7 +1563,7 @@
         for (const nm of nj.matches || []) {
           const om = (oj.matches || []).find(m => m.matchId === nm.matchId)
           if (!om) return true
-          if (om.status !== nm.status || om.theirInterest !== nm.theirInterest) return true
+          if (om.status !== nm.status || om.theirInterest !== nm.theirInterest || om.myInterest !== nm.myInterest) return true
         }
       }
       return false
