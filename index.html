@@ -1050,9 +1050,10 @@
         // ============================================
         // ORG / CLIENT MODE CONFIG
         // ============================================
-        let orgCode = null;       // set from ?client=xxx URL param
-        let orgLocations = [];    // fetched from get-org-locations API; empty = use Google Places for To field
-        let orgLogoUrl = null;    // org logo URL from DB; null = no logo
+        let orgCode = null;          // set from ?client=xxx URL param
+        let orgLocations = [];       // fetched from get-org-locations API; empty = use Google Places for To field
+        let orgLogoUrl = null;       // org logo URL from DB; null = no logo
+        let orgCustomMessage = null; // label shown under logo; from custom_message in DB
 
         // ============================================
         // SHARE LOGIC
@@ -1686,6 +1687,7 @@
                 if (data.success) {
                     orgName = data.org.name || orgCode;
                     orgLogoUrl = data.org.logoUrl || null;
+                    orgCustomMessage = data.org.customMessage || null;
                     orgLocations = data.locations || [];
                 }
             } catch (e) {
@@ -1716,7 +1718,7 @@
 
                 const label = document.createElement('p');
                 label.style.cssText = 'text-align:center;color:#374151;font-size:14px;font-weight:600;margin:0;';
-                label.textContent = `${orgName} Employee Carpooling`;
+                label.textContent = orgCustomMessage || `${orgName} Employee Carpooling`;
                 brandingBlock.appendChild(label);
 
                 description.after(brandingBlock);
