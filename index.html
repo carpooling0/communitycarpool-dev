@@ -1698,16 +1698,26 @@
             // Insert org branding block after .description (below generic CC content)
             const description = document.querySelector('.description');
             if (description) {
-                const logoHtml = orgLogoUrl
-                    ? `<img src="${orgLogoUrl}" alt="${orgName}" style="max-width:180px;height:auto;display:block;margin:0 auto 12px;">`
-                    : '';
                 const brandingBlock = document.createElement('div');
                 brandingBlock.style.cssText = 'margin-top:16px;';
-                brandingBlock.innerHTML = `
-                    <hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 16px;">
-                    ${logoHtml}
-                    <p style="text-align:center;color:#374151;font-size:14px;font-weight:600;margin:0;">${orgName} Employee Carpooling</p>
-                `;
+
+                const hr = document.createElement('hr');
+                hr.style.cssText = 'border:none;border-top:1px solid #e5e7eb;margin:0 0 16px;';
+                brandingBlock.appendChild(hr);
+
+                if (orgLogoUrl) {
+                    const img = document.createElement('img');
+                    img.setAttribute('src', orgLogoUrl); // use setAttribute so & in URL is never HTML-parsed
+                    img.setAttribute('alt', orgName);
+                    img.style.cssText = 'max-width:180px;height:auto;display:block;margin:0 auto 12px;';
+                    brandingBlock.appendChild(img);
+                }
+
+                const label = document.createElement('p');
+                label.style.cssText = 'text-align:center;color:#374151;font-size:14px;font-weight:600;margin:0;';
+                label.textContent = `${orgName} Employee Carpooling`;
+                brandingBlock.appendChild(label);
+
                 description.after(brandingBlock);
             }
 
