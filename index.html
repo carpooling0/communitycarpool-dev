@@ -1048,19 +1048,10 @@
         const SHARE_URL = 'https://communitycarpool.org/';
 
         // ============================================
-        // DAMAC VERSION CONFIG
+        // ORG / CLIENT MODE CONFIG
         // ============================================
-        const DAMAC_LOCATIONS = {
-            'shatha': {
-                name: 'Shatha Tower, Al Sufouh',
-                latlng: '25.0895035,55.1530186'
-            },
-            'executive': {
-                name: 'DAMAC Executive Heights, Barsha Heights',
-                latlng: '25.0953478,55.1728533'
-            }
-        };
-        let isDamacMode = false;
+        let orgCode = null;       // set from ?client=xxx URL param
+        let orgLocations = [];    // fetched from get-org-locations API; empty = use Google Places for To field
 
         // ============================================
         // SHARE LOGIC
@@ -1321,7 +1312,7 @@
             'kw': { lat: 29.3117, lng: 47.4818 }
         };
 
-        function initAutocomplete() {
+        async function initAutocomplete() {
             const countryCenter = COUNTRY_CENTERS[userCountry] || COUNTRY_CENTERS['ae'];
             const circle = new google.maps.Circle({
                 center: { lat: countryCenter.lat, lng: countryCenter.lng },
@@ -1372,8 +1363,9 @@
                 updateProgress();
             });
 
-            // TO
-            if (!isDamacMode) {
+            // TO — wait for org mode to resolve before deciding whether to use dropdown or Google Places
+            await orgModeReady;
+            if (orgLocations.length === 0) {
                 toAutocomplete = new google.maps.places.Autocomplete(toInput, options);
                 toAutocomplete.setBounds(bounds);
                 toAutocomplete.addListener('place_changed', () => {
@@ -1526,7 +1518,8 @@
                 distance: distanceLabel, // Send label (e.g., "1 - 3 km")
                 distanceValue: distanceStep, // Send step value (1-4)
                 ip: userIP || 'unknown',
-                country: userCountry || 'ae'
+                country: userCountry || 'ae',
+                orgCode: orgCode || undefined
             };
 
             console.log('Submitting:', data);
@@ -1671,42 +1664,74 @@
 
 
         // ============================================
-        // DAMAC MODE INITIALIZATION
+        // ORG MODE INITIALIZATION
         // ============================================
-        function initDamacMode() {
+        async function initOrgMode() {
             const params = new URLSearchParams(window.location.search);
-            if (params.get('client') === 'damac') {
-                isDamacMode = true;
-                console.log('Damac client mode active');
+            const clientParam = params.get('client');
+            if (!clientParam) return;
 
-                // Change toInput to a dropdown
+            orgCode = clientParam.toLowerCase();
+            let orgName = orgCode;
+
+            // Fetch org details + locations from API
+            try {
+                const res = await fetch(
+                    `${SUPABASE_URL}/functions/v1/get-org-locations?org=${encodeURIComponent(orgCode)}`,
+                    { headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+                );
+                const data = await res.json();
+                if (data.success) {
+                    orgName = data.org.name || orgCode;
+                    orgLocations = data.locations || [];
+                }
+            } catch (e) {
+                console.warn('Could not fetch org locations, falling back to Google Places for To field');
+                orgLocations = [];
+            }
+
+            // Update page title
+            document.title = `${orgName} Carpool | Community Carpool`;
+
+            // Insert subtitle under tagline
+            const tagline = document.querySelector('.tagline');
+            if (tagline) {
+                const subtitle = document.createElement('p');
+                subtitle.style.cssText = 'text-align:center;color:#6b7280;font-size:13px;margin:-10px 0 4px;font-weight:500;';
+                subtitle.textContent = `${orgName} Employee Carpooling`;
+                tagline.after(subtitle);
+            }
+
+            // Replace To field with dropdown if org has locations
+            if (orgLocations.length > 0) {
                 const toWrapper = toInput.parentElement;
+                const optionsHtml = orgLocations.map(loc =>
+                    `<option value="${loc.location_id}">${loc.location_name}</option>`
+                ).join('');
                 toWrapper.innerHTML = `
-                    <select id="toInput" class="place-input" style="height: 48px; -webkit-appearance: none; appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2316a34a%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 0.7rem top 50%; background-size: 0.65rem auto; padding-right: 3rem;">
+                    <select id="toInput" class="place-input" style="height:48px;-webkit-appearance:none;appearance:none;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2316a34a%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');background-repeat:no-repeat;background-position:right 0.7rem top 50%;background-size:0.65rem auto;padding-right:3rem;">
                         <option value="" disabled selected>Select Destination</option>
-                        <option value="shatha">Shatha Tower</option>
-                        <option value="executive">DAMAC Executive Heights</option>
+                        ${optionsHtml}
                     </select>
-                    <div class="location-status" id="toStatus" style="right: 40px;"></div>
+                    <div class="location-status" id="toStatus" style="right:40px;"></div>
                 `;
-
-                // Re-cache reference and add listener
                 const newToInput = document.getElementById('toInput');
                 newToInput.addEventListener('change', (e) => {
-                    const loc = DAMAC_LOCATIONS[e.target.value];
+                    const loc = orgLocations.find(l => String(l.location_id) === e.target.value);
                     if (loc) {
-                        toLocationText = loc.name;
-                        toLatLng = loc.latlng;
+                        toLocationText = loc.location_name;
+                        toLatLng = loc.location_latlng;
                         toSelected = true;
                         setLocationStatus('to', 'success');
                     }
                     updateProgress();
                 });
             }
+            // else: orgLocations empty → Google Places autocomplete runs normally for To field
         }
 
-        // Run Damac check before anything else
-        initDamacMode();
+        // Start org mode fetch immediately; initAutocomplete will await it before setting up To field
+        const orgModeReady = initOrgMode();
 
         // Initial
         updateProgress();

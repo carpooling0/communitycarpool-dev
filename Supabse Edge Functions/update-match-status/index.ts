@@ -59,7 +59,7 @@ function buildMutualEmail(recipientName: string, otherName: string, otherEmail: 
   <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
     <div style="text-align:center;margin-bottom:32px;">
       <a href="${SITE_URL}" style="text-decoration:none;">
-        <img src="${SITE_URL}/logo_with slogan.png" alt="Community Carpool" style="height:64px;width:auto;display:block;margin:0 auto;" />
+        <img src="${SITE_URL}/logo_with%20slogan.png" alt="Community Carpool" style="height:64px;width:auto;display:block;margin:0 auto;" />
       </a>
     </div>
     <div style="background:white;border-radius:16px;padding:32px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
