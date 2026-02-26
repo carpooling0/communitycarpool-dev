@@ -1677,8 +1677,9 @@
 
             // Fetch org details + locations from API
             try {
+                const SUPABASE_BASE = 'https://tbkjealpnoriwdosvmju.supabase.co';
                 const res = await fetch(
-                    `${SUPABASE_URL}/functions/v1/get-org-locations?org=${encodeURIComponent(orgCode)}`,
+                    `${SUPABASE_BASE}/functions/v1/get-org-locations?org=${encodeURIComponent(orgCode)}`,
                     { headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
                 );
                 const data = await res.json();
