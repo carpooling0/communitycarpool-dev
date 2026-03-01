@@ -143,8 +143,8 @@ Deno.serve(async (req) => {
       newStatus = 'contact_revealed'
       await supabase.from('matches').update({ status: 'contact_revealed' }).eq('match_id', matchId)
       await supabase.from('events').insert([
-        { event_type: 'mutual_match_confirmed', user_id: user.user_id, match_id: matchId },
-        { event_type: 'contact_details_revealed', match_id: matchId }
+        { event_type: 'mutual_match_confirmed', user_id: user.user_id, submission_id: submissionId, match_id: matchId },
+        { event_type: 'contact_details_revealed', user_id: user.user_id, submission_id: submissionId, match_id: matchId }
       ])
 
       // Send mutual match emails to both users — fire-and-forget (don't block response)
