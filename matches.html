@@ -1658,9 +1658,11 @@
       }
       if (!targetMatch) return
 
-      if (targetMatch._carpoolReported) {
-        // Undo — revert to original button
+      if (targetMatch._carpoolReported || targetMatch.successReported) {
+        // Undo — revert both local flags and update DB
         targetMatch._carpoolReported = false
+        targetMatch.successReported = false
+        await trackEvent('carpooling_undo', matchId)
         showToast('Carpool report undone.', '')
       } else {
         // Confirm + report
