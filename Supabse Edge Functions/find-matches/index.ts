@@ -11,28 +11,72 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
 }
 
-// Road distance via Mapbox Directions API — returns actual driving distance in km.
-// Falls back to haversine if token missing, method is 'haversine', or API call fails.
-async function roadDistance(
+// ── Distance modes ────────────────────────────────────────────────────────────
+// 'haversine' → straight-line for everything
+// 'mapbox'    → Mapbox Directions API for everything (proximity + disambiguation)
+// 'hybrid'    → Mapbox for proximity scoring, haversine for direction disambiguation
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function mapboxDistance(
+  lat1: number, lng1: number, lat2: number, lng2: number,
+  mapboxToken: string
+): Promise<number> {
+  // Mapbox Directions: coordinates are lng,lat (note order)
+  const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${lng1},${lat1};${lng2},${lat2}` +
+    `?access_token=${mapboxToken}&overview=false&steps=false`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Mapbox HTTP ${res.status}`)
+  const json = await res.json()
+  if (!json.routes?.length) throw new Error('No route found')
+  return json.routes[0].distance / 1000  // metres → km
+}
+
+// calcDistance: respects distance_method config for proximity scoring
+// 'mapbox' | 'hybrid' → Mapbox; 'haversine' → straight-line
+async function calcDistance(
   lat1: number, lng1: number, lat2: number, lng2: number,
   method: string, mapboxToken: string
 ): Promise<number> {
-  if (method !== 'mapbox' || !mapboxToken) {
+  if (method === 'haversine') {
+    return haversineDistance(lat1, lng1, lat2, lng2)
+  }
+  // mapbox or hybrid — both use Mapbox for proximity scoring
+  if (!mapboxToken) {
+    console.error(`MAPBOX_TOKEN not set but distance_method='${method}' — falling back to haversine. Set MAPBOX_TOKEN in Edge Function secrets.`)
     return haversineDistance(lat1, lng1, lat2, lng2)
   }
   try {
-    // Mapbox Directions: coordinates are lng,lat (note order)
-    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${lng1},${lat1};${lng2},${lat2}` +
-      `?access_token=${mapboxToken}&overview=false&steps=false`
-    const res = await fetch(url)
-    if (!res.ok) throw new Error(`Mapbox HTTP ${res.status}`)
-    const json = await res.json()
-    if (!json.routes?.length) throw new Error('No route found')
-    return json.routes[0].distance / 1000  // metres → km
+    return await mapboxDistance(lat1, lng1, lat2, lng2, mapboxToken)
   } catch (err: any) {
-    console.warn(`Mapbox fallback to haversine: ${err.message}`)
+    console.error(`Mapbox failed, falling back to haversine: ${err.message}`)
     return haversineDistance(lat1, lng1, lat2, lng2)
   }
+}
+
+// disambiguateDirection: picks same vs reverse for candidates appearing in both spatial lists.
+// 'mapbox'              → 4 Mapbox calls (fully accurate road distances)
+// 'haversine' | 'hybrid' → haversine (O(1), sufficient — relative comparison only)
+async function disambiguateDirection(
+  fromLat: number, fromLng: number, toLat: number, toLng: number,
+  candFromLat: number, candFromLng: number, candToLat: number, candToLng: number,
+  method: string, mapboxToken: string
+): Promise<boolean> {  // returns true if reversed
+  if (method === 'mapbox' && mapboxToken) {
+    // All 4 legs via Mapbox — parallel calls
+    const [sdStart, sdEnd, rvStart, rvEnd] = await Promise.all([
+      calcDistance(fromLat, fromLng, candFromLat, candFromLng, method, mapboxToken),
+      calcDistance(toLat,   toLng,   candToLat,   candToLng,   method, mapboxToken),
+      calcDistance(fromLat, fromLng, candToLat,   candToLng,   method, mapboxToken),
+      calcDistance(toLat,   toLng,   candFromLat, candFromLng, method, mapboxToken),
+    ])
+    return (rvStart + rvEnd) < (sdStart + sdEnd)
+  }
+  // haversine or hybrid: straight-line is sufficient for relative direction comparison
+  const sameDirTotal  = haversineDistance(fromLat, fromLng, candFromLat, candFromLng)
+                      + haversineDistance(toLat,   toLng,   candToLat,   candToLng)
+  const reversedTotal = haversineDistance(fromLat, fromLng, candToLat,   candToLng)
+                      + haversineDistance(toLat,   toLng,   candFromLat, candFromLng)
+  return reversedTotal < sameDirTotal
 }
 
 Deno.serve(async (req) => {
@@ -42,8 +86,13 @@ Deno.serve(async (req) => {
 
     // Read distance method config and Mapbox token once per request
     const { data: methodConfig } = await supabase.from('config').select('value').eq('key', 'distance_method').single()
-    const distanceMethod = methodConfig?.value || 'haversine'  // 'haversine' | 'mapbox'
+    const distanceMethod = methodConfig?.value || 'haversine'  // 'haversine' | 'mapbox' | 'hybrid'
     const mapboxToken = Deno.env.get('MAPBOX_TOKEN') || ''
+
+    // Warn early if Mapbox expected but token missing
+    if ((distanceMethod === 'mapbox' || distanceMethod === 'hybrid') && !mapboxToken) {
+      console.error(`distance_method='${distanceMethod}' but MAPBOX_TOKEN is not set — all distances will use haversine fallback. Set MAPBOX_TOKEN in Supabase Edge Function secrets.`)
+    }
 
     // Fetch submission coords as floats (stored directly — no WKB parsing needed)
     const { data: sub, error: subError } = await supabase.rpc('get_submission_coords', { p_id: submissionId }).single()
@@ -63,7 +112,6 @@ Deno.serve(async (req) => {
     }
 
     // ── Call 1: same-direction candidates ──────────────────────────────────
-    // Spatial filter: candidate.FROM ≈ my FROM  AND  candidate.TO ≈ my TO
     const { data: sameDirCandidates } = await supabase.rpc('find_nearby_users', {
       user_from_lat: fromLat, user_from_lng: fromLng,
       user_to_lat:   toLat,   user_to_lng:   toLng,
@@ -71,8 +119,6 @@ Deno.serve(async (req) => {
     })
 
     // ── Call 2: reverse-direction candidates ───────────────────────────────
-    // Spatial filter: candidate.FROM ≈ my TO  AND  candidate.TO ≈ my FROM
-    // Catches opposite-direction commuters on the same road — ideal carpoolers.
     const { data: reverseCandidates } = await supabase.rpc('find_nearby_users', {
       user_from_lat: toLat,   user_from_lng: toLng,
       user_to_lat:   fromLat, user_to_lng:   fromLng,
@@ -80,15 +126,8 @@ Deno.serve(async (req) => {
     })
 
     // ── Merge, deduplicate, tag reversed candidates ────────────────────────
-    // A candidate can appear in BOTH lists when FROM/TO endpoints are spatially close
-    // (e.g. exact-reverse routes, or same-direction routes within a compact area).
-    // For candidates in only one list → direction is unambiguous.
-    // For candidates in BOTH lists → compute both distance formulas and pick the
-    // classification that gives the SMALLER total distance. This correctly handles:
-    //   - Exact reverse (A→B vs B→A): reversed formula gives ~0 km, same-dir gives large
-    //   - Same-direction in compact area: same-dir formula gives small, reversed gives large
-    const sameDirIds  = new Set((sameDirCandidates  || []).map((c: any) => c.submission_id))
-    const reverseIds  = new Set((reverseCandidates  || []).map((c: any) => c.submission_id))
+    const sameDirIds = new Set((sameDirCandidates  || []).map((c: any) => c.submission_id))
+    const reverseIds = new Set((reverseCandidates  || []).map((c: any) => c.submission_id))
 
     const allCandidates: any[] = []
     const seen = new Set<number>()
@@ -107,15 +146,17 @@ Deno.serve(async (req) => {
         seen.add(c.submission_id)
       }
     }
-    // Candidates in BOTH lists → pick direction by comparing haversine distances
-    // (use haversine here for O(1) cost; Mapbox used later only for the winning formula)
+    // Candidates in BOTH lists → disambiguate direction using configured method
+    // 'mapbox': 4 Mapbox calls per ambiguous candidate (fully accurate)
+    // 'haversine'|'hybrid': haversine (O(1), sufficient for relative comparison)
     for (const c of (sameDirCandidates || [])) {
       if (seen.has(c.submission_id)) continue
-      const sameDirTotal = haversineDistance(fromLat, fromLng, c.from_lat, c.from_lng)
-                         + haversineDistance(toLat,   toLng,   c.to_lat,   c.to_lng)
-      const reversedTotal = haversineDistance(fromLat, fromLng, c.to_lat,   c.to_lng)
-                          + haversineDistance(toLat,   toLng,   c.from_lat, c.from_lng)
-      allCandidates.push({ ...c, _reversed: reversedTotal < sameDirTotal })
+      const isReversed = await disambiguateDirection(
+        fromLat, fromLng, toLat, toLng,
+        c.from_lat, c.from_lng, c.to_lat, c.to_lng,
+        distanceMethod, mapboxToken
+      )
+      allCandidates.push({ ...c, _reversed: isReversed })
       seen.add(c.submission_id)
     }
 
@@ -128,7 +169,6 @@ Deno.serve(async (req) => {
     let matchesFound = 0
 
     for (const candidate of allCandidates) {
-      // Skip if match already exists (unique index on LEAST/GREATEST pair)
       const minId = Math.min(submissionId, candidate.submission_id)
       const maxId = Math.max(submissionId, candidate.submission_id)
       const { data: existing } = await supabase.from('matches')
@@ -144,17 +184,15 @@ Deno.serve(async (req) => {
       // ── Compute pickup/dropoff proximity ────────────────────────────────
       // Same-direction:  my FROM ↔ their FROM,  my TO ↔ their TO
       // Reverse-route:   my FROM ↔ their TO,    my TO ↔ their FROM
-      // Uses road distance (Mapbox) when distance_method = 'mapbox', haversine otherwise.
       const [startDist, endDist] = await Promise.all([
         isReversed
-          ? roadDistance(fromLat, fromLng, candToLat,   candToLng,   distanceMethod, mapboxToken)
-          : roadDistance(fromLat, fromLng, candFromLat, candFromLng, distanceMethod, mapboxToken),
+          ? calcDistance(fromLat, fromLng, candToLat,   candToLng,   distanceMethod, mapboxToken)
+          : calcDistance(fromLat, fromLng, candFromLat, candFromLng, distanceMethod, mapboxToken),
         isReversed
-          ? roadDistance(toLat, toLng, candFromLat, candFromLng, distanceMethod, mapboxToken)
-          : roadDistance(toLat, toLng, candToLat,   candToLng,   distanceMethod, mapboxToken)
+          ? calcDistance(toLat, toLng, candFromLat, candFromLng, distanceMethod, mapboxToken)
+          : calcDistance(toLat, toLng, candToLat,   candToLng,   distanceMethod, mapboxToken)
       ])
 
-      // Use the looser of the two users' distance preferences
       const maxRadius = Math.max(sub.distance_pref || 3, candidate.distance_pref || 3)
 
       if (startDist <= maxRadius && endDist <= maxRadius) {
@@ -188,11 +226,6 @@ Deno.serve(async (req) => {
     }
 
     // ── Instant email notification ─────────────────────────────────────────
-    // When matching_mode = 'instant', fire batch-send-emails immediately after
-    // creating matches so users are notified within seconds, not the next cron cycle.
-    // Fire-and-forget (no await) — email latency must not block this response.
-    // Idempotent: batch-send-emails only processes notification_sent=false matches,
-    // so the daily cron running later will simply find nothing to do.
     if (matchesFound > 0) {
       const { data: modeConfig } = await supabase.from('config').select('value').eq('key', 'matching_mode').single()
       if (modeConfig?.value === 'instant') {

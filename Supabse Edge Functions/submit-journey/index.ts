@@ -25,13 +25,21 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
 }
 
-// Road distance via Mapbox Directions API — returns actual driving distance in km.
-// Falls back to haversine if token missing, method is 'haversine', or API call fails.
+// ── Distance modes ────────────────────────────────────────────────────────────
+// 'haversine' → straight-line for everything
+// 'mapbox'    → Mapbox Directions API (actual road distance)
+// 'hybrid'    → same as 'mapbox' for journey distance; haversine used in find-matches disambiguation only
+// ─────────────────────────────────────────────────────────────────────────────
 async function roadDistance(
   lat1: number, lng1: number, lat2: number, lng2: number,
   method: string, mapboxToken: string
 ): Promise<number> {
-  if (method !== 'mapbox' || !mapboxToken) {
+  if (method === 'haversine') {
+    return haversineDistance(lat1, lng1, lat2, lng2)
+  }
+  // mapbox or hybrid — both use Mapbox for journey distance
+  if (!mapboxToken) {
+    console.error(`MAPBOX_TOKEN not set but distance_method='${method}' — falling back to haversine. Set MAPBOX_TOKEN in Supabase Edge Function secrets.`)
     return haversineDistance(lat1, lng1, lat2, lng2)
   }
   try {
@@ -44,7 +52,7 @@ async function roadDistance(
     if (!json.routes?.length) throw new Error('No route found')
     return json.routes[0].distance / 1000  // metres → km
   } catch (err: any) {
-    console.warn(`Mapbox fallback to haversine: ${err.message}`)
+    console.error(`Mapbox failed, falling back to haversine: ${err.message}`)
     return haversineDistance(lat1, lng1, lat2, lng2)
   }
 }
