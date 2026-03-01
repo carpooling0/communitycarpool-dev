@@ -993,6 +993,7 @@
     let token = null
     let paginationState = {} // { submissionId: currentPage }
     let pendingUndos = new Set() // matchIds where user clicked undo, awaiting new Yes/No choice
+    const carpoolPending = new Map() // matchId → 'reported' | 'undone'; prevents poll snap-back during in-flight trackEvent call
 
     // ============================================
     // INIT
@@ -1542,6 +1543,22 @@
           }
         }
 
+        // Re-apply pending carpool states — prevents poll overwriting an in-flight undo/report
+        if (carpoolPending.size > 0) {
+          for (const journey of journeys) {
+            for (const match of journey.matches || []) {
+              const pending = carpoolPending.get(match.matchId)
+              if (pending === 'undone') {
+                match.successReported = false
+                match._carpoolReported = false
+              } else if (pending === 'reported') {
+                match.successReported = true
+                match._carpoolReported = true
+              }
+            }
+          }
+        }
+
         recalcPendingCounts()
         renderTabs()
         renderAllPanels()
@@ -1656,16 +1673,24 @@
       if (!targetMatch) return
 
       if (targetMatch._carpoolReported || targetMatch.successReported) {
-        // Undo — revert both local flags and update DB
+        // Undo — optimistic update first, then persist to DB
         targetMatch._carpoolReported = false
         targetMatch.successReported = false
+        carpoolPending.set(matchId, 'undone')         // protect from poll snap-back during await
+        renderAllPanels()
+        activateTab(activeJourneyIndex, false)
         await trackEvent('carpooling_undo', matchId)
+        carpoolPending.delete(matchId)                 // release: DB is now updated
         showToast('Carpool report undone.', '')
       } else {
-        // Confirm + report
+        // Confirm + report — optimistic update first, then persist to DB
         if (!confirm('Are you carpooling with this person? This helps us track successful matches and carbon savings! 🎉')) return
         targetMatch._carpoolReported = true
+        carpoolPending.set(matchId, 'reported')        // protect from poll snap-back during await
+        renderAllPanels()
+        activateTab(activeJourneyIndex, false)
         await trackEvent('carpooling_reported', matchId)
+        carpoolPending.delete(matchId)                 // release: DB is now updated
         showToast('🌿 Thank you! Every shared ride counts.', 'success')
       }
       renderAllPanels()
