@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
       await supabase.from('events').insert({ event_type: 'matches_page_viewed', user_id: user.user_id, metadata: { token_used: true } })
     }
 
-    return new Response(JSON.stringify({ success: true, user: { name: user.name, email: user.email }, journeys }),
+    return new Response(JSON.stringify({ success: true, user: { name: user.name, email: user.email }, journeys, pollIntervalSeconds: 10 }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   } catch (err) {
     return new Response(JSON.stringify({ success: false, error: err.message }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 })

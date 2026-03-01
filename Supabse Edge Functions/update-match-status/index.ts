@@ -123,7 +123,11 @@ Deno.serve(async (req) => {
     else if (interest === 'yes') newStatus = 'interest_expressed'
 
     const interestValue = interest === 'reset' ? null : interest
-    await supabase.from('matches').update({ [myInterestField]: interestValue, status: newStatus, is_mutual_click: newStatus === 'mutual_confirmed' }).eq('match_id', matchId)
+    // is_mutual_click is sticky — only ever set to true, never explicitly reset to false
+    // (resetting it caused the flag to wipe if a user later undid their interest)
+    const matchUpdatePayload: Record<string, any> = { [myInterestField]: interestValue, status: newStatus }
+    if (newStatus === 'mutual_confirmed') matchUpdatePayload.is_mutual_click = true
+    await supabase.from('matches').update(matchUpdatePayload).eq('match_id', matchId)
 
     await supabase.from('events').insert({
       event_type: interest === 'yes' ? 'match_interest_expressed' : interest === 'reset' ? 'match_interest_reset' : 'match_declined',
