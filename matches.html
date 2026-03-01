@@ -1048,14 +1048,8 @@
     function renderPage(defaultJourneyId = null) {
       const main = document.getElementById('mainContent')
 
-      // Sort journeys: active first (asc), then inactive_with_interest (asc), then inactive/expired (asc)
-      const sortOrder = { 'active': 0, 'inactive_with_interest': 1, 'inactive': 2, 'expired': 3 }
-      journeys.sort((a, b) => {
-        const ao = sortOrder[a.journeyStatus] ?? 2
-        const bo = sortOrder[b.journeyStatus] ?? 2
-        if (ao !== bo) return ao - bo
-        return a.journeyNum - b.journeyNum
-      })
+      // Sort journeys by business rules
+      sortJourneys()
 
       // Find default tab index
       if (defaultJourneyId) {
@@ -1468,6 +1462,10 @@
         const journey = journeys.find(j => j.submissionId === submissionId)
         if (journey) journey.journeyStatus = data.newStatus
 
+        // Re-sort — status change may move this journey to a different sort group
+        sortJourneys()
+        restoreFocus(submissionId) // stay on the journey the user just toggled
+
         renderTabs()
         renderAllPanels()
         activateTab(activeJourneyIndex, false)
@@ -1488,7 +1486,11 @@
         })
         const data = await res.json()
         if (data.success) {
+          // Capture current journey before overwriting so we can restore focus after re-sort
+          const activeSubmissionId = journeys[activeJourneyIndex]?.submissionId
           journeys = data.journeys
+          sortJourneys()                    // fix: was missing — server returns DB order, not sort order
+          restoreFocus(activeSubmissionId)  // fix: stay on same journey, not same positional index
           recalcPendingCounts()
           renderTabs()
           renderAllPanels()
@@ -1519,16 +1521,11 @@
         // Only re-render if something actually changed — avoids unnecessary flicker
         if (!hasMatchChanges(data.journeys)) return
 
+        // Capture current journey before overwriting so we can restore focus after re-sort
+        const activeSubmissionId = journeys[activeJourneyIndex]?.submissionId
         journeys = data.journeys
-
-        // Re-sort: active → inactive_with_interest → inactive/expired, then by journey number
-        const sortOrder = { 'active': 0, 'inactive_with_interest': 1, 'inactive': 2, 'expired': 3 }
-        journeys.sort((a, b) => {
-          const ao = sortOrder[a.journeyStatus] ?? 2
-          const bo = sortOrder[b.journeyStatus] ?? 2
-          if (ao !== bo) return ao - bo
-          return a.journeyNum - b.journeyNum
-        })
+        sortJourneys()                    // keep business-rule order
+        restoreFocus(activeSubmissionId)  // stay on same journey, not same positional index
 
         // Re-apply any pending undo state — prevents poll from snapping back the UI
         // when the user has clicked undo but hasn't yet chosen Yes or No
@@ -1602,10 +1599,27 @@
     // ============================================
     function recalcPendingCounts() {
       for (const journey of journeys) {
-        journey.pendingCount = journey.matches.filter(m => 
+        journey.pendingCount = journey.matches.filter(m =>
           !m.myInterest && (m.status === 'notified' || m.status === 'viewed' || m.status === 'interest_expressed')
         ).length
       }
+    }
+
+    // Sort journeys by business rules: active → inactive_with_interest → inactive/expired, then journeyNum asc
+    function sortJourneys() {
+      const sortOrder = { 'active': 0, 'inactive_with_interest': 1, 'inactive': 2, 'expired': 3 }
+      journeys.sort((a, b) => {
+        const ao = sortOrder[a.journeyStatus] ?? 2
+        const bo = sortOrder[b.journeyStatus] ?? 2
+        if (ao !== bo) return ao - bo
+        return a.journeyNum - b.journeyNum
+      })
+    }
+
+    // After any re-sort, restore focus to the same journey by submissionId (not position)
+    function restoreFocus(submissionId) {
+      const newIdx = journeys.findIndex(j => j.submissionId === submissionId)
+      if (newIdx > -1) activeJourneyIndex = newIdx
     }
 
     function getStatusBadge(journey) {
