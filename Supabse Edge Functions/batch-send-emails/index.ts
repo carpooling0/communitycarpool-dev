@@ -101,13 +101,7 @@ Deno.serve(async (req) => {
       // Whitelist is controlled per-user via users.email_whitelist = true
       if (testingMode && !userData.emailWhitelist) {
         emailsSkipped++
-        console.log(`[TESTING MODE] Skipping email to ${email}`)
-        // Still mark their matches as notified so they don't pile up
-        for (const match of unsentMatches) {
-          if (match.sub_a.users.email === email || match.sub_b.users.email === email) {
-            successfullyEmailedMatchIds.add(match.match_id)
-          }
-        }
+        console.log(`[TESTING MODE] Skipping email to ${email} — match stays 'new' for real send later`)
         continue
       }
 
