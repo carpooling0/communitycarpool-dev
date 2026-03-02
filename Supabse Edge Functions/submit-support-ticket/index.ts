@@ -70,10 +70,8 @@ Deno.serve(async (req) => {
     }
 
     // Extract well-known fields for indexed columns; rest goes into data jsonb
-    const email = fields.deletionEmail || fields.successEmail || fields.reporterEmail || null
+    const email = fields.email || null
     const subjectEmail = fields.subjectEmail || null
-    const matchId = fields.matchId ? parseInt(fields.matchId) || null : null
-    const rating = fields.rating ? parseInt(fields.rating) || null : null
 
     const { data: ticket, error } = await supabase
       .from('support_tickets')
@@ -81,8 +79,6 @@ Deno.serve(async (req) => {
         request_type: requestType,
         email,
         subject_email: subjectEmail,
-        match_id: matchId,
-        rating,
         data: fields,
         ip_address: ip || null
       })
