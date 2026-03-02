@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
 
     // Extract well-known fields for indexed columns; rest goes into data jsonb
     const email = fields.deletionEmail || fields.successEmail || fields.reporterEmail || null
+    const subjectEmail = fields.subjectEmail || null
     const matchId = fields.matchId ? parseInt(fields.matchId) || null : null
     const rating = fields.rating ? parseInt(fields.rating) || null : null
 
@@ -79,6 +80,7 @@ Deno.serve(async (req) => {
       .insert({
         request_type: requestType,
         email,
+        subject_email: subjectEmail,
         match_id: matchId,
         rating,
         data: fields,

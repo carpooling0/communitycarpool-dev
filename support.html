@@ -382,21 +382,17 @@
                 <!-- Issue Report Fields -->
                 <div id="issueFields" class="hidden">
                     <div class="form-group">
-                        <label for="reporterEmail">What Email did you use to submit the form? <span
-                                class="required">*</span></label>
+                        <label for="reporterEmail">Your Email <span class="required">*</span></label>
                         <input type="email" id="reporterEmail" name="reporterEmail" placeholder="your@email.com">
                     </div>
 
-                    <!-- Updated Field: Replaced Subject Email with User Description TextArea -->
                     <div class="form-group">
-                        <label for="userDescription">Reporting on another User - Please share their Email and / or your
-                            concern <span class="required">*</span></label>
-                        <textarea id="userDescription" name="userDescription"
-                            placeholder="Please provide their email address and explain the issue..."></textarea>
+                        <label for="subjectEmail">Email of the person you are reporting <span class="required">*</span></label>
+                        <input type="email" id="subjectEmail" name="subjectEmail" placeholder="their@email.com">
                     </div>
 
                     <div class="form-group">
-                        <label for="issueDescription">Please describe the issue you encountered with this match.</label>
+                        <label for="issueDescription">Issue type <span class="required">*</span></label>
                         <select id="issueDescription" name="issueDescription">
                             <option value="">Select issue type...</option>
                             <option value="Spam/Harassment">Spam/Harassment</option>
@@ -404,6 +400,12 @@
                             <option value="Safety Concern">Safety Concern</option>
                             <option value="Other">Other</option>
                         </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userDescription">Describe your concern <span class="required">*</span></label>
+                        <textarea id="userDescription" name="userDescription"
+                            placeholder="Please explain the issue in detail..."></textarea>
                     </div>
                 </div>
 
@@ -619,8 +621,16 @@
                         showMessage('Please enter your email address.', 'error');
                         return false;
                     }
+                    if (!document.getElementById('subjectEmail').value) {
+                        showMessage('Please enter the email of the person you are reporting.', 'error');
+                        return false;
+                    }
+                    if (!document.getElementById('issueDescription').value) {
+                        showMessage('Please select an issue type.', 'error');
+                        return false;
+                    }
                     if (!document.getElementById('userDescription').value) {
-                        showMessage('Please provide description and email of whom you are reporting on.', 'error');
+                        showMessage('Please describe your concern.', 'error');
                         return false;
                     }
                     break;
