@@ -462,6 +462,8 @@
     .pill-mutual { background: var(--green); color: white; }
     .pill-waiting { background: var(--blue-light); color: var(--blue); }
     .pill-respond { background: #fef3c7; color: #92400e; animation: pulse-orange 2s infinite; }
+    /* Interest timestamp — hidden on desktop (tooltip only), shown inline on mobile */
+    .interest-date { display: none; font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
 
     @keyframes pulse-orange {
       0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
@@ -903,6 +905,8 @@
       }
       .actions-cell { flex-wrap: wrap; gap: 6px; margin-top: 4px; }
       .actions-cell.stacked { gap: 6px; }
+      /* Show interest timestamp inline under the pill on mobile */
+      .interest-date { display: block; }
     }
 
   </style>
@@ -1276,9 +1280,11 @@
     }
 
     function getTheirStatusPill(match) {
-      if (match.isMutual) return `<span class="interest-pill pill-mutual">✓ Interested</span>`
-      if (match.theirInterest === 'yes') return `<span class="interest-pill pill-yes">✓ Interested</span>`
-      if (match.theirInterest === 'no') return `<span class="interest-pill pill-no">✗ Declined</span>`
+      const ago = timeAgo(match.theirInterestAt)
+      const dateSpan = ago ? `<span class="interest-date">${ago}</span>` : ''
+      if (match.isMutual) return `<span class="interest-pill pill-mutual" ${ago ? `title="${ago}"` : ''}>✓ Interested</span>${dateSpan}`
+      if (match.theirInterest === 'yes') return `<span class="interest-pill pill-yes" ${ago ? `title="${ago}"` : ''}>✓ Interested</span>${dateSpan}`
+      if (match.theirInterest === 'no') return `<span class="interest-pill pill-no" ${ago ? `title="${ago}"` : ''}>✗ Declined</span>${dateSpan}`
       if (match.myInterest === 'yes') return `<span class="interest-pill pill-waiting">◷ Waiting...</span>`
       return `<span class="interest-pill pill-pending">○ Pending</span>`
     }
@@ -1675,6 +1681,23 @@
       const parts = str.split(',')
       const short = parts[0].trim()
       return short.length > maxLen ? short.substring(0, maxLen) + '…' : short
+    }
+
+    // Human-readable relative time — e.g. "2 days ago", "just now"
+    function timeAgo(isoString) {
+      if (!isoString) return ''
+      const seconds = Math.floor((Date.now() - new Date(isoString).getTime()) / 1000)
+      if (seconds < 60)   return 'just now'
+      if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`
+      const hours = Math.floor(seconds / 3600)
+      if (hours < 24)     return `${hours} hr${hours > 1 ? 's' : ''} ago`
+      const days = Math.floor(seconds / 86400)
+      if (days === 1)     return '1 day ago'
+      if (days < 7)       return `${days} days ago`
+      if (days < 14)      return '1 week ago'
+      if (days < 30)      return `${Math.floor(days / 7)} weeks ago`
+      if (days < 60)      return '1 month ago'
+      return `${Math.floor(days / 30)} months ago`
     }
 
     // Truncate POI for route display — keep first 44 chars of first segment

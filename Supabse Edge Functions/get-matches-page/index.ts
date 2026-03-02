@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
       const { data: matches } = await supabase.from('matches')
         .select(`
           match_id, match_strength, created_at, status, sub_a_id, sub_b_id,
-          interest_a, interest_b, success_reported,
+          interest_a, interest_b, interest_a_at, interest_b_at, success_reported,
           sub_a:submissions!sub_a_id (submission_id, from_location, to_location, from_lat, from_lng, to_lat, to_lng, users(name, email)),
           sub_b:submissions!sub_b_id (submission_id, from_location, to_location, from_lat, from_lng, to_lat, to_lng, users(name, email))
         `)
@@ -55,6 +55,7 @@ Deno.serve(async (req) => {
         const otherUser = otherSub.users
         const myInterest = isSubA ? match.interest_a : match.interest_b
         const theirInterest = isSubA ? match.interest_b : match.interest_a
+        const theirInterestAt = isSubA ? match.interest_b_at : match.interest_a_at
         const isMutual = match.status === 'mutual_confirmed' || match.status === 'contact_revealed'
 
         return {
@@ -64,6 +65,7 @@ Deno.serve(async (req) => {
           status: match.status,
           myInterest,
           theirInterest,
+          theirInterestAt: theirInterestAt || null,
           isMutual,
           successReported: match.success_reported || false,
           otherUser: {
