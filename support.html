@@ -303,7 +303,6 @@
                         <option value="">Select a request type...</option>
                         <option value="deletion">Data Deletion Request</option>
                         <option value="feedback">Feedback</option>
-                        <option value="success">Report Successful Match</option>
                         <option value="issue">Report an Issue</option>
                     </select>
                 </div>
@@ -358,24 +357,6 @@
                             <option value="No">No</option>
                             <option value="Maybe">Maybe</option>
                         </select>
-                    </div>
-                </div>
-
-                <!-- Successful Match Fields -->
-                <div id="successFields" class="hidden">
-                    <div class="form-group">
-                        <label for="successEmail">Your Email <span class="required">*</span></label>
-                        <input type="email" id="successEmail" name="successEmail" placeholder="your@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="matchId">Match ID <span class="required">*</span> <span class="optional">(Found in
-                                your Match Emails sent by us)</span></label>
-                        <input type="text" id="matchId" name="matchId" placeholder="e.g., 123">
-                    </div>
-                    <div class="form-group">
-                        <label for="successDetails">Additional details (optional):</label>
-                        <textarea id="successDetails" name="successDetails"
-                            placeholder="Tell us about your successful match..."></textarea>
                     </div>
                 </div>
 
@@ -435,7 +416,6 @@
         // Field containers
         const deletionFields = document.getElementById('deletionFields');
         const feedbackFields = document.getElementById('feedbackFields');
-        const successFields = document.getElementById('successFields');
         const issueFields = document.getElementById('issueFields');
 
         // Rating stars
@@ -476,7 +456,6 @@
             // Hide all field groups
             deletionFields.classList.add('hidden');
             feedbackFields.classList.add('hidden');
-            successFields.classList.add('hidden');
             issueFields.classList.add('hidden');
 
             // Clear previous validation
@@ -489,9 +468,6 @@
                     break;
                 case 'feedback':
                     feedbackFields.classList.remove('hidden');
-                    break;
-                case 'success':
-                    successFields.classList.remove('hidden');
                     break;
                 case 'issue':
                     issueFields.classList.remove('hidden');
@@ -603,17 +579,6 @@
                         return false;
                     }
                     // "recommend" is now optional - no validation required
-                    break;
-
-                case 'success':
-                    if (!document.getElementById('successEmail').value) {
-                        showMessage('Please enter your email address.', 'error');
-                        return false;
-                    }
-                    if (!document.getElementById('matchId').value) {
-                        showMessage('Please enter the Match ID.', 'error');
-                        return false;
-                    }
                     break;
 
                 case 'issue':
