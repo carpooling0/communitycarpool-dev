@@ -127,10 +127,12 @@
             cursor: pointer;
         }
 
-        .radio-option span {
+        .radio-option label {
             font-size: 14px;
             color: #1e293b;
             font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 0;
         }
 
         .radio-option.selected { border-color: #10b981; background: #f0fdf4; }
@@ -248,18 +250,18 @@
                 <div class="form-group">
                     <label>What is this about? <span class="required">*</span></label>
                     <div class="radio-group">
-                        <label class="radio-option" id="optionDeletion">
-                            <input type="radio" name="requestType" value="deletion">
-                            <span>Data Deletion Request</span>
-                        </label>
-                        <label class="radio-option" id="optionReportUser">
-                            <input type="radio" name="requestType" value="report_user">
-                            <span>Report a User</span>
-                        </label>
-                        <label class="radio-option" id="optionTechnical">
-                            <input type="radio" name="requestType" value="technical">
-                            <span>Technical / Other Issue</span>
-                        </label>
+                        <div class="radio-option" id="optionDeletion">
+                            <input type="radio" name="requestType" value="deletion" id="rdDeletion">
+                            <label for="rdDeletion">Data Deletion Request</label>
+                        </div>
+                        <div class="radio-option" id="optionReportUser">
+                            <input type="radio" name="requestType" value="report_user" id="rdReportUser">
+                            <label for="rdReportUser">Report a User</label>
+                        </div>
+                        <div class="radio-option" id="optionTechnical">
+                            <input type="radio" name="requestType" value="technical" id="rdTechnical">
+                            <label for="rdTechnical">Technical / Other Issue</label>
+                        </div>
                     </div>
                 </div>
 
