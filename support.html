@@ -343,16 +343,12 @@
             <!-- Inline feedback -->
             <div id="inlineFeedback" style="margin-top:28px; border-top:1px solid #e2e8f0; padding-top:24px; text-align:left;">
                 <p style="font-size:15px; font-weight:600; color:#1e293b; margin-bottom:4px;">How was your experience?</p>
-                <p style="font-size:13px; color:#64748b; margin-bottom:16px;">Optional — takes 10 seconds</p>
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
-                    <div id="inlineStars" style="display:flex; gap:4px;">
-                        <button class="star-btn" data-val="1" onclick="setInlineRating(1)">★</button>
-                        <button class="star-btn" data-val="2" onclick="setInlineRating(2)">★</button>
-                        <button class="star-btn" data-val="3" onclick="setInlineRating(3)">★</button>
-                        <button class="star-btn" data-val="4" onclick="setInlineRating(4)">★</button>
-                        <button class="star-btn" data-val="5" onclick="setInlineRating(5)">★</button>
-                    </div>
-                    <span id="inlineStarCount" style="font-size:14px; color:#64748b; font-weight:600;">0 / 5</span>
+                <div style="display:flex; gap:4px; margin-bottom:16px;" id="inlineStars">
+                    <button class="star-btn" data-val="1" onclick="setInlineRating(1)">★</button>
+                    <button class="star-btn" data-val="2" onclick="setInlineRating(2)">★</button>
+                    <button class="star-btn" data-val="3" onclick="setInlineRating(3)">★</button>
+                    <button class="star-btn" data-val="4" onclick="setInlineRating(4)">★</button>
+                    <button class="star-btn" data-val="5" onclick="setInlineRating(5)">★</button>
                 </div>
                 <textarea id="inlineFeedbackComment" class="feedback-textarea" placeholder="Where did you struggle? What could be improved? (optional)" style="margin-bottom:12px;"></textarea>
                 <input type="text" id="inlineHoneypot" style="display:none" tabindex="-1" autocomplete="off">
@@ -537,7 +533,6 @@
             _inlineRating = 0;
             _inlineOpenedAt = Date.now();
             document.querySelectorAll('#inlineStars .star-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('inlineStarCount').textContent = '0 / 5';
             document.getElementById('inlineFeedbackComment').value = '';
             document.getElementById('inlineHoneypot').value = '';
             const btn = document.getElementById('inlineSubmitBtn');
@@ -552,7 +547,6 @@
             document.querySelectorAll('#inlineStars .star-btn').forEach(b => {
                 b.classList.toggle('active', parseInt(b.dataset.val) <= val);
             });
-            document.getElementById('inlineStarCount').textContent = val + ' / 5';
             const btn = document.getElementById('inlineSubmitBtn');
             btn.disabled = false;
             btn.style.opacity = '1';

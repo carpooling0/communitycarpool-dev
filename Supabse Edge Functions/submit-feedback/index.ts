@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     if (ip) {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
       const { count } = await supabase
-        .from('match_feedback')
+        .from('feedback')
         .select('*', { count: 'exact', head: true })
         .eq('ip_address', ip)
         .gte('created_at', since)
@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
 
     // 6. Insert feedback
     const { data: feedback, error } = await supabase
-      .from('match_feedback')
+      .from('feedback')
       .insert({
         match_id:              resolvedMatchId,
         submitted_by_user_id:  userId,
