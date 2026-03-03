@@ -391,7 +391,7 @@
             <p style="font-size:13px;color:#64748b;line-height:1.6;margin-bottom:20px;">
                 If you changed your mind and want to remain, simply ignore the email sent to you. Your data will <strong>not</strong> be deleted.
             </p>
-            <button onclick="const p=document.getElementById('deletionPopupOverlay');p.style.display='none';p.classList.add('hidden');"
+            <button onclick="closeDeletionPopup();"
                 style="width:100%;padding:13px;background:#10b981;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
                 Close
             </button>
@@ -447,6 +447,19 @@
             report_user: 'Please explain the issue in detail...',
             technical:   'Please describe what is not working...'
         };
+
+        function closeDeletionPopup() {
+            const popup = document.getElementById('deletionPopupOverlay');
+            popup.style.display = 'none';
+            popup.classList.add('hidden');
+            // Reset form to blank initial state
+            form.reset();
+            detailsInput.placeholder = 'Please provide any details...';
+            document.getElementById('deletionWarning').classList.add('hidden');
+            reportUserFields.classList.add('hidden');
+            submitBtn.textContent = 'Submit';
+            submitBtn.disabled = false;
+        }
 
         let userIP = '';
 
