@@ -334,11 +334,36 @@
             </form>
         </div>
 
-        <!-- Thank You Section -->
+        <!-- Thank You + Feedback Section -->
         <div id="thankYouSection" class="thank-you hidden">
             <div class="thank-you-icon">✅</div>
             <h2>Thank You!</h2>
-            <p>Your request has been submitted successfully.<br>We will review it and get back to you if needed.</p>
+            <p>Your request has been submitted successfully. We will review it and get back to you if needed.</p>
+
+            <!-- Inline feedback -->
+            <div id="inlineFeedback" style="margin-top:28px; border-top:1px solid #e2e8f0; padding-top:24px; text-align:left;">
+                <p style="font-size:15px; font-weight:600; color:#1e293b; margin-bottom:4px;">How was your experience?</p>
+                <p style="font-size:13px; color:#64748b; margin-bottom:16px;">Optional — takes 10 seconds</p>
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+                    <div id="inlineStars" style="display:flex; gap:4px;">
+                        <button class="star-btn" data-val="1" onclick="setInlineRating(1)">★</button>
+                        <button class="star-btn" data-val="2" onclick="setInlineRating(2)">★</button>
+                        <button class="star-btn" data-val="3" onclick="setInlineRating(3)">★</button>
+                        <button class="star-btn" data-val="4" onclick="setInlineRating(4)">★</button>
+                        <button class="star-btn" data-val="5" onclick="setInlineRating(5)">★</button>
+                    </div>
+                    <span id="inlineStarCount" style="font-size:14px; color:#64748b; font-weight:600;">0 / 5</span>
+                </div>
+                <textarea id="inlineFeedbackComment" class="feedback-textarea" placeholder="Where did you struggle? What could be improved? (optional)" style="margin-bottom:12px;"></textarea>
+                <input type="text" id="inlineHoneypot" style="display:none" tabindex="-1" autocomplete="off">
+                <button id="inlineSubmitBtn" onclick="submitInlineFeedback()" disabled
+                    style="width:100%; background:#10b981; color:white; border:none; border-radius:10px; padding:13px; font-size:15px; font-weight:600; cursor:pointer; opacity:0.5;">
+                    Submit Rating
+                </button>
+            </div>
+            <div id="inlineFeedbackDone" class="hidden" style="margin-top:20px; font-size:14px; color:#10b981; font-weight:600;">
+                🙏 Thank you for your feedback!
+            </div>
         </div>
     </div>
 
@@ -452,6 +477,7 @@
                 if (result.success) {
                     formSection.classList.add('hidden');
                     thankYouSection.classList.remove('hidden');
+                    resetInlineFeedback();
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
                     showMessage('Error: ' + (result.error || 'Something went wrong. Please try again.'), 'error');
@@ -502,6 +528,63 @@
             message.textContent = text;
             message.className = 'message ' + type + ' show';
             message.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // ── INLINE FEEDBACK (Thank You section) ──
+        let _inlineRating = 0, _inlineOpenedAt = null, _lastTicketId = null;
+
+        function resetInlineFeedback() {
+            _inlineRating = 0;
+            _inlineOpenedAt = Date.now();
+            document.querySelectorAll('#inlineStars .star-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('inlineStarCount').textContent = '0 / 5';
+            document.getElementById('inlineFeedbackComment').value = '';
+            document.getElementById('inlineHoneypot').value = '';
+            const btn = document.getElementById('inlineSubmitBtn');
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            document.getElementById('inlineFeedback').classList.remove('hidden');
+            document.getElementById('inlineFeedbackDone').classList.add('hidden');
+        }
+
+        function setInlineRating(val) {
+            _inlineRating = val;
+            document.querySelectorAll('#inlineStars .star-btn').forEach(b => {
+                b.classList.toggle('active', parseInt(b.dataset.val) <= val);
+            });
+            document.getElementById('inlineStarCount').textContent = val + ' / 5';
+            const btn = document.getElementById('inlineSubmitBtn');
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
+
+        async function submitInlineFeedback() {
+            if (_inlineRating < 1) return;
+            const btn = document.getElementById('inlineSubmitBtn');
+            btn.disabled = true; btn.textContent = 'Submitting…';
+            try {
+                const res = await fetch('https://tbkjealpnoriwdosvmju.supabase.co/functions/v1/submit-feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rating:       _inlineRating,
+                        comment:      document.getElementById('inlineFeedbackComment').value.trim() || null,
+                        source:       'footer_link',
+                        pageContext:  'support',
+                        formOpenedAt: _inlineOpenedAt,
+                        honeypot:     document.getElementById('inlineHoneypot').value || null
+                    })
+                });
+                const data = await res.json();
+                if (data.success || data.error === 'Already submitted') {
+                    document.getElementById('inlineFeedback').classList.add('hidden');
+                    document.getElementById('inlineFeedbackDone').classList.remove('hidden');
+                } else {
+                    btn.disabled = false; btn.textContent = 'Submit Rating'; btn.style.opacity = '1';
+                }
+            } catch(e) {
+                btn.disabled = false; btn.textContent = 'Submit Rating'; btn.style.opacity = '1';
+            }
         }
     </script>
 
