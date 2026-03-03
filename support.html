@@ -511,14 +511,8 @@
                 submitBtn.textContent = 'Sending…';
 
                 try {
-                    // Create support ticket for record-keeping (non-blocking)
-                    fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ requestType: 'deletion', email, details: detailsInput.value.trim(), ip: userIP || 'unknown' })
-                    }).catch(() => {});
-
                     // Trigger deletion verification email
+                    // (no support ticket logged — manage-deletion notifies admin directly)
                     await fetch(`${SUPABASE_URL}/functions/v1/manage-deletion`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON}` },
