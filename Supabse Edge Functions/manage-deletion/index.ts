@@ -244,24 +244,6 @@ Deno.serve(async (req) => {
       const matchesUrl = `${SITE_URL}/matches.html?token=${user.match_page_token}`
       await sendEmail(user.email, `Deletion scheduled for ${formatDate(deletionDate)} — Community Carpool`, deletionScheduledEmail(user.name, matchesUrl, deletionDate, retentionDays))
 
-      // 5. Notify admin
-      const notifyEmail = await getConfig('support_notify_email')
-      if (notifyEmail) {
-        const html = `<div style="font-family:sans-serif;padding:24px;">
-          <h2 style="color:#dc2626;">⚠️ Data Deletion Confirmed</h2>
-          <p><b>Name:</b> ${user.name}</p>
-          <p><b>Email:</b> ${user.email}</p>
-          <p><b>User ID:</b> ${user.user_id}</p>
-          <p><b>Confirmed at:</b> ${now}</p>
-          <p><b>Scheduled deletion:</b> ${formatDate(deletionDate)}</p>
-          <hr>
-          <p>To cancel (if user contacts support within ${retentionDays} days):</p>
-          <pre style="background:#f3f4f6;padding:12px;border-radius:6px;font-size:13px;">UPDATE users SET deletion_requested_at = NULL WHERE user_id = ${user.user_id};
-UPDATE submissions SET journey_status = 'active' WHERE user_id = ${user.user_id};</pre>
-        </div>`
-        sendEmail(notifyEmail, `[Data Deletion] ${user.name} (${user.email}) confirmed`, html).catch(() => {})
-      }
-
       return json({ success: true, deletionDate: deletionDate.toISOString(), retentionDays })
     }
 

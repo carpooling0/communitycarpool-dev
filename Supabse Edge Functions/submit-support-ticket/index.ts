@@ -73,6 +73,13 @@ Deno.serve(async (req) => {
       })
     }
 
+    // Deletion requests are handled exclusively by manage-deletion — never store tickets for them
+    if (requestType === 'deletion') {
+      return new Response(JSON.stringify({ success: false, error: 'Deletion requests must go through manage-deletion' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
     const { data: ticket, error } = await supabase
       .from('support_tickets')
       .insert({
