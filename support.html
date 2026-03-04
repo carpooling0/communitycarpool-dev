@@ -429,7 +429,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://tbkjealpnoriwdosvmju.supabase.co/functions/v1/submit-support-ticket';
+        const SCRIPT_URL = 'https://jboohdwihsiuvyrfeftp.supabase.co/functions/v1/submit-support-ticket';
 
         const form             = document.getElementById('supportForm');
         const message          = document.getElementById('message');
@@ -439,8 +439,8 @@
         const reportUserFields = document.getElementById('reportUserFields');
         const detailsInput     = document.getElementById('details');
 
-        const SUPABASE_URL  = 'https://tbkjealpnoriwdosvmju.supabase.co';
-        const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMTg2ODAsImV4cCI6MjA4Njg5NDY4MH0.K0iS87GLgAZhYwFIQNphVFrarMzFxECkFYFvxpeVcsA';
+        const SUPABASE_URL  = 'https://jboohdwihsiuvyrfeftp.supabase.co';
+        const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impib29oZHdpaHNpdXZ5cmZlZnRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDExNzksImV4cCI6MjA4ODIxNzE3OX0.HuaHizEMQFcYQ41dAEOszWh9-eWB_k-NRUiKtIj-BzY';
 
         const detailsPlaceholders = {
             deletion:    'Tell us why you\'re leaving (optional)...',
@@ -635,7 +635,7 @@
             const btn = document.getElementById('inlineSubmitBtn');
             btn.disabled = true; btn.textContent = 'Submitting…';
             try {
-                const res = await fetch('https://tbkjealpnoriwdosvmju.supabase.co/functions/v1/submit-feedback', {
+                const res = await fetch('https://jboohdwihsiuvyrfeftp.supabase.co/functions/v1/submit-feedback', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -661,7 +661,7 @@
     </script>
 
     <script>
-        const FEEDBACK_URL = 'https://tbkjealpnoriwdosvmju.supabase.co/functions/v1/submit-feedback';
+        const FEEDBACK_URL = 'https://jboohdwihsiuvyrfeftp.supabase.co/functions/v1/submit-feedback';
         let _fbRating = 0, _fbOpenedAt = null;
 
         function openFeedbackModal() {
