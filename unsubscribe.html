@@ -132,6 +132,7 @@
       .card { padding: 28px 20px; }
     }
   </style>
+  <script src="config.js"></script>
 </head>
 <body>
 
@@ -209,9 +210,6 @@
   </div>
 
   <script>
-    const SUPABASE_URL  = 'https://tbkjealpnoriwdosvmju.supabase.co'
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMTg2ODAsImV4cCI6MjA4Njg5NDY4MH0.K0iS87GLgAZhYwFIQNphVFrarMzFxECkFYFvxpeVcsA'
-
     const params = new URLSearchParams(window.location.search)
     const token  = params.get('token')
 
@@ -237,7 +235,7 @@
 
       try {
         const res  = await fetch(`${SUPABASE_URL}/functions/v1/update-email-prefs?token=${encodeURIComponent(token)}`, {
-          headers: { 'Authorization': `Bearer ${SUPABASE_ANON}` }
+          headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
         })
         const data = await res.json()
 
@@ -260,7 +258,7 @@
       try {
         const res  = await fetch(`${SUPABASE_URL}/functions/v1/update-email-prefs`, {
           method:  'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON}` },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
           body:    JSON.stringify({
             token,
             unsubscribedMatches:   !$('toggleMatches').checked,
@@ -287,7 +285,7 @@
       try {
         const res  = await fetch(`${SUPABASE_URL}/functions/v1/update-email-prefs`, {
           method:  'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON}` },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
           body:    JSON.stringify({ token, unsubscribedMatches: true, unsubscribedReminders: true, unsubscribedMarketing: true })
         })
         const data = await res.json()

@@ -266,6 +266,7 @@
         .btn-submit-feedback:disabled { background: #9ca3af; cursor: not-allowed; }
         .btn-skip-feedback { background: none; border: 2px solid #e2e8f0; border-radius: 10px; padding: 13px 18px; font-size: 15px; font-weight: 500; color: #64748b; cursor: pointer; }
     </style>
+    <script src="config.js"></script>
 </head>
 
 <body>
@@ -429,8 +430,6 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://tbkjealpnoriwdosvmju.supabase.co/functions/v1/submit-support-ticket';
-
         const form             = document.getElementById('supportForm');
         const message          = document.getElementById('message');
         const submitBtn        = document.getElementById('submitBtn');
@@ -438,9 +437,6 @@
         const thankYouSection  = document.getElementById('thankYouSection');
         const reportUserFields = document.getElementById('reportUserFields');
         const detailsInput     = document.getElementById('details');
-
-        const SUPABASE_URL  = 'https://tbkjealpnoriwdosvmju.supabase.co';
-        const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMTg2ODAsImV4cCI6MjA4Njg5NDY4MH0.K0iS87GLgAZhYwFIQNphVFrarMzFxECkFYFvxpeVcsA';
 
         const detailsPlaceholders = {
             deletion:    'Tell us why you\'re leaving (optional)...',
@@ -515,7 +511,7 @@
                     // (no support ticket logged — manage-deletion notifies admin directly)
                     await fetch(`${SUPABASE_URL}/functions/v1/manage-deletion`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON}` },
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
                         body: JSON.stringify({ email })
                     });
                 } catch(err) { /* silent — still show popup */ }
@@ -539,7 +535,7 @@
             data.ip = userIP || 'unknown';
 
             try {
-                const response = await fetch(SCRIPT_URL, {
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/submit-support-ticket`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -635,7 +631,7 @@
             const btn = document.getElementById('inlineSubmitBtn');
             btn.disabled = true; btn.textContent = 'Submitting…';
             try {
-                const res = await fetch('https://tbkjealpnoriwdosvmju.supabase.co/functions/v1/submit-feedback', {
+                const res = await fetch(`${SUPABASE_URL}/functions/v1/submit-feedback`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -661,7 +657,6 @@
     </script>
 
     <script>
-        const FEEDBACK_URL = 'https://tbkjealpnoriwdosvmju.supabase.co/functions/v1/submit-feedback';
         let _fbRating = 0, _fbOpenedAt = null;
 
         function openFeedbackModal() {
@@ -693,7 +688,7 @@
             const btn = document.getElementById('feedbackSubmitBtn');
             btn.disabled = true; btn.textContent = 'Submitting…';
             try {
-                const res = await fetch(FEEDBACK_URL, {
+                const res = await fetch(`${SUPABASE_URL}/functions/v1/submit-feedback`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

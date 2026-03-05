@@ -64,6 +64,7 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
+  <script src="config.js"></script>
 </head>
 <body>
   <div class="card">
@@ -111,9 +112,6 @@
   </div>
 
   <script>
-    const SUPABASE_URL  = 'https://tbkjealpnoriwdosvmju.supabase.co'
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMTg2ODAsImV4cCI6MjA4Njg5NDY4MH0.K0iS87GLgAZhYwFIQNphVFrarMzFxECkFYFvxpeVcsA'
-
     function show(id) {
       document.getElementById('stateLoading').classList.add('hidden')
       document.getElementById(id).classList.remove('hidden')
@@ -138,7 +136,7 @@
       try {
         const res  = await fetch(`${SUPABASE_URL}/functions/v1/manage-deletion`, {
           method:  'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON}` },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
           body:    JSON.stringify({ token })
         })
         const data = await res.json()

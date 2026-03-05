@@ -840,6 +840,7 @@
             z-index: -1;
         }
     </style>
+    <script src="config.js"></script>
 </head>
 
 <body>
@@ -1041,10 +1042,8 @@
 
     <script>
         // ============================================
-        // CONFIG
+        // CONFIG — credentials loaded from config.js
         // ============================================
-        const SUPABASE_URL = 'https://tbkjealpnoriwdosvmju.supabase.co/functions/v1/submit-journey';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMTg2ODAsImV4cCI6MjA4Njg5NDY4MH0.K0iS87GLgAZhYwFIQNphVFrarMzFxECkFYFvxpeVcsA';
         const SHARE_URL = 'https://communitycarpool.org/';
 
         // ============================================
@@ -1527,7 +1526,7 @@
             console.log('Submitting:', data);
 
             try {
-                const response = await fetch(SUPABASE_URL, {
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/submit-journey`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1683,9 +1682,8 @@
 
             // Fetch org details + locations from API
             try {
-                const SUPABASE_BASE = 'https://tbkjealpnoriwdosvmju.supabase.co';
                 const res = await fetch(
-                    `${SUPABASE_BASE}/functions/v1/get-org-locations?org=${encodeURIComponent(orgCode)}`,
+                    `${SUPABASE_URL}/functions/v1/get-org-locations?org=${encodeURIComponent(orgCode)}`,
                     { headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
                 );
                 const data = await res.json();
@@ -1781,7 +1779,7 @@
         // ============================================
         // ANALYTICS TRACKING
         // ============================================
-        const TRACK_EVENT_URL = SUPABASE_URL.replace('submit-journey', 'track-event');
+        const TRACK_EVENT_URL = `${SUPABASE_URL}/functions/v1/track-event`;
 
         function trackPageEvent(eventType, metadata = {}) {
             fetch(TRACK_EVENT_URL, {
