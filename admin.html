@@ -425,8 +425,11 @@
     <div id="panel-users" class="panel hidden">
       <div class="section-hd"><div class="section-title">User Lookup</div></div>
       <div class="filter-bar">
-        <input type="email" id="userSearchInput" placeholder="Search by email…" style="min-width:280px" />
+        <input type="text" id="userSearchInput" placeholder="Search by email…" style="min-width:280px"
+          oninput="if(!this.value.trim())document.getElementById('usersContent').innerHTML=''"
+          onchange="if(!this.value.trim())document.getElementById('usersContent').innerHTML=''" />
         <button class="btn btn-primary btn-sm" onclick="searchUser()">Search</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('userSearchInput').value='';document.getElementById('usersContent').innerHTML=''" title="Clear">✕</button>
       </div>
       <div id="usersContent"></div>
     </div>
@@ -1431,11 +1434,6 @@ document.getElementById('deleteModal').addEventListener('click', e => { if (e.ta
 // USERS
 // ═══════════════════════════════════════════════════════════════
 document.getElementById('userSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchUser() })
-  ;['input','change','keyup','cut','paste'].forEach(ev =>
-  document.getElementById('userSearchInput').addEventListener(ev, function() {
-    setTimeout(() => { if (!this.value.trim()) document.getElementById('usersContent').innerHTML = '' }, 0)
-  })
-)
 
 async function searchUser() {
   const email = document.getElementById('userSearchInput').value.trim()
