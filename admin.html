@@ -88,6 +88,18 @@
     .topbar-title { font-size: 16px; font-weight: 700; }
     .topbar-user { font-size: 13px; color: var(--text-secondary); }
     .topbar-user strong { color: var(--text); }
+    .profile-btn { display: flex; align-items: center; gap: 8px; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 5px 12px; cursor: pointer; font-family: inherit; font-size: 13px; color: var(--text); transition: background 0.15s; position: relative; }
+    .profile-btn:hover { background: var(--bg); }
+    .profile-btn .profile-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--green-dark); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .profile-dropdown { position: absolute; top: calc(100% + 6px); right: 0; background: white; border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); min-width: 200px; z-index: 100; overflow: hidden; }
+    .profile-dropdown-header { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+    .profile-dropdown-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .profile-dropdown-role { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; text-transform: capitalize; }
+    .profile-dropdown-item { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 14px; background: none; border: none; font-family: inherit; font-size: 13px; color: var(--text); cursor: pointer; text-align: left; transition: background 0.15s; }
+    .profile-dropdown-item:hover { background: var(--bg); }
+    .profile-dropdown-item.danger { color: var(--red); }
+    .profile-dropdown-item.danger:hover { background: var(--red-light); }
+    .profile-dropdown-item svg { width: 15px; height: 15px; flex-shrink: 0; }
     .panel { padding: 24px; }
 
     /* KPI CARDS */
@@ -303,7 +315,27 @@
   <main id="mainContent">
     <div class="topbar">
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
-      <div class="topbar-user">Signed in as <strong id="topbarUser">—</strong></div>
+      <div style="position:relative">
+        <button class="profile-btn" onclick="toggleProfileDropdown()" id="profileBtn">
+          <div class="profile-avatar" id="profileAvatar">—</div>
+          <span id="topbarUser">—</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="profile-dropdown hidden" id="profileDropdown">
+          <div class="profile-dropdown-header">
+            <div class="profile-dropdown-name" id="dropdownName">—</div>
+            <div class="profile-dropdown-role" id="dropdownRole">—</div>
+          </div>
+          <button class="profile-dropdown-item" onclick="openChangePassword()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Change Password
+          </button>
+          <button class="profile-dropdown-item danger" onclick="closeProfileDropdown();doLogout()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign Out
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- DASHBOARD -->
@@ -432,6 +464,22 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeEditAdmin()">Cancel</button>
       <button class="btn btn-primary" onclick="saveEditAdmin()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay hidden" id="changePwModal">
+  <div class="modal-card" style="max-width:400px">
+    <div class="modal-title">Change Password</div>
+    <div class="modal-sub">Enter your current password and choose a new one.</div>
+    <div class="form-group"><label>Current Password</label><input type="password" id="cpCurrent" placeholder="Your current password" /></div>
+    <div class="form-group"><label>New Password</label><input type="password" id="cpNew" placeholder="At least 8 characters" /></div>
+    <div class="form-group"><label>Confirm New Password</label><input type="password" id="cpConfirm" placeholder="Repeat new password" /></div>
+    <div class="error-msg" id="cpError"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeChangePassword()">Cancel</button>
+      <button class="btn btn-primary" id="cpSubmitBtn" onclick="submitChangePassword()">Update Password</button>
     </div>
   </div>
 </div>
@@ -573,6 +621,53 @@ async function doLogout() {
   localStorage.removeItem(TOKEN_KEY); currentAdmin = null; showLogin()
 }
 
+// ── Profile dropdown ──────────────────────────────────────────────────────────
+function toggleProfileDropdown() {
+  document.getElementById('profileDropdown').classList.toggle('hidden')
+}
+function closeProfileDropdown() {
+  document.getElementById('profileDropdown').classList.add('hidden')
+}
+document.addEventListener('click', e => {
+  if (!document.getElementById('profileBtn')?.contains(e.target)) closeProfileDropdown()
+})
+
+// ── Change Password ───────────────────────────────────────────────────────────
+function openChangePassword() {
+  closeProfileDropdown()
+  document.getElementById('cpCurrent').value = ''
+  document.getElementById('cpNew').value = ''
+  document.getElementById('cpConfirm').value = ''
+  document.getElementById('cpError').textContent = ''
+  document.getElementById('changePwModal').classList.remove('hidden')
+  setTimeout(() => document.getElementById('cpCurrent').focus(), 50)
+}
+function closeChangePassword() {
+  document.getElementById('changePwModal').classList.add('hidden')
+}
+document.getElementById('changePwModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeChangePassword()
+})
+
+async function submitChangePassword() {
+  const current = document.getElementById('cpCurrent').value.trim()
+  const newPw   = document.getElementById('cpNew').value.trim()
+  const confirm = document.getElementById('cpConfirm').value.trim()
+  const errEl   = document.getElementById('cpError')
+  const btn     = document.getElementById('cpSubmitBtn')
+  errEl.textContent = ''
+  if (!current || !newPw || !confirm) { errEl.textContent = 'All fields are required'; return }
+  if (newPw.length < 8) { errEl.textContent = 'New password must be at least 8 characters'; return }
+  if (newPw !== confirm) { errEl.textContent = 'New passwords do not match'; return }
+  btn.disabled = true; btn.textContent = 'Updating…'
+  try {
+    const data = await apiPost('admins.change_password', { currentPassword: current, newPassword: newPw })
+    if (data.success) { showToast('Password updated ✓', 'success'); closeChangePassword() }
+    else errEl.textContent = data.error || 'Failed to update password'
+  } catch(e) { errEl.textContent = 'Network error — please try again' }
+  finally { btn.disabled = false; btn.textContent = 'Update Password' }
+}
+
 document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin() })
 
 function showLogin() {
@@ -582,7 +677,13 @@ function showLogin() {
 function showApp() {
   document.getElementById('loginScreen').classList.add('hidden')
   document.getElementById('app').classList.remove('hidden')
-  document.getElementById('topbarUser').textContent = currentAdmin?.name || ''
+  const adminName = currentAdmin?.name || ''
+  const adminRole = (currentAdmin?.role || '').replace('_', ' ')
+  const initials  = adminName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() || '?'
+  document.getElementById('topbarUser').textContent = adminName
+  document.getElementById('profileAvatar').textContent = initials
+  document.getElementById('dropdownName').textContent = adminName
+  document.getElementById('dropdownRole').textContent = adminRole
   const isAdmin = ['admin','super_admin'].includes(currentAdmin?.role)
   const isSA = currentAdmin?.role === 'super_admin'
   document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin))
