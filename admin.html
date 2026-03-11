@@ -895,7 +895,7 @@ async function loadTickets() {
                <div class="email-frame">
                  <div class="email-frame-header">To: ${esc(t.email)}</div>
                  <div class="email-frame-body">
-                   <div class="email-frame-line">Dear [Name],</div>
+                   <div class="email-frame-line">Dear ${t.user_first_name ? esc(t.user_first_name) : '[Name]'},</div>
                    <textarea id="note-${t.ticket_id}" rows="4" placeholder="Write your message here…"></textarea>
                    <div class="email-frame-footer">Thank you.<br>Regards,<br><strong>Community Carpool Team</strong></div>
                  </div>
