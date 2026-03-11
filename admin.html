@@ -500,6 +500,7 @@ let currentPanel = 'dashboard'
 let ticketStatusFilter = 'all'
 let ticketPage = 1
 let ticketExpandedId = null
+let cachedTicketsData = null
 let auditPage = 1
 let allAuditEntries = []
 let deletePendingUserId = null
@@ -953,7 +954,13 @@ async function loadTickets() {
   const search = document.getElementById('ticketSearch')?.value.trim() || ''
   const data = await apiPost('tickets.list', { status: ticketStatusFilter, search, page: ticketPage })
   if (!data.success) { document.getElementById('ticketsContent').innerHTML = `<div class="empty-state"><p>${esc(data.error)}</p></div>`; return }
+  cachedTicketsData = data
+  renderTicketsFromCache()
+}
 
+function renderTicketsFromCache() {
+  if (!cachedTicketsData) return
+  const data = cachedTicketsData
   const tickets = data.tickets || []
   if (!tickets.length) { document.getElementById('ticketsContent').innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No tickets found</p></div>'; return }
 
@@ -963,7 +970,7 @@ async function loadTickets() {
 
   for (const t of tickets) {
     const expanded = ticketExpandedId === t.ticket_id
-    html += `<tr class="clickable ${expanded?'row-expanded':''}" onclick="toggleTicket(${t.ticket_id})">
+    html += `<tr class="clickable ${expanded?'row-expanded':''}" id="ticket-row-${t.ticket_id}" onclick="toggleTicket(${t.ticket_id})">
       <td>#${t.ticket_id}</td><td>${typeBadge(t.request_type)}</td>
       <td>${esc(t.email)}</td><td>${fmtDate(t.created_at)}</td>
       <td>${statusBadge(t.status)}</td>
@@ -981,7 +988,7 @@ async function loadTickets() {
             <div class="note-text">${esc(n.text)}</div>
           </div>`).join('')
         : ''
-      html += `<tr class="expand-row"><td colspan="6"><div class="expand-inner">
+      html += `<tr class="expand-row" id="ticket-expand-${t.ticket_id}"><td colspan="6"><div class="expand-inner">
         ${t.details_note ? `<p style="margin-bottom:8px;font-size:13px"><strong>Details:</strong> ${esc(t.details_note)}</p>` : ''}
         ${t.issue_against_subject_email ? `<p style="margin-bottom:8px;font-size:13px"><strong>Reported against:</strong> ${esc(t.issue_against_subject_email)}</p>` : ''}
         ${t.issue_reported_type ? `<p style="margin-bottom:10px;font-size:13px"><strong>Issue type:</strong> ${esc(t.issue_reported_type)}</p>` : ''}
@@ -1026,9 +1033,19 @@ async function loadTickets() {
   }
   html += '</div>'
   document.getElementById('ticketsContent').innerHTML = html
+
+  // Scroll the expanded ticket into view without jumping the page
+  if (ticketExpandedId) {
+    requestAnimationFrame(() => {
+      document.getElementById(`ticket-row-${ticketExpandedId}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    })
+  }
 }
 
-function toggleTicket(id) { ticketExpandedId = ticketExpandedId === id ? null : id; loadTickets() }
+function toggleTicket(id) {
+  ticketExpandedId = ticketExpandedId === id ? null : id
+  renderTicketsFromCache()
+}
 
 async function saveNote(id, noteType, e) {
   e.stopPropagation()
@@ -1040,15 +1057,18 @@ async function saveNote(id, noteType, e) {
       ? (data.emailSent ? 'Reply sent to user ✓' : 'Reply saved (email failed)')
       : 'Internal note saved ✓'
     showToast(msg, data.emailSent === false && noteType === 'reply' ? 'error' : 'success')
-    loadTickets()
+    loadTickets()  // refresh from server (note was saved) — keep ticketExpandedId so row stays open
   } else showToast(data.error || 'Error saving note', 'error')
 }
 
 async function closeTicket(id, notifyUser, e) {
   e.stopPropagation()
   const data = await apiPost('tickets.close', { ticketId: id, notifyUser })
-  if (data.success) { showToast(notifyUser ? 'Ticket closed & user notified ✓' : 'Ticket closed ✓', 'success'); loadTickets() }
-  else showToast(data.error || 'Error closing ticket', 'error')
+  if (data.success) {
+    showToast(notifyUser ? 'Ticket closed & user notified ✓' : 'Ticket closed ✓', 'success')
+    ticketExpandedId = null
+    loadTickets()
+  } else showToast(data.error || 'Error closing ticket', 'error')
 }
 
 // ═══════════════════════════════════════════════════════════════
