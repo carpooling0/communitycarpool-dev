@@ -18,7 +18,7 @@
       --blue: #2563eb; --blue-light: #dbeafe;
       --bg: #f3f4f6; --card: #fff; --border: #e5e7eb;
       --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
-      --sidebar-w: 56px; --nav-w: 200px; --topbar-h: 56px;
+      --nav-w: 190px; --topbar-h: 56px;
       --shadow: 0 1px 3px rgba(0,0,0,0.08); --radius: 10px;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -62,29 +62,25 @@
     /* APP SHELL */
     #app { display: flex; height: 100vh; overflow: hidden; }
 
-    /* ICON STRIP */
-    .icon-strip { width: var(--sidebar-w); background: var(--green-dark); display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 2px; flex-shrink: 0; z-index: 20; }
-    .icon-strip-logo { padding: 4px 0 10px; }
-    .icon-strip-logo img { height: 30px; width: 30px; object-fit: contain; border-radius: 6px; }
-    .nav-icon { position: relative; width: 40px; height: 40px; border: none; background: transparent; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); transition: background 0.15s, color 0.15s; }
-    .nav-icon:hover { background: rgba(255,255,255,0.12); color: white; }
-    .nav-icon.active { background: rgba(255,255,255,0.22); color: white; }
-    .nav-icon svg { width: 20px; height: 20px; }
-    .nav-icon .nav-tip { position: absolute; left: calc(100% + 10px); background: #1f2937; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 100; }
-    .nav-icon:hover .nav-tip { opacity: 1; }
-    .icon-strip-spacer { flex: 1; }
-    .icon-strip-toggle { width: 36px; height: 36px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.45); transition: color 0.15s; margin-bottom: 4px; }
-    .icon-strip-toggle:hover { color: white; }
-    .icon-strip-toggle svg { width: 16px; height: 16px; transition: transform 0.2s; }
-    #sidebar.collapsed .icon-strip-toggle svg { transform: rotate(180deg); }
-
-    /* NAV PANEL */
-    .nav-panel { width: var(--nav-w); background: white; border-right: 1px solid var(--border); padding: 14px 10px; overflow-y: auto; transition: width 0.2s, opacity 0.2s, padding 0.2s; flex-shrink: 0; }
-    #sidebar.collapsed .nav-panel { width: 0; opacity: 0; overflow: hidden; padding: 0; }
-    .nav-section-label { font-size: 10.5px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; padding: 12px 8px 4px; }
-    .nav-item { display: flex; align-items: center; width: 100%; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-secondary); transition: background 0.15s, color 0.15s; border: none; background: none; text-align: left; font-family: inherit; }
+    /* SIDEBAR */
+    #sidebar { width: var(--nav-w); background: white; border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.2s, opacity 0.2s; overflow: hidden; }
+    #sidebar.collapsed { width: 0; opacity: 0; }
+    .nav-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 10px 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .nav-logo { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--text); }
+    .nav-logo img { height: 26px; width: 26px; object-fit: contain; border-radius: 5px; }
+    .nav-toggle { width: 28px; height: 28px; border: none; background: transparent; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: color 0.15s; flex-shrink: 0; }
+    .nav-toggle:hover { color: var(--text); }
+    .nav-toggle svg { width: 15px; height: 15px; transition: transform 0.2s; }
+    #sidebar.collapsed .nav-toggle svg { transform: rotate(180deg); }
+    .nav-body { flex: 1; overflow-y: auto; padding: 8px 8px; }
+    .nav-footer { padding: 8px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .nav-section-label { font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 6px 3px; }
+    .nav-item { display: flex; align-items: center; width: 100%; padding: 6px 8px; border-radius: 7px; cursor: pointer; font-size: 13.5px; font-weight: 500; color: var(--text-secondary); transition: background 0.15s, color 0.15s; border: none; background: none; text-align: left; font-family: inherit; }
     .nav-item:hover { background: #f9fafb; color: var(--text); }
     .nav-item.active { background: var(--green-light); color: var(--green-dark); font-weight: 600; }
+    .nav-logout { display: flex; align-items: center; gap: 6px; width: 100%; padding: 6px 8px; border-radius: 7px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-muted); border: none; background: none; font-family: inherit; transition: background 0.15s, color 0.15s; }
+    .nav-logout:hover { background: var(--red-light); color: var(--red); }
+    .nav-logout svg { width: 15px; height: 15px; flex-shrink: 0; }
 
     /* MAIN */
     #mainContent { flex: 1; overflow-y: auto; display: flex; flex-direction: column; min-width: 0; }
@@ -251,54 +247,14 @@
 
   <!-- Sidebar -->
   <aside id="sidebar">
-    <!-- Icon strip -->
-    <div class="icon-strip">
-      <div class="icon-strip-logo"><img src="logo.png" alt="CCP" /></div>
-
-      <button class="nav-icon active" data-panel="dashboard" onclick="switchPanel('dashboard')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-        <span class="nav-tip">Dashboard</span>
-      </button>
-
-      <button class="nav-icon" data-panel="tickets" onclick="switchPanel('tickets')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span class="nav-tip">Tickets</span>
-      </button>
-
-      <button class="nav-icon admin-only" data-panel="deletions" onclick="switchPanel('deletions')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-        <span class="nav-tip">Deletions</span>
-      </button>
-
-      <button class="nav-icon admin-only" data-panel="users" onclick="switchPanel('users')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span class="nav-tip">Users</span>
-      </button>
-
-      <button class="nav-icon superadmin-only" data-panel="audit" onclick="switchPanel('audit')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.5"/><circle cx="3.5" cy="12" r="1.5"/><circle cx="3.5" cy="18" r="1.5"/></svg>
-        <span class="nav-tip">Audit Log</span>
-      </button>
-
-      <button class="nav-icon superadmin-only" data-panel="team" onclick="switchPanel('team')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span class="nav-tip">Team</span>
-      </button>
-
-      <div class="icon-strip-spacer"></div>
-
-      <button class="nav-icon" onclick="doLogout()" style="margin-bottom:2px">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        <span class="nav-tip">Log Out</span>
-      </button>
-
-      <button class="icon-strip-toggle" onclick="toggleSidebar()">
+    <div class="nav-header">
+      <div class="nav-logo"><img src="logo.png" alt="CCP" />CCP Admin</div>
+      <button class="nav-toggle" onclick="toggleSidebar()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
     </div>
 
-    <!-- Nav panel -->
-    <div class="nav-panel" id="navPanel">
+    <div class="nav-body">
       <div class="nav-section-label">Overview</div>
       <button class="nav-item active" data-panel="dashboard" onclick="switchPanel('dashboard')">Dashboard</button>
 
@@ -312,6 +268,13 @@
       <div class="nav-section-label superadmin-only">System</div>
       <button class="nav-item superadmin-only" data-panel="audit" onclick="switchPanel('audit')">Audit Log</button>
       <button class="nav-item superadmin-only" data-panel="team" onclick="switchPanel('team')">Team</button>
+    </div>
+
+    <div class="nav-footer">
+      <button class="nav-logout" onclick="doLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Log Out
+      </button>
     </div>
   </aside>
 
@@ -616,7 +579,6 @@ function switchPanel(panel) {
   currentPanel = panel
   document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'))
   document.getElementById(`panel-${panel}`)?.classList.remove('hidden')
-  document.querySelectorAll('.nav-icon[data-panel]').forEach(b => b.classList.toggle('active', b.dataset.panel === panel))
   document.querySelectorAll('.nav-item[data-panel]').forEach(b => b.classList.toggle('active', b.dataset.panel === panel))
   document.getElementById('topbarTitle').textContent = PANEL_TITLES[panel] || panel
   if (panel === 'tickets')   loadTickets()
