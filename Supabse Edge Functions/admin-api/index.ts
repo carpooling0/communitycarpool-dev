@@ -247,7 +247,7 @@ Deno.serve(async (req) => {
       if (!admin.deletion_pin_hash) return json({ error: 'No deletion PIN set for your account. Contact Super-Admin.' }, 403)
       const pinOk = await verifySecret(String(deletionPin), admin.deletion_pin_hash)
       if (!pinOk) return json({ error: 'Incorrect deletion PIN' }, 403)
-      const { data: user } = await supabase.from('users').select('user_id, email, name').eq('user_id', userId).single()
+      const { data: user } = await supabase.from('users').select('user_id, email, name, deletion_requested_at').eq('user_id', userId).single()
       if (!user) return json({ error: 'User not found' }, 404)
       const { data: subs } = await supabase.from('submissions').select('submission_id').eq('user_id', userId)
       const subIds = (subs || []).map((s: any) => s.submission_id)
@@ -256,13 +256,25 @@ Deno.serve(async (req) => {
         const { data: matchRows } = await supabase.from('matches').select('match_id').or(`sub_a_id.in.(${subIds.join(',')}),sub_b_id.in.(${subIds.join(',')})`)
         matchIds = (matchRows || []).map((m: any) => m.match_id)
       }
+      // Delete in FK-safe order
       await supabase.from('events').delete().eq('user_id', userId)
       if (matchIds.length) await supabase.from('events').delete().in('match_id', matchIds)
       if (matchIds.length) await supabase.from('matches').delete().in('match_id', matchIds)
       if (subIds.length) await supabase.from('submissions').delete().in('submission_id', subIds)
       await supabase.from('user_notifications').delete().eq('user_id', userId)
+      // Delete support tickets submitted by this user (GDPR — email is PII)
+      await supabase.from('support_tickets').delete().eq('email', user.email.toLowerCase())
       await supabase.from('users').delete().eq('user_id', userId)
-      await supabase.from('deletion_log').insert({ email: user.email, deleted_at: new Date().toISOString(), reason: 'admin_manual' })
+      // Log to deletion_log with all required fields
+      await supabase.from('deletion_log').insert({
+        user_id: userId,
+        email: user.email,
+        name: user.name,
+        deletion_requested_at: user.deletion_requested_at || null,
+        deleted_at: new Date().toISOString(),
+        submissions_deleted: subIds.length,
+        matches_deleted: matchIds.length
+      })
       await logAction(admin, 'deletions.process', user.email, { userId, submissionsDeleted: subIds.length, matchesDeleted: matchIds.length }, clientIP)
       return json({ success: true, email: user.email, submissionsDeleted: subIds.length, matchesDeleted: matchIds.length })
     }
