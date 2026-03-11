@@ -1428,10 +1428,11 @@ document.getElementById('deleteModal').addEventListener('click', e => { if (e.ta
 // ═══════════════════════════════════════════════════════════════
 document.getElementById('userSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchUser() })
 document.getElementById('userSearchInput').addEventListener('input', function() { if (!this.value.trim()) document.getElementById('usersContent').innerHTML = '' })
+document.getElementById('userSearchInput').addEventListener('change', function() { if (!this.value.trim()) document.getElementById('usersContent').innerHTML = '' })
 
 async function searchUser() {
   const email = document.getElementById('userSearchInput').value.trim()
-  if (!email) return
+  if (!email) { document.getElementById('usersContent').innerHTML = ''; return }
   document.getElementById('usersContent').innerHTML = '<div class="loading"><span class="spinner"></span>Searching…</div>'
   const data = await apiPost('users.search', { email })
   if (!data.success) { document.getElementById('usersContent').innerHTML = `<div class="empty-state"><p>${esc(data.error)}</p></div>`; return }
