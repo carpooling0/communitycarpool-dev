@@ -1544,7 +1544,11 @@
                 distanceValue: distanceStep, // Send step value (1-4)
                 ip: userIP || 'unknown',
                 country: fromCountry || userCountry?.toUpperCase() || 'AE',
-                orgCode: orgCode || undefined
+                orgCode: orgCode || undefined,
+                refCode: sessionStorage.getItem('cc_ref') || undefined,
+                utmSource: sessionStorage.getItem('cc_utm_source') || undefined,
+                utmMedium: sessionStorage.getItem('cc_utm_medium') || undefined,
+                utmCampaign: sessionStorage.getItem('cc_utm_campaign') || undefined
             };
 
             console.log('Submitting:', data);

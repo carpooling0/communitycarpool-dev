@@ -130,6 +130,7 @@
     .chart-toggle button { border: none; background: transparent; padding: 5px 12px; border-radius: 5px; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; font-family: inherit; transition: background 0.15s; }
     .chart-toggle button.active { background: white; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .chart-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 22px; }
+    .chart-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 22px; }
     .chart-grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; margin-bottom: 22px; }
 
     /* LOCATION LIST */
@@ -256,7 +257,7 @@
 
     /* RESPONSIVE */
     @media (max-width: 1200px) { .kpi-5 { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 900px) { .kpi-5, .kpi-4 { grid-template-columns: repeat(2, 1fr); } .chart-grid-3 { grid-template-columns: 1fr; } .chart-grid-1-2 { grid-template-columns: 1fr; } .form-grid-2 { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .kpi-5, .kpi-4 { grid-template-columns: repeat(2, 1fr); } .chart-grid-3, .chart-grid-2 { grid-template-columns: 1fr; } .chart-grid-1-2 { grid-template-columns: 1fr; } .form-grid-2 { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -1097,6 +1098,19 @@ function renderLocationList(items, key, labelFn) {
   }).join('')}</ul>`
 }
 
+function renderAcquisitionList(items, key) {
+  if (!items?.length) return '<p style="color:var(--text-muted);font-size:13px;padding:12px 0;text-align:center">No data yet — referral links not used</p>'
+  const max = items[0]?.count || 1
+  return `<ul class="loc-list">${items.map(it => {
+    const label = it[key] || '—'
+    return `<li>
+      <span style="min-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:13px">${esc(label)}</span>
+      <div class="loc-bar-wrap"><div class="loc-bar"><div class="loc-bar-inner" style="width:${Math.round(it.count/max*100)}%"></div></div></div>
+      <span class="loc-count">${it.count} (${it.pct??0}%)</span>
+    </li>`
+  }).join('')}</ul>`
+}
+
 function renderDashboard(data) {
   const { kpi, charts, emailMetrics } = data
   const u = kpi.users, s = kpi.submissions, m = kpi.matches, mt = kpi.matching, op = kpi.operational
@@ -1198,6 +1212,22 @@ function renderDashboard(data) {
           null)
     }
   </div>`
+
+  // Row 9 – Acquisition Sources (only if any referral data exists)
+  const hasRefData = (charts.refBreakdown||[]).length > 0 || (charts.utmSourceBreakdown||[]).length > 0
+  if (hasRefData) {
+    html += `<div style="margin-bottom:10px"><div class="section-title">Acquisition Sources</div></div>
+    <div class="chart-grid-2" style="margin-bottom:24px">
+      <div class="chart-card">
+        <h3>Individual Referral Links <span style="font-size:11px;color:var(--text-muted);font-weight:400">(ref codes)</span></h3>
+        ${renderAcquisitionList(charts.refBreakdown||[], 'ref')}
+      </div>
+      <div class="chart-card">
+        <h3>Campaign Sources <span style="font-size:11px;color:var(--text-muted);font-weight:400">(utm_source)</span></h3>
+        ${renderAcquisitionList(charts.utmSourceBreakdown||[], 'source')}
+      </div>
+    </div>`
+  }
 
   document.getElementById('dashboardContent').innerHTML = html
 

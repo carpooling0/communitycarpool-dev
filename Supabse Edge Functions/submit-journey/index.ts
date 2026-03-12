@@ -62,13 +62,14 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json()
-    const { firstName, email, fromLocation, fromLatLng, toLocation, toLatLng, distance, distanceValue, ip, country, orgCode } = body
+    const { firstName, email, fromLocation, fromLatLng, toLocation, toLatLng, distance, distanceValue, ip, country, orgCode,
+            refCode, utmSource, utmMedium, utmCampaign } = body
 
     // 1. Check blacklist
     const { data: blacklisted } = await supabase
       .from('blacklist').select('blacklist_id').eq('email', email.toLowerCase()).single()
     if (blacklisted) {
-      return new Response(JSON.stringify({ success: false, error: 'This email is not permitted to register.' }), 
+      return new Response(JSON.stringify({ success: false, error: 'This email is not permitted to register.' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 })
     }
 
@@ -80,15 +81,29 @@ Deno.serve(async (req) => {
     let userId: number
     let userJourneyLimit: number | null = null
     const { data: existingUser } = await supabase
-      .from('users').select('user_id, journey_limit').eq('email', email.toLowerCase()).single()
+      .from('users').select('user_id, journey_limit, ref_code').eq('email', email.toLowerCase()).single()
 
     if (existingUser) {
       userId = existingUser.user_id
-      userJourneyLimit = existingUser.journey_limit  // per-user override (null = use global)
-      await supabase.from('users').update({ last_seen_at: new Date().toISOString(), name: firstName }).eq('user_id', userId)
+      userJourneyLimit = existingUser.journey_limit
+      const updates: Record<string, any> = { last_seen_at: new Date().toISOString(), name: firstName }
+      // Only set referral data on first touch — never overwrite existing attribution
+      if (!existingUser.ref_code && (refCode || utmSource)) {
+        if (refCode)    updates.ref_code     = refCode
+        if (utmSource)  updates.utm_source   = utmSource
+        if (utmMedium)  updates.utm_medium   = utmMedium
+        if (utmCampaign) updates.utm_campaign = utmCampaign
+      }
+      await supabase.from('users').update(updates).eq('user_id', userId)
     } else {
       const { data: newUser } = await supabase.from('users')
-        .insert({ email: email.toLowerCase(), name: firstName, last_seen_at: new Date().toISOString() })
+        .insert({
+          email: email.toLowerCase(), name: firstName, last_seen_at: new Date().toISOString(),
+          ref_code:     refCode     || null,
+          utm_source:   utmSource   || null,
+          utm_medium:   utmMedium   || null,
+          utm_campaign: utmCampaign || null,
+        })
         .select('user_id').single()
       userId = newUser!.user_id
     }
@@ -150,11 +165,17 @@ Deno.serve(async (req) => {
     // 10. Trigger matching
     const matchingMode = await getConfig('matching_mode')
     if (matchingMode === 'hybrid' || matchingMode === 'instant') {
-      // Fire-and-forget — don't block the response waiting for matching to complete
+      // Fire-and-forget with 30s timeout — don't block the response waiting for matching to complete
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 30000)
       fetch(`${Deno.env.get('DB_URL')}/functions/v1/find-matches`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('DB_SERVICE_KEY')}` },
-        body: JSON.stringify({ submissionId: submission!.submission_id })
+        body: JSON.stringify({ submissionId: submission!.submission_id }),
+        signal: controller.signal
+      }).then(() => clearTimeout(timeout)).catch((e: any) => {
+        clearTimeout(timeout)
+        console.error('find-matches trigger failed:', e.message)
       })
     }
 
