@@ -1779,7 +1779,16 @@ let lgMode = 'individual'
 // Persist counter + registry in localStorage
 function lgGetCounter()  { return parseInt(localStorage.getItem('lgRefCounter') || '0') }
 function lgNextSerial()  { const n = lgGetCounter() + 1; localStorage.setItem('lgRefCounter', n); return n }
-function lgGetRegistry() { try { return JSON.parse(localStorage.getItem('lgRegistry') || '[]') } catch { return [] } }
+function lgGetRegistry() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('lgRegistry') || '[]')
+    // Deduplicate by URL — keep newest entry per URL (array is newest-first)
+    const seen = new Set()
+    const deduped = raw.filter(h => { if (seen.has(h.url)) return false; seen.add(h.url); return true })
+    if (deduped.length !== raw.length) lgSaveRegistry(deduped)  // auto-clean persisted list
+    return deduped
+  } catch { return [] }
+}
 function lgSaveRegistry(r) { localStorage.setItem('lgRegistry', JSON.stringify(r)) }
 
 function lgResetOutput() {
