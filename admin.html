@@ -345,7 +345,7 @@
       <div class="nav-section-label admin-only">Admin</div>
       <button class="nav-item admin-only" data-panel="deletions" onclick="switchPanel('deletions')">Deletions</button>
       <button class="nav-item admin-only" data-panel="users" onclick="switchPanel('users')">Users</button>
-      <button class="nav-item admin-only" data-panel="campaigns" onclick="switchPanel('campaigns')">Campaign Links</button>
+      <button class="nav-item admin-only" data-panel="campaigns" onclick="switchPanel('campaigns');lgRenderHistory()">Campaign Links</button>
 
       <div class="nav-section-label superadmin-only">System</div>
       <button class="nav-item superadmin-only" data-panel="audit" onclick="switchPanel('audit')">Audit Log</button>
@@ -1888,12 +1888,6 @@ function lgClearHistory() {
   lgRenderHistory()
 }
 
-// Load history when panel is opened
-const _origSwitchPanel = switchPanel
-function switchPanel(panel) {
-  _origSwitchPanel(panel)
-  if (panel === 'campaigns') lgRenderHistory()
-}
 
 // ═══════════════════════════════════════════════════════════════
 // INIT
