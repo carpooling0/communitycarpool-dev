@@ -344,6 +344,7 @@
       <div class="nav-section-label admin-only">Admin</div>
       <button class="nav-item admin-only" data-panel="deletions" onclick="switchPanel('deletions')">Deletions</button>
       <button class="nav-item admin-only" data-panel="users" onclick="switchPanel('users')">Users</button>
+      <button class="nav-item admin-only" data-panel="campaigns" onclick="switchPanel('campaigns')">Campaign Links</button>
 
       <div class="nav-section-label superadmin-only">System</div>
       <button class="nav-item superadmin-only" data-panel="audit" onclick="switchPanel('audit')">Audit Log</button>
@@ -475,6 +476,63 @@
         </div>
       </div>
       <div id="teamContent"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+    </div>
+
+    <div id="panel-campaigns" class="panel hidden">
+      <div class="section-hd">
+        <div>
+          <div class="section-title">Campaign Link Generator</div>
+          <div class="section-sub">Build UTM-tagged URLs to track which channel drives signups</div>
+        </div>
+      </div>
+
+      <div class="inline-form" style="max-width:680px">
+        <div class="form-grid-2">
+          <div class="form-group" style="grid-column:1/-1">
+            <label>Base URL</label>
+            <select id="utmBase" onchange="buildUTM()">
+              <option value="https://communitycarpool.org">https://communitycarpool.org (Production)</option>
+              <option value="https://dev.communitycarpool.org">https://dev.communitycarpool.org (Dev)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Source <span style="color:var(--text-muted);font-weight:400">(required)</span></label>
+            <input type="text" id="utmSource" placeholder="instagram, whatsapp, google, email…" oninput="buildUTM()" />
+          </div>
+          <div class="form-group">
+            <label>Medium</label>
+            <input type="text" id="utmMedium" placeholder="social, paid, email, organic…" oninput="buildUTM()" />
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label>Campaign</label>
+            <input type="text" id="utmCampaign" placeholder="summer_2026, jvc_launch, ramadan…" oninput="buildUTM()" />
+          </div>
+          <div class="form-group">
+            <label>Content <span style="color:var(--text-muted);font-weight:400">(optional, for A/B)</span></label>
+            <input type="text" id="utmContent" placeholder="banner_a, story_v2…" oninput="buildUTM()" />
+          </div>
+          <div class="form-group">
+            <label>Term <span style="color:var(--text-muted);font-weight:400">(optional, paid keywords)</span></label>
+            <input type="text" id="utmTerm" placeholder="carpool dubai, commute…" oninput="buildUTM()" />
+          </div>
+        </div>
+
+        <div style="margin-top:6px">
+          <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Generated URL</label>
+          <div style="display:flex;gap:8px;align-items:stretch">
+            <input type="text" id="utmOutput" readonly style="flex:1;font-size:12px;font-family:monospace;background:#f9fafb;color:var(--text);cursor:text" placeholder="Fill in Source to generate a link…" />
+            <button class="btn btn-primary btn-sm" onclick="copyUTM()" id="utmCopyBtn" style="white-space:nowrap">Copy</button>
+          </div>
+          <div id="utmCopyMsg" style="font-size:12px;color:var(--green-dark);margin-top:6px;min-height:18px"></div>
+        </div>
+
+        <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px">
+          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:10px">RECENT LINKS</div>
+          <div id="utmHistory" style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:12px;color:var(--text-muted)">No links generated yet this session.</div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </main>
@@ -1642,6 +1700,64 @@ async function saveEditAdmin() {
   const data = await apiPost('admins.update', payload)
   if (data.success) { showToast('Admin updated ✓', 'success'); closeEditAdmin(); loadTeam() }
   else errEl.textContent = data.error || 'Error updating admin'
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CAMPAIGN LINK GENERATOR
+// ═══════════════════════════════════════════════════════════════
+const utmHistory = []
+
+function buildUTM() {
+  const base     = document.getElementById('utmBase').value
+  const source   = document.getElementById('utmSource').value.trim().replace(/\s+/g, '_')
+  const medium   = document.getElementById('utmMedium').value.trim().replace(/\s+/g, '_')
+  const campaign = document.getElementById('utmCampaign').value.trim().replace(/\s+/g, '_')
+  const content  = document.getElementById('utmContent').value.trim().replace(/\s+/g, '_')
+  const term     = document.getElementById('utmTerm').value.trim().replace(/\s+/g, '_')
+  const output   = document.getElementById('utmOutput')
+  if (!source) { output.value = ''; return }
+  const params = new URLSearchParams()
+  params.set('utm_source', source)
+  if (medium)   params.set('utm_medium', medium)
+  if (campaign) params.set('utm_campaign', campaign)
+  if (content)  params.set('utm_content', content)
+  if (term)     params.set('utm_term', term)
+  output.value = `${base}?${params.toString()}`
+  document.getElementById('utmCopyMsg').textContent = ''
+}
+
+function copyUTM() {
+  const url = document.getElementById('utmOutput').value
+  if (!url) return
+  navigator.clipboard.writeText(url).then(() => {
+    document.getElementById('utmCopyMsg').textContent = '✓ Copied to clipboard'
+    setTimeout(() => document.getElementById('utmCopyMsg').textContent = '', 2500)
+    // Add to history
+    const source   = document.getElementById('utmSource').value.trim()
+    const campaign = document.getElementById('utmCampaign').value.trim()
+    const label    = [source, campaign].filter(Boolean).join(' · ')
+    utmHistory.unshift({ label, url, ts: new Date() })
+    if (utmHistory.length > 10) utmHistory.pop()
+    renderUTMHistory()
+  })
+}
+
+function renderUTMHistory() {
+  const el = document.getElementById('utmHistory')
+  if (!utmHistory.length) { el.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">No links generated yet this session.</div>'; return }
+  el.innerHTML = utmHistory.map(h => `
+    <div style="background:#f9fafb;border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px">${esc(h.label)}</div>
+        <div style="font-size:11px;font-family:monospace;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(h.url)}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="flex-shrink:0;font-size:11px" onclick="navigator.clipboard.writeText('${h.url.replace(/'/g,"\\'")}').then(()=>toast('Copied'))">Copy</button>
+    </div>`).join('')
+}
+
+function toast(msg) {
+  document.getElementById('utmCopyMsg').textContent = '✓ ' + msg
+  setTimeout(() => document.getElementById('utmCopyMsg').textContent = '', 2500)
 }
 
 // ═══════════════════════════════════════════════════════════════
