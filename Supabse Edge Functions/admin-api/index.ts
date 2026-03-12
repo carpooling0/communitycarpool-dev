@@ -170,6 +170,7 @@ Deno.serve(async (req) => {
         const { data: userRow } = await supabase.from('users').select('name').eq('email', ticket.email.toLowerCase()).single()
         const firstName = userRow?.name?.split(' ')[0] || ''
         emailSent = await sendEmail(ticket.email, `Re: Your support ticket #${ticketId}`, buildReplyEmail(ticketId, note, firstName))
+        if (emailSent) await supabase.from('support_tickets').update({ notify_user: true }).eq('ticket_id', ticketId)
       }
       await logAction(admin, 'tickets.save_note', ticket.email, { ticketId, noteType, note }, clientIP)
       return json({ success: true, emailSent })
@@ -288,7 +289,7 @@ Deno.serve(async (req) => {
       if (!email) return json({ error: 'email required' }, 400)
       const { data: user } = await supabase.from('users').select('user_id, name, email, first_seen_at, last_seen_at, deletion_requested_at').ilike('email', `%${email.trim()}%`).limit(1).single()
       if (!user) return json({ error: 'User not found' }, 404)
-      const { data: blRow } = await supabase.from('blacklist').select('id, reason, blacklisted_by, created_at').eq('email', user.email.toLowerCase()).maybeSingle()
+      const { data: blRow } = await supabase.from('blacklist').select('blacklist_id, reason, blacklisted_by, created_at').eq('email', user.email.toLowerCase()).maybeSingle()
       const isBlacklisted = !!blRow
       const { data: subs } = await supabase.from('submissions').select('submission_id, from_location, to_location, distance_km, journey_status, created_at, expires_at').eq('user_id', user.user_id).order('created_at', { ascending: false })
       const subsWithMatches = await Promise.all((subs || []).map(async (sub: any) => {
