@@ -1227,7 +1227,7 @@ function renderTicketsFromCache() {
     html += `<tr class="clickable ${expanded?'row-expanded':''}" id="ticket-row-${t.ticket_id}" onclick="toggleTicket(${t.ticket_id})">
       <td>#${t.ticket_id}</td><td>${typeBadge(t.request_type)}</td>
       <td>${esc(t.email)}</td><td>${fmtDate(t.created_at)}</td>
-      <td>${statusBadge(t.status)}</td>
+      <td>${statusBadge(t.status)}${t.status==='closed'&&t.notify_user?` <span style="font-size:11px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:4px;font-weight:600">✉ Notified</span>`:''}</td>
       <td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform:rotate(${expanded?180:0}deg);transition:transform 0.2s;display:block"><polyline points="6 9 12 15 18 9"/></svg></td>
     </tr>`
     if (expanded) {
@@ -1248,7 +1248,7 @@ function renderTicketsFromCache() {
         ${t.issue_reported_type ? `<p style="margin-bottom:10px;font-size:13px"><strong>Issue type:</strong> ${esc(t.issue_reported_type)}</p>` : ''}
         ${notes.length ? `<div class="note-list">${notesHtml}</div>` : ''}
         ${t.status === 'closed'
-          ? `<p style="font-size:12px;color:var(--text-muted)">Closed ${fmtDateTime(t.resolved_at)}</p>`
+          ? `<p style="font-size:12px;color:var(--text-muted)">Closed ${fmtDateTime(t.resolved_at)}${t.notify_user ? ' &nbsp;·&nbsp; <span style="color:var(--green-dark);font-weight:600">✉ User notified</span>' : ''}</p>`
           : `<div class="note-compose">
                <select id="tmpl-${t.ticket_id}" onchange="applyTemplate(${t.ticket_id})">
                  <option value="">— pick a template —</option>
