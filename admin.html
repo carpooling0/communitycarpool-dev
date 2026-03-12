@@ -543,7 +543,7 @@
               <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Generated Link</label>
               <div style="display:flex;gap:8px;align-items:stretch">
                 <input type="text" id="lgOutput" readonly style="flex:1;font-size:13px;font-family:monospace;background:#f9fafb;color:var(--text)" />
-                <button class="btn btn-ghost btn-sm" onclick="lgCopy()" style="white-space:nowrap">Copy &amp; Save</button>
+                <button id="lgCopyBtn" class="btn btn-ghost btn-sm" onclick="lgCopy()" style="white-space:nowrap">Copy &amp; Save</button>
               </div>
               <div id="lgCopyMsg" style="font-size:12px;color:var(--green-dark);margin-top:6px;min-height:18px"></div>
             </div>
@@ -1825,6 +1825,10 @@ function lgBuild() {
   document.getElementById('lgOutput').value = url
   document.getElementById('lgOutputWrap').style.display = 'block'
   document.getElementById('lgCopyMsg').textContent = ''
+  // Reset Copy & Save button so a fresh generate allows saving again
+  const copyBtn = document.getElementById('lgCopyBtn')
+  copyBtn.disabled = false
+  copyBtn.textContent = 'Copy & Save'
   lgRenderQR(url, qrLabel)
 }
 
@@ -1868,21 +1872,28 @@ function lgDownloadQR() {
 function lgCopy() {
   const url = document.getElementById('lgOutput').value
   if (!url) return
+  const btn = document.getElementById('lgCopyBtn')
+  if (btn.disabled) return  // prevent double-save
+
   navigator.clipboard.writeText(url).then(() => {
-    document.getElementById('lgCopyMsg').textContent = '✓ Copied!'
+    // Disable button immediately to prevent duplicate saves
+    btn.disabled = true
+    btn.textContent = '✓ Saved'
+
+    document.getElementById('lgCopyMsg').textContent = '✓ Copied & saved!'
     setTimeout(() => document.getElementById('lgCopyMsg').textContent = '', 2500)
 
-    let display, ref = null
+    let display, ref = null, finalUrl = url
     if (lgMode === 'individual') {
       const name   = document.getElementById('lgIndivName').value.trim()
-      const serial = lgNextSerial()  // NOW we increment
+      const serial = lgNextSerial()  // increment only on first save
       ref          = String(serial).padStart(3, '0')
       display      = `#${ref} — ${name}`
-      // Rebuild URL with the now-committed serial
+      // Rebuild URL with committed serial
       const base = document.getElementById('lgBase').value
-      const committed = `${base}?ref=${ref}`
-      document.getElementById('lgOutput').value = committed
-      lgRenderQR(committed, `ref ${ref}`)
+      finalUrl = `${base}?ref=${ref}`
+      document.getElementById('lgOutput').value = finalUrl
+      lgRenderQR(finalUrl, `ref ${ref}`)
     } else {
       const src = document.getElementById('lgSource').value.trim()
       const cam = document.getElementById('lgCampaign').value.trim()
@@ -1890,7 +1901,7 @@ function lgCopy() {
     }
 
     const registry = lgGetRegistry()
-    registry.unshift({ display, url: document.getElementById('lgOutput').value, mode: lgMode, ref, ts: Date.now() })
+    registry.unshift({ display, url: finalUrl, mode: lgMode, ref, ts: Date.now() })
     lgSaveRegistry(registry)
     lgRenderHistory()
   })
@@ -1912,8 +1923,8 @@ function lgRenderHistory() {
         </div>
         <div style="font-size:11px;font-family:monospace;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(h.url)}</div>
       </div>
-      <button class="btn btn-ghost btn-sm" style="flex-shrink:0;font-size:11px"
-        onclick="navigator.clipboard.writeText(${JSON.stringify(h.url)}).then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='Copy',1500)})">Copy</button>
+      <button class="btn btn-ghost btn-sm" style="flex-shrink:0;font-size:11px" data-url="${esc(h.url)}"
+        onclick="navigator.clipboard.writeText(this.dataset.url).then(()=>{this.textContent='✓';setTimeout(()=>{this.textContent='Copy'},1500)})">Copy</button>
     </div>`).join('')
 }
 
