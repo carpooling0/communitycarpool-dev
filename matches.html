@@ -1759,7 +1759,7 @@
         const res = await fetch(`${SUPABASE_URL}/functions/v1/update-match-status`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-          body: JSON.stringify({ token: matchToken, action: 'accept_terms', termsVersion: pendingTermsVersion })
+          body: JSON.stringify({ token, action: 'accept_terms', termsVersion: pendingTermsVersion })
         })
         const result = await res.json()
         if (result.success) {
