@@ -1945,7 +1945,7 @@ async function lgRenderQR(url, sub) {
   // Step 3: composite logo if enabled
   if (showLogo) {
     const targetSize = Math.round(SIZE * 0.28)  // artwork target size on QR canvas
-    const pad = Math.round(SIZE * 0.016)         // scales with render size (~10px at 600px)
+    const pad = Math.round(SIZE * 0.006)         // ~4px at 600px — just enough to clear the artwork edge
     const cx = SIZE / 2, cy = SIZE / 2
     try {
       const logo = new Image()
