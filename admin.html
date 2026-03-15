@@ -501,14 +501,14 @@
           <!-- Base URL (both modes) -->
           <div class="form-group" style="margin-bottom:14px">
             <label>Destination</label>
-            <div style="display:flex;gap:20px;margin-top:6px">
-              <label style="display:flex;align-items:center;gap:7px;font-weight:400;cursor:pointer">
-                <input type="radio" name="lgBase" id="lgBaseProd" value="https://communitycarpool.org" checked>
-                <span>communitycarpool.org <span style="font-size:11px;color:var(--text-muted)">(Production)</span></span>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+              <label style="display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer;width:fit-content">
+                <input type="radio" name="lgBase" id="lgBaseProd" value="https://communitycarpool.org" checked style="flex-shrink:0;width:16px;height:16px;cursor:pointer">
+                <span style="font-size:13px">communitycarpool.org <span style="font-size:11px;color:var(--text-muted)">(Production)</span></span>
               </label>
-              <label style="display:flex;align-items:center;gap:7px;font-weight:400;cursor:pointer">
-                <input type="radio" name="lgBase" id="lgBaseDev" value="https://dev.communitycarpool.org">
-                <span>dev.communitycarpool.org <span style="font-size:11px;color:var(--text-muted)">(Dev)</span></span>
+              <label style="display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer;width:fit-content">
+                <input type="radio" name="lgBase" id="lgBaseDev" value="https://dev.communitycarpool.org" style="flex-shrink:0;width:16px;height:16px;cursor:pointer">
+                <span style="font-size:13px">dev.communitycarpool.org <span style="font-size:11px;color:var(--text-muted)">(Dev)</span></span>
               </label>
             </div>
           </div>
@@ -1781,6 +1781,7 @@ async function saveEditAdmin() {
 // LINK GENERATOR (Individual serial + Campaign UTM + QR)
 // ═══════════════════════════════════════════════════════════════
 let lgMode = 'individual'
+let lgCurrentLinks = []   // in-memory cache of last loaded registry (DB or localStorage)
 
 // Persist counter + registry in localStorage
 function lgGetCounter()  { return parseInt(localStorage.getItem('lgRefCounter') || '0') }
@@ -1920,28 +1921,57 @@ function lgCopy() {
     }
 
     const registry = lgGetRegistry()
+    const entry = { display, url: finalUrl, mode: lgMode, ref, ts: Date.now() }
     // Prevent duplicates — skip if URL already exists
     if (!registry.some(h => h.url === finalUrl)) {
-      registry.unshift({ display, url: finalUrl, mode: lgMode, ref, ts: Date.now() })
+      registry.unshift(entry)
       lgSaveRegistry(registry)
     }
-    lgRenderHistory()
+    // Optimistically update in-memory list so the new entry shows instantly
+    if (!lgCurrentLinks.some(h => h.url === finalUrl)) {
+      lgCurrentLinks.unshift(entry)
+    }
+    lgRenderLinkList(document.getElementById('lgHistory'))
+    // Save to DB (async — localStorage already has it as fallback)
+    lgApiSave({ mode: lgMode, display, url: finalUrl, refCode: ref || undefined })
   })
 }
 
-function lgRenderHistory() {
+async function lgRenderHistory() {
   const el = document.getElementById('lgHistory')
-  const registry = lgGetRegistry()
-  if (!registry.length) {
+  el.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">Loading…</div>'
+  try {
+    const data = await apiPost('links.list')
+    if (!data.success) throw new Error(data.error)
+    // Normalise DB rows to same shape used in lgCurrentLinks
+    lgCurrentLinks = (data.links || []).map(l => ({
+      display: l.display, url: l.url, mode: l.mode,
+      ref: l.ref_code, createdBy: l.created_by_name,
+      ts: new Date(l.created_at).getTime()
+    }))
+    // Sync local serial counter to DB max so all devices stay in sync
+    const maxRef = lgCurrentLinks
+      .filter(l => l.ref).reduce((m, l) => Math.max(m, parseInt(l.ref) || 0), 0)
+    if (maxRef > lgGetCounter()) localStorage.setItem('lgRefCounter', maxRef)
+  } catch (e) {
+    // Fallback to localStorage if not logged in or network error
+    lgCurrentLinks = lgGetRegistry()
+  }
+  lgRenderLinkList(el)
+}
+
+function lgRenderLinkList(el) {
+  if (!lgCurrentLinks.length) {
     el.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">No links saved yet.</div>'
     return
   }
-  el.innerHTML = registry.map((h, i) => `
-    <div style="background:#f9fafb;border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px">
+  el.innerHTML = lgCurrentLinks.map((h, i) => `
+    <div style="background:#f9fafb;border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap">
           <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:${h.mode==='individual'?'#f0fdf4':'#eff6ff'};color:${h.mode==='individual'?'var(--green-dark)':'#1d4ed8'}">${h.mode==='individual'?'Individual':'Campaign'}</span>
           <span style="font-size:12px;font-weight:600;color:var(--text)">${esc(h.display)}</span>
+          ${h.createdBy ? `<span style="font-size:11px;color:var(--text-muted)">· ${esc(h.createdBy)}</span>` : ''}
         </div>
         <div style="font-size:11px;font-family:monospace;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(h.url)}</div>
       </div>
@@ -1950,7 +1980,7 @@ function lgRenderHistory() {
 }
 
 function lgHistoryCopy(btn) {
-  const url = lgGetRegistry()[parseInt(btn.dataset.idx)]?.url
+  const url = lgCurrentLinks[parseInt(btn.dataset.idx)]?.url
   if (!url) return
   navigator.clipboard.writeText(url).then(() => {
     btn.textContent = '✓'
@@ -1958,10 +1988,19 @@ function lgHistoryCopy(btn) {
   })
 }
 
+async function lgApiSave(entry) {
+  try {
+    await apiPost('links.save', entry)
+  } catch (e) {
+    console.warn('[lgApiSave]', e)
+  }
+}
+
 function lgClearHistory() {
-  if (!confirm('Clear all saved links? The serial counter will NOT reset.')) return
+  if (!confirm('Clear local cache? Links remain in the database and will reload next time you open this panel.')) return
   lgSaveRegistry([])
-  lgRenderHistory()
+  lgCurrentLinks = []
+  lgRenderLinkList(document.getElementById('lgHistory'))
 }
 
 

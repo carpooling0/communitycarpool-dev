@@ -431,6 +431,33 @@ Deno.serve(async (req) => {
       return json({ success: true })
     }
 
+    // ── REFERRAL LINKS (admin+) ────────────────────────────────────────────────
+    if (action.startsWith('links.') && !requireRole(admin, 'admin'))
+      return json({ error: 'Insufficient permissions' }, 403)
+
+    if (action === 'links.save') {
+      const { mode, display, url, refCode } = body
+      if (!mode || !display || !url) return json({ error: 'mode, display, url required' }, 400)
+      const { error } = await supabase.from('referral_links').insert({
+        mode, display, url,
+        ref_code: refCode || null,
+        created_by_id: admin.admin_id,
+        created_by_name: admin.name
+      })
+      if (error && error.code === '23505') return json({ success: true, duplicate: true })
+      if (error) throw error
+      await logAction(admin, 'links.save', null, { mode, display, url }, clientIP)
+      return json({ success: true })
+    }
+
+    if (action === 'links.list') {
+      const { data, error } = await supabase.from('referral_links')
+        .select('id, mode, display, url, ref_code, created_by_name, created_at')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return json({ success: true, links: data })
+    }
+
     return json({ error: `Unknown action: ${action}` }, 400)
 
   } catch (err: any) {
