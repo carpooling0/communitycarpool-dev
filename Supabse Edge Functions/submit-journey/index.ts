@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
       }
       userId = existingUser.user_id
       userJourneyLimit = existingUser.journey_limit
-      const updates: Record<string, any> = { last_seen_at: new Date().toISOString(), name: firstName }
+      const updates: Record<string, any> = { last_seen_at: new Date().toISOString(), name: firstName, ...(termsVersion ? { terms_accepted_version: termsVersion } : {}) }
       // Only set ref_code on first touch — never overwrite existing attribution
       if (!existingUser.ref_code && refCode) {
         updates.ref_code = refCode
@@ -111,6 +111,7 @@ Deno.serve(async (req) => {
         .insert({
           email: email.toLowerCase(), name: firstName, last_seen_at: new Date().toISOString(),
           ref_code: refCode || null,
+          terms_accepted_version: termsVersion || null,
         })
         .select('user_id').single()
       userId = newUser!.user_id

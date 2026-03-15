@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
-const SITE_URL = 'https://communitycarpool.org'
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
 const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' }
 
 // ── Email helper (same pattern as batch-send-emails — Resend preferred, SES fallback) ──
@@ -90,11 +90,18 @@ function buildMutualEmail(recipientName: string, otherName: string, otherEmail: 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   try {
-    const { token, matchId, submissionId, interest } = await req.json()
+    const { token, action, matchId, submissionId, interest, termsVersion } = await req.json()
 
     const { data: user, error: userError } = await supabase.from('users')
       .select('user_id, name, email').eq('match_page_token', token).single()
     if (userError || !user) return new Response(JSON.stringify({ success: false, error: 'Invalid token' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 })
+
+    // ── Accept updated Terms & Conditions ─────────────────────────────────────
+    if (action === 'accept_terms') {
+      if (!termsVersion) return new Response(JSON.stringify({ success: false, error: 'termsVersion required' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 })
+      await supabase.from('users').update({ terms_accepted_version: termsVersion }).eq('user_id', user.user_id)
+      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
 
     const { data: match } = await supabase.from('matches').select(`
       match_id, status, sub_a_id, sub_b_id, interest_a, interest_b,
