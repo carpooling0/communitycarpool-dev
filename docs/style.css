@@ -108,17 +108,20 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 .sidebar-section { margin-bottom: 4px; }
 .sidebar-section + .sidebar-section { margin-top: 8px; }
 .sidebar-section-label {
+  display: inline-flex;
+  align-items: center;
+  background: #dcfce7;
+  color: #15803d;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--green-dark);
-  padding: 12px 20px 5px;
-  border-top: 1px solid var(--border);
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin: 12px 18px 4px;
 }
 .sidebar-section:first-child .sidebar-section-label {
-  border-top: none;
-  padding-top: 4px;
+  margin-top: 4px;
 }
 .sidebar-link {
   display: block;
