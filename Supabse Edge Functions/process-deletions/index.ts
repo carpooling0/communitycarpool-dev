@@ -86,10 +86,17 @@ Deno.serve(async (req) => {
         ])
 
         // 4. Delete in FK-safe order
-        await supabase.from('events').delete().eq('user_id', user.user_id)
-        await supabase.from('feedback').delete().eq('submitted_by_user_id', user.user_id)
+        // Step A: delete user's own data in parallel (no cross-table FK dependencies here)
+        await Promise.all([
+          supabase.from('events').delete().eq('user_id', user.user_id),
+          supabase.from('feedback').delete().eq('submitted_by_user_id', user.user_id),
+          supabase.from('support_tickets').delete().eq('email', user.email) // GDPR
+        ])
 
+        // Step B: delete all events referencing the user's matches (from partner side too)
+        // Must happen before deleting matches to avoid FK constraint violations
         if (matchIds.length > 0) {
+          await supabase.from('events').delete().in('match_id', matchIds)
           await supabase.from('matches').delete().in('match_id', matchIds)
         }
         if (subIds.length > 0) {

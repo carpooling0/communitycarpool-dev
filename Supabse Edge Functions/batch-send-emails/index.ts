@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
-const SITE_URL = 'https://communitycarpool.org'
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
 const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' }
 
 async function getConfig(key: string): Promise<string> {
@@ -9,19 +9,34 @@ async function getConfig(key: string): Promise<string> {
   return data?.value || ''
 }
 
-async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+// sendEmail returns the provider message ID if sent via Resend, else null
+async function sendEmail(to: string, subject: string, html: string, batchId?: string): Promise<string | null> {
   const resendKey = Deno.env.get('RESEND_API_KEY')
   const sesKey = Deno.env.get('AWS_ACCESS_KEY_ID')
   const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || Deno.env.get('SES_FROM_EMAIL') || ''
 
   if (resendKey) {
+    const payload: any = {
+      from: `Community Carpool <${fromEmail}>`,
+      to: [to],
+      subject,
+      html,
+    }
+    // Add tags so Resend webhook events can be correlated back to our batches
+    if (batchId) {
+      payload.tags = [
+        { name: 'batch_id', value: batchId },
+        { name: 'type',     value: 'match_notification' }
+      ]
+    }
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: `Community Carpool <${fromEmail}>`, to: [to], subject, html })
+      body: JSON.stringify(payload)
     })
     if (!res.ok) throw new Error(`Resend error ${res.status}: ${await res.text()}`)
-    return
+    const resData = await res.json()
+    return resData.id || null  // Returns "re_xxxx" — used for webhook event correlation
   }
 
   if (sesKey) {
@@ -50,7 +65,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
     const signature = hex(await sign(kSigning, stringToSign))
     const res = await fetch(`https://${host}/`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Amz-Date': amzDate, 'Authorization': `AWS4-HMAC-SHA256 Credential=${sesKey}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}` }, body })
     if (!res.ok) throw new Error(`SES error ${res.status}: ${await res.text()}`)
-    return
+    return null  // SES doesn't return an ID we can track with Resend webhooks
   }
 
   throw new Error('No email provider configured. Set RESEND_API_KEY or AWS SES secrets.')
@@ -168,9 +183,10 @@ Deno.serve(async (req) => {
             </div>
           </div></body></html>`
 
-        await sendEmail(email, `Your Carpool Update \u2014 ${batchDate}`, html)
+        const emailMsgId = await sendEmail(email, `Your Carpool Update \u2014 ${batchDate}`, html, batchId)
         emailsSent++
-        supabase.from('events').insert({ event_type: 'match_email_sent', metadata: { email, batch_id: batchId, provider: 'resend' } })
+        // Log to general events table (lightweight record)
+        supabase.from('events').insert({ event_type: 'match_email_sent', metadata: { email, batch_id: batchId, message_id: emailMsgId, provider: emailMsgId ? 'resend' : 'ses' } })
 
         for (const match of unsentMatches) {
           if (match.sub_a.users.email === email || match.sub_b.users.email === email) {

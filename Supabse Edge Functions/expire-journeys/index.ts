@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_KEY')!)
-const SITE_URL = 'https://communitycarpool.org'
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
 const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' }
 
 async function getConfig(key: string): Promise<string> {

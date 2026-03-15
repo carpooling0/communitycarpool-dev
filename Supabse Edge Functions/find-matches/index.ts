@@ -102,6 +102,16 @@ Deno.serve(async (req) => {
     const fromLng = sub.from_lng as number
     const toLat   = sub.to_lat   as number
     const toLng   = sub.to_lng   as number
+
+    // Guard: reject submissions with missing or NaN coordinates (legacy data or DB issue)
+    if (!fromLat || !fromLng || !toLat || !toLng ||
+        isNaN(fromLat) || isNaN(fromLng) || isNaN(toLat) || isNaN(toLng)) {
+      console.error(`Submission ${submissionId} has invalid coordinates: from=(${fromLat},${fromLng}) to=(${toLat},${toLng})`)
+      return new Response(JSON.stringify({ success: false, error: 'Submission has no valid coordinates' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400
+      })
+    }
+
     const radiusMeters = (sub.distance_pref || 3) * 1000
 
     const rpcParams = {
@@ -200,12 +210,12 @@ Deno.serve(async (req) => {
           100 * (1 - (startDist + endDist) / (2 * maxRadius * 2))
         )))
 
-        const { error: matchError } = await supabase.from('matches').insert({
+        const { error: matchError } = await supabase.from('matches').upsert({
           sub_a_id: minId, sub_b_id: maxId,
           match_strength: matchStrength,
           status: 'new',
           notification_sent: false
-        })
+        }, { onConflict: 'sub_a_id,sub_b_id', ignoreDuplicates: true })
 
         if (!matchError) {
           matchesFound++

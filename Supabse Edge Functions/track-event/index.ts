@@ -12,7 +12,15 @@ Deno.serve(async (req) => {
 
     let userId = null
     if (token) {
-      const { data: user } = await supabase.from('users').select('user_id').eq('match_page_token', token).single()
+      // Validate token with expiry check (same policy as get-matches-page)
+      const { data: expConfig } = await supabase.from('config').select('value').eq('key', 'match_token_expiry_days').single()
+      const expiryDays = parseInt(expConfig?.value || '120', 10)
+      const tokenExpiry = new Date()
+      tokenExpiry.setDate(tokenExpiry.getDate() - expiryDays)
+      const { data: user } = await supabase.from('users').select('user_id')
+        .eq('match_page_token', token)
+        .gt('token_created_at', tokenExpiry.toISOString())
+        .single()
       userId = user?.user_id || null
     }
 
@@ -51,7 +59,8 @@ Deno.serve(async (req) => {
     await Promise.allSettled(dbOps)
 
     return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-  } catch (err) {
-    return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  } catch (err: any) {
+    console.error('track-event error:', err)
+    return new Response(JSON.stringify({ success: false, error: 'Internal server error' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 })
   }
 })

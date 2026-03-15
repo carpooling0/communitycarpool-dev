@@ -11,6 +11,15 @@ async function getConfig(key: string): Promise<string> {
   return data?.value || ''
 }
 
+function escapeHtml(str: string): string {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+}
+
 async function sendAdminEmail(ticket: any): Promise<void> {
   const notifyEmail = await getConfig('support_notify_email')
   if (!notifyEmail) return
@@ -33,7 +42,7 @@ async function sendAdminEmail(ticket: any): Promise<void> {
   if (ticket.ip_address)                  fields['IP Address']         = ticket.ip_address
 
   const rows = Object.entries(fields)
-    .map(([k, v]) => `<tr><td style="padding:6px 12px;color:#6b7280;font-size:13px;">${k}</td><td style="padding:6px 12px;font-size:13px;">${v}</td></tr>`)
+    .map(([k, v]) => `<tr><td style="padding:6px 12px;color:#6b7280;font-size:13px;">${k}</td><td style="padding:6px 12px;font-size:13px;">${escapeHtml(v)}</td></tr>`)
     .join('')
 
   const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,system-ui,sans-serif;">
@@ -95,7 +104,7 @@ Deno.serve(async (req) => {
 
     if (error) throw error
 
-    sendAdminEmail(ticket).catch(e => console.error('Admin notify failed:', e))
+    sendAdminEmail(ticket).catch((e: any) => console.error(`[submit-support-ticket] Admin email failed for ticket ${ticket.ticket_id}:`, e.message))
 
     return new Response(JSON.stringify({ success: true, ticketId: ticket.ticket_id }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
