@@ -1915,7 +1915,8 @@ function lgQrStyleChanged() {
 
 async function lgRenderQR(url, sub) {
   lgQrLastUrl = url; lgQrLastSub = sub
-  const SIZE = 180
+  const SIZE    = 600   // render at high res — crisp when pasted to WhatsApp/email
+  const DISPLAY = 180   // CSS display size keeps the panel compact
   const showLogo = document.getElementById('lgQrLogo')?.checked !== false
   const wrap = document.getElementById('lgQrCanvas')
   wrap.innerHTML = ''
@@ -1934,7 +1935,7 @@ async function lgRenderQR(url, sub) {
   // Step 2: draw QR onto canvas
   const canvas = document.createElement('canvas')
   canvas.width = SIZE; canvas.height = SIZE
-  canvas.style.cssText = `width:${SIZE}px;height:${SIZE}px;border-radius:6px`
+  canvas.style.cssText = `width:${DISPLAY}px;height:${DISPLAY}px;border-radius:6px`
   const ctx = canvas.getContext('2d')
   const qrBmp = await createImageBitmap(qrBlob)
   ctx.drawImage(qrBmp, 0, 0, SIZE, SIZE)
@@ -1942,7 +1943,7 @@ async function lgRenderQR(url, sub) {
   // Step 3: composite logo if enabled
   if (showLogo) {
     const targetSize = Math.round(SIZE * 0.28)  // artwork target size on QR canvas
-    const pad = 3                                // px of white around artwork only
+    const pad = Math.round(SIZE * 0.016)         // scales with render size (~10px at 600px)
     const cx = SIZE / 2, cy = SIZE / 2
     try {
       const logo = new Image()
@@ -1971,7 +1972,7 @@ async function lgRenderQR(url, sub) {
       const dw = Math.round(srcW * scale), dh = Math.round(srcH * scale)
       const dx = cx - dw / 2, dy = cy - dh / 2
       // White rounded-square tight around artwork
-      const bx = dx - pad, by = dy - pad, bw = dw + pad*2, bh = dh + pad*2, br = 7
+      const bx = dx - pad, by = dy - pad, bw = dw + pad*2, bh = dh + pad*2, br = Math.round(SIZE * 0.038)
       ctx.fillStyle = '#ffffff'
       ctx.beginPath()
       ctx.moveTo(bx + br, by)
