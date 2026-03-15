@@ -4,8 +4,3 @@
 // Dev:        communitycarpool-dev repo (main branch)
 const SUPABASE_URL = 'https://jboohdwihsiuvyrfeftp.supabase.co'
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impib29oZHdpaHNpdXZ5cmZlZnRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDExNzksImV4cCI6MjA4ODIxNzE3OX0.HuaHizEMQFcYQ41dAEOszWh9-eWB_k-NRUiKtIj-BzY'
-
-// Terms & Conditions version — bump this when terms.html content changes.
-// terms.html reads this to display the version number dynamically.
-// Also update the matching const TERMS_VERSION in index.html when bumping.
-window.TERMS_VERSION = '1.0'

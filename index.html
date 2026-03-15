@@ -1045,7 +1045,7 @@
         // CONFIG — credentials loaded from config.js
         // ============================================
         const SHARE_URL = 'https://communitycarpool.org/';
-        // TERMS_VERSION is defined in config.js (window.TERMS_VERSION)
+        let termsVersion = null; // fetched from Supabase config table on load
 
         // ============================================
         // ORG / CLIENT MODE CONFIG
@@ -1550,7 +1550,7 @@
                 utmSource: sessionStorage.getItem('cc_utm_source') || undefined,
                 utmMedium: sessionStorage.getItem('cc_utm_medium') || undefined,
                 utmCampaign: sessionStorage.getItem('cc_utm_campaign') || undefined,
-                termsVersion: TERMS_VERSION
+                termsVersion: termsVersion
             };
 
             console.log('Submitting:', data);
@@ -1799,6 +1799,19 @@
             }
             // else: orgLocations empty → Google Places autocomplete runs normally for To field
         }
+
+        // Fetch current T&C version from Supabase config table
+        async function fetchTermsVersion() {
+            try {
+                const res = await fetch(
+                    `${SUPABASE_URL}/rest/v1/config?select=value&key=eq.required_terms_version`,
+                    { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+                )
+                const data = await res.json()
+                if (data?.[0]?.value) termsVersion = data[0].value
+            } catch (e) { /* silent fail — termsVersion stays null */ }
+        }
+        const termsVersionReady = fetchTermsVersion()
 
         // Start org mode fetch immediately; initAutocomplete will await it before setting up To field
         const orgModeReady = initOrgMode();
