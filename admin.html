@@ -1941,27 +1941,47 @@ async function lgRenderQR(url, sub) {
 
   // Step 3: composite logo if enabled
   if (showLogo) {
-    const logoSize = Math.round(SIZE * 0.28)  // 28% of QR — safe with H error correction
-    const pad = 3                              // tight white margin around logo
+    const targetSize = Math.round(SIZE * 0.28)  // artwork target size on QR canvas
+    const pad = 3                                // px of white around artwork only
     const cx = SIZE / 2, cy = SIZE / 2
-    const bx = cx - logoSize / 2 - pad,  by = cy - logoSize / 2 - pad
-    const bw = logoSize + pad * 2,        bh = logoSize + pad * 2
-    const br = 7                               // corner radius for rounded square
-    // Tight white rounded-square background
-    ctx.fillStyle = '#ffffff'
-    ctx.beginPath()
-    ctx.moveTo(bx + br, by)
-    ctx.lineTo(bx + bw - br, by);        ctx.quadraticCurveTo(bx + bw, by,      bx + bw, by + br)
-    ctx.lineTo(bx + bw, by + bh - br);   ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - br, by + bh)
-    ctx.lineTo(bx + br, by + bh);        ctx.quadraticCurveTo(bx,      by + bh, bx, by + bh - br)
-    ctx.lineTo(bx, by + br);             ctx.quadraticCurveTo(bx,      by,      bx + br, by)
-    ctx.closePath(); ctx.fill()
-    // Draw logo
     try {
       const logo = new Image()
       logo.crossOrigin = 'anonymous'
       await new Promise((res, rej) => { logo.onload = res; logo.onerror = rej; logo.src = '/logo-qr.png' })
-      ctx.drawImage(logo, cx - logoSize / 2, cy - logoSize / 2, logoSize, logoSize)
+      // Auto-crop: find bounding box of non-white pixels in the source image
+      const tmp = document.createElement('canvas')
+      tmp.width = logo.naturalWidth; tmp.height = logo.naturalHeight
+      const tctx = tmp.getContext('2d')
+      tctx.drawImage(logo, 0, 0)
+      const { data: d, width: iw, height: ih } = tctx.getImageData(0, 0, tmp.width, tmp.height)
+      let minX = iw, minY = ih, maxX = 0, maxY = 0
+      for (let y = 0; y < ih; y++) {
+        for (let x = 0; x < iw; x++) {
+          const i = (y * iw + x) * 4
+          // Non-white = any pixel not close to (255,255,255)
+          if (d[i] < 245 || d[i+1] < 245 || d[i+2] < 245) {
+            if (x < minX) minX = x; if (x > maxX) maxX = x
+            if (y < minY) minY = y; if (y > maxY) maxY = y
+          }
+        }
+      }
+      const srcW = maxX - minX + 1, srcH = maxY - minY + 1
+      // Scale to fit targetSize, preserving aspect ratio
+      const scale = targetSize / Math.max(srcW, srcH)
+      const dw = Math.round(srcW * scale), dh = Math.round(srcH * scale)
+      const dx = cx - dw / 2, dy = cy - dh / 2
+      // White rounded-square tight around artwork
+      const bx = dx - pad, by = dy - pad, bw = dw + pad*2, bh = dh + pad*2, br = 7
+      ctx.fillStyle = '#ffffff'
+      ctx.beginPath()
+      ctx.moveTo(bx + br, by)
+      ctx.lineTo(bx + bw - br, by);        ctx.quadraticCurveTo(bx + bw, by,      bx + bw, by + br)
+      ctx.lineTo(bx + bw, by + bh - br);   ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - br, by + bh)
+      ctx.lineTo(bx + br, by + bh);        ctx.quadraticCurveTo(bx,      by + bh, bx, by + bh - br)
+      ctx.lineTo(bx, by + br);             ctx.quadraticCurveTo(bx,      by,      bx + br, by)
+      ctx.closePath(); ctx.fill()
+      // Draw only the cropped artwork region
+      ctx.drawImage(logo, minX, minY, srcW, srcH, dx, dy, dw, dh)
     } catch (e) { console.warn('[lgRenderQR] logo failed', e) }
   }
 
