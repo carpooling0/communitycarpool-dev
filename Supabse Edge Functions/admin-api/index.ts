@@ -94,12 +94,14 @@ function buildReplyEmail(ticketId: number, noteText: string, firstName: string):
 
 async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
   const apiKey = Deno.env.get('RESEND_API_KEY')
+  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
   if (!apiKey) { console.error('[admin-api] RESEND_API_KEY not set'); return false }
+  if (!fromEmail) { console.error('[admin-api] RESEND_FROM_EMAIL not set'); return false }
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: 'Community Carpool <hello@communitycarpool.org>', to, subject, html })
+      body: JSON.stringify({ from: fromEmail, to, subject, html })
     })
     if (!res.ok) { console.error('[admin-api] Resend error:', await res.text()); return false }
     return true
