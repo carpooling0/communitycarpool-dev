@@ -321,7 +321,7 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
   .topnav { padding: 0 16px; gap: 10px; }
   .topnav-divider { display: none; }
   .topnav-section { display: none; }
-  .topnav-logo span { font-size: 13px; }
+  .topnav-logo span { display: none; }
   .topnav-home { font-size: 13px; white-space: nowrap; }
 
   /* Homepage */
