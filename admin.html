@@ -1894,8 +1894,10 @@ function lgBuild() {
   lgRenderQR(url, qrLabel)
 }
 
-// ── QR Code (qr-code-styling library) ─────────────────────────────────────
-let lgQrInstance  = null
+// ── QR Code ────────────────────────────────────────────────────────────────
+// qr-code-styling generates the QR pattern; we composite logo manually on a
+// real <canvas> so copy-to-clipboard and download both work from pixel data.
+let lgQrCanvas    = null   // the final composited <canvas> element
 let lgQrLastUrl   = ''
 let lgQrLastSub   = ''
 let lgQrStyleOpts = { dot: 'rounded', csq: 'extra-rounded', cdot: 'dot' }
@@ -1911,31 +1913,59 @@ function lgQrStyleChanged() {
   if (lgQrLastUrl) lgRenderQR(lgQrLastUrl, lgQrLastSub)
 }
 
-function lgRenderQR(url, sub) {
+async function lgRenderQR(url, sub) {
   lgQrLastUrl = url; lgQrLastSub = sub
+  const SIZE = 180
   const showLogo = document.getElementById('lgQrLogo')?.checked !== false
   const wrap = document.getElementById('lgQrCanvas')
   wrap.innerHTML = ''
-  lgQrInstance = new QRCodeStyling({
-    width: 180, height: 180,
-    data: url,
-    image: showLogo ? '/logo.png' : undefined,
-    qrOptions:            { errorCorrectionLevel: 'H' },
+
+  // Step 1: get QR pattern as PNG blob (no image — we composite manually)
+  const qr = new QRCodeStyling({
+    width: SIZE, height: SIZE, data: url,
+    qrOptions:            { errorCorrectionLevel: showLogo ? 'H' : 'M' },
     dotsOptions:          { color: '#15803d', type: lgQrStyleOpts.dot },
     cornersSquareOptions: { color: '#15803d', type: lgQrStyleOpts.csq },
     cornersDotOptions:    { color: '#166534', type: lgQrStyleOpts.cdot },
-    imageOptions:         { crossOrigin: 'anonymous', margin: 3, imageSize: 0.28 },
     backgroundOptions:    { color: '#ffffff' }
   })
-  lgQrInstance.append(wrap)
+  const qrBlob = await qr.getRawData('png')
+
+  // Step 2: draw QR onto canvas
+  const canvas = document.createElement('canvas')
+  canvas.width = SIZE; canvas.height = SIZE
+  canvas.style.cssText = `width:${SIZE}px;height:${SIZE}px;border-radius:6px`
+  const ctx = canvas.getContext('2d')
+  const qrBmp = await createImageBitmap(qrBlob)
+  ctx.drawImage(qrBmp, 0, 0, SIZE, SIZE)
+
+  // Step 3: composite logo if enabled
+  if (showLogo) {
+    const logoSize = Math.round(SIZE * 0.30)  // 30% of QR — safe with H error correction
+    const logoR    = logoSize / 2
+    const cx = SIZE / 2, cy = SIZE / 2
+    // White circle background (slightly larger than logo)
+    ctx.fillStyle = '#ffffff'
+    ctx.beginPath(); ctx.arc(cx, cy, logoR + 5, 0, Math.PI * 2); ctx.fill()
+    // Draw clean logo (logo-qr.png — white/transparent background, no pixel hacks needed)
+    try {
+      const logo = new Image()
+      logo.crossOrigin = 'anonymous'
+      await new Promise((res, rej) => { logo.onload = res; logo.onerror = rej; logo.src = '/logo-qr.png' })
+      ctx.drawImage(logo, cx - logoR, cy - logoR, logoSize, logoSize)
+    } catch (e) { console.warn('[lgRenderQR] logo failed', e) }
+  }
+
+  wrap.appendChild(canvas)
+  lgQrCanvas = canvas
   document.getElementById('lgQrPlaceholder').style.display = 'none'
-  wrap.style.display = 'block'
+  wrap.style.display = 'flex'
   document.getElementById('lgQrSub').textContent = sub
   document.getElementById('lgQrActions').style.display = 'flex'
 }
 
 function lgClearQR() {
-  lgQrInstance = null; lgQrLastUrl = ''; lgQrLastSub = ''
+  lgQrCanvas = null; lgQrLastUrl = ''; lgQrLastSub = ''
   const wrap = document.getElementById('lgQrCanvas')
   wrap.innerHTML = ''; wrap.style.display = 'none'
   document.getElementById('lgQrPlaceholder').style.display = ''
@@ -1943,24 +1973,30 @@ function lgClearQR() {
   document.getElementById('lgQrActions').style.display = 'none'
 }
 
-async function lgDownloadQR() {
-  if (!lgQrInstance) return
-  lgQrInstance.download({ name: `qr_${(lgQrLastSub||'qr').replace(/[^a-z0-9]/gi,'_').toLowerCase()}`, extension: 'png' })
+function lgDownloadQR() {
+  if (!lgQrCanvas) return
+  lgQrCanvas.toBlob(blob => {
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `qr_${(lgQrLastSub||'qr').replace(/[^a-z0-9]/gi,'_').toLowerCase()}.png`
+    a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+  }, 'image/png')
 }
 
-async function lgCopyQR() {
-  if (!lgQrInstance) return
+function lgCopyQR() {
+  if (!lgQrCanvas) return
   const btn = document.getElementById('lgQrCopyBtn')
-  try {
-    const blob = await lgQrInstance.getRawData('png')
-    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+  // Pass Promise directly to ClipboardItem — keeps the user-gesture context intact
+  navigator.clipboard.write([
+    new ClipboardItem({ 'image/png': new Promise(res => lgQrCanvas.toBlob(res, 'image/png')) })
+  ]).then(() => {
     btn.textContent = '✓ Copied!'
     setTimeout(() => { btn.textContent = '⎘ Copy Image' }, 2000)
-  } catch (e) {
+  }).catch(e => {
     btn.textContent = '✗ Failed'
     setTimeout(() => { btn.textContent = '⎘ Copy Image' }, 2000)
     console.warn('[lgCopyQR]', e)
-  }
+  })
 }
 
 function lgCopy() {
