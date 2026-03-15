@@ -294,7 +294,7 @@ Deno.serve(async (req) => {
       if (!user) return json({ error: 'User not found' }, 404)
       const { data: blRow } = await supabase.from('blacklist').select('blacklist_id, reason, blacklisted_by, created_at').eq('email', user.email.toLowerCase()).maybeSingle()
       const isBlacklisted = !!blRow
-      const { data: subs } = await supabase.from('submissions').select('submission_id, from_location, to_location, distance_km, journey_status, created_at, expires_at').eq('user_id', user.user_id).order('created_at', { ascending: false })
+      const { data: subs } = await supabase.from('submissions').select('submission_id, from_location, to_location, distance_km, journey_status, created_at, expires_at, terms_version').eq('user_id', user.user_id).order('created_at', { ascending: false })
       const subsWithMatches = await Promise.all((subs || []).map(async (sub: any) => {
         const { data: matches } = await supabase.from('matches').select('match_id, match_strength, status, interest_a, interest_b, interest_a_at, interest_b_at, created_at, notification_sent, sub_a_id, sub_b_id').or(`sub_a_id.eq.${sub.submission_id},sub_b_id.eq.${sub.submission_id}`).order('created_at', { ascending: false })
         const enriched = await Promise.all((matches || []).map(async (m: any) => {

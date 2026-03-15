@@ -1646,7 +1646,7 @@ async function searchUser() {
       const sub = subs[i]
       html += `<div class="sub-accordion-hd" onclick="this.nextElementSibling.classList.toggle('open')">
         <span><strong>${esc(sub.from_location)}</strong> → ${esc(sub.to_location)}</span>
-        <span>${statusBadge(sub.journey_status)} ${fmtDate(sub.created_at)}</span>
+        <span>${statusBadge(sub.journey_status)} ${fmtDate(sub.created_at)}${sub.terms_version ? ` <span style="font-size:10px;color:var(--text-muted);background:#f1f5f9;border:1px solid var(--border);border-radius:4px;padding:1px 6px;margin-left:4px">T&amp;C v${esc(sub.terms_version)}</span>` : ''}</span>
       </div>
       <div class="sub-accordion-body">
         ${!(sub.matches||[]).length ? '<p style="font-size:12px;color:var(--text-muted);padding:6px 4px">No matches</p>' : `
