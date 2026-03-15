@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
   <script src="config.js"></script>
   <style>
     :root {
@@ -258,6 +259,9 @@
     /* RESPONSIVE */
     @media (max-width: 1200px) { .kpi-5 { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 900px) { .kpi-5, .kpi-4 { grid-template-columns: repeat(2, 1fr); } .chart-grid-3, .chart-grid-2 { grid-template-columns: 1fr; } .chart-grid-1-2 { grid-template-columns: 1fr; } .form-grid-2 { grid-template-columns: 1fr; } }
+  .qr-style-btn { font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid var(--border);background:white;color:var(--text-secondary);cursor:pointer;transition:all .15s }
+  .qr-style-btn:hover { border-color:#6b7280 }
+  .qr-style-btn.active { background:var(--green-dark);color:white;border-color:var(--green-dark) }
   </style>
 </head>
 <body>
@@ -557,14 +561,52 @@
         </div>
 
         <!-- RIGHT: QR -->
-        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);min-width:210px">
+        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);width:220px">
           <div style="font-size:11px;font-weight:700;color:var(--text-secondary);letter-spacing:0.06em">QR CODE</div>
-          <div id="lgQrWrap" style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;background:#f9fafb;border-radius:8px;border:1px dashed var(--border)">
+          <div id="lgQrWrap" style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;background:#f9fafb;border-radius:8px;border:1px dashed var(--border);overflow:hidden">
             <span id="lgQrPlaceholder" style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px">Fill in the form<br>to generate</span>
-            <img id="lgQrImg" src="" alt="QR Code" style="display:none;width:180px;height:180px;border-radius:8px" />
+            <div id="lgQrCanvas" style="display:none"></div>
           </div>
           <div id="lgQrSub" style="font-size:12px;color:var(--text-secondary);text-align:center;max-width:180px;min-height:16px"></div>
-          <button class="btn btn-ghost btn-sm" id="lgQrDownload" onclick="lgDownloadQR()" style="display:none;width:100%">⬇ Download QR</button>
+          <!-- Copy + Download -->
+          <div id="lgQrActions" style="display:none;flex-direction:column;gap:6px;width:100%">
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" id="lgQrCopyBtn" onclick="lgCopyQR()" style="flex:1;font-size:11px">⎘ Copy Image</button>
+              <button class="btn btn-ghost btn-sm" onclick="lgDownloadQR()" style="flex:1;font-size:11px">⬇ Download</button>
+            </div>
+          </div>
+          <!-- Style pickers -->
+          <div style="width:100%;border-top:1px solid var(--border);padding-top:10px">
+            <div style="font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:0.06em;margin-bottom:8px">STYLE</div>
+            <div style="margin-bottom:7px">
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">Dots</div>
+              <div style="display:flex;flex-wrap:wrap;gap:3px">
+                <button class="qr-style-btn active" data-key="dot" data-val="rounded" onclick="lgQrStyle(this)">Rounded</button>
+                <button class="qr-style-btn" data-key="dot" data-val="dots" onclick="lgQrStyle(this)">Dots</button>
+                <button class="qr-style-btn" data-key="dot" data-val="square" onclick="lgQrStyle(this)">Square</button>
+                <button class="qr-style-btn" data-key="dot" data-val="classy" onclick="lgQrStyle(this)">Classy</button>
+              </div>
+            </div>
+            <div style="margin-bottom:7px">
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">Eye outer</div>
+              <div style="display:flex;flex-wrap:wrap;gap:3px">
+                <button class="qr-style-btn active" data-key="csq" data-val="extra-rounded" onclick="lgQrStyle(this)">Rounded</button>
+                <button class="qr-style-btn" data-key="csq" data-val="square" onclick="lgQrStyle(this)">Square</button>
+                <button class="qr-style-btn" data-key="csq" data-val="dot" onclick="lgQrStyle(this)">Dot</button>
+              </div>
+            </div>
+            <div style="margin-bottom:7px">
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">Eye inner</div>
+              <div style="display:flex;flex-wrap:wrap;gap:3px">
+                <button class="qr-style-btn active" data-key="cdot" data-val="dot" onclick="lgQrStyle(this)">Dot</button>
+                <button class="qr-style-btn" data-key="cdot" data-val="square" onclick="lgQrStyle(this)">Square</button>
+              </div>
+            </div>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:4px">
+              <input type="checkbox" id="lgQrLogo" checked onchange="lgQrStyleChanged()" style="cursor:pointer;width:14px;height:14px">
+              <span style="font-size:11px;color:var(--text-secondary)">Logo in centre</span>
+            </label>
+          </div>
         </div>
 
       </div>
@@ -572,7 +614,7 @@
       <!-- History / Registry -->
       <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px;max-width:860px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div style="font-size:12px;font-weight:700;color:var(--text-secondary)">LINK REGISTRY <span style="font-weight:400;color:var(--text-muted)">(saved in browser)</span></div>
+          <div style="font-size:12px;font-weight:700;color:var(--text-secondary)">LINK REGISTRY <span style="font-weight:400;color:var(--text-muted)">(saved in database)</span></div>
           <button class="btn btn-ghost btn-sm" style="font-size:11px;color:var(--red)" onclick="lgClearHistory()">Clear all</button>
         </div>
         <div id="lgHistory" style="display:flex;flex-direction:column;gap:8px">
@@ -1852,41 +1894,73 @@ function lgBuild() {
   lgRenderQR(url, qrLabel)
 }
 
+// ── QR Code (qr-code-styling library) ─────────────────────────────────────
+let lgQrInstance  = null
+let lgQrLastUrl   = ''
+let lgQrLastSub   = ''
+let lgQrStyleOpts = { dot: 'rounded', csq: 'extra-rounded', cdot: 'dot' }
+
+function lgQrStyle(btn) {
+  const key = btn.dataset.key, val = btn.dataset.val
+  lgQrStyleOpts[key] = val
+  document.querySelectorAll(`.qr-style-btn[data-key="${key}"]`).forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  lgQrStyleChanged()
+}
+function lgQrStyleChanged() {
+  if (lgQrLastUrl) lgRenderQR(lgQrLastUrl, lgQrLastSub)
+}
+
 function lgRenderQR(url, sub) {
-  const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&color=15803d&bgcolor=ffffff&margin=8&data=${encodeURIComponent(url)}`
-  const img = document.getElementById('lgQrImg')
-  img.src = apiUrl
-  img.style.display = 'block'
+  lgQrLastUrl = url; lgQrLastSub = sub
+  const showLogo = document.getElementById('lgQrLogo')?.checked !== false
+  const wrap = document.getElementById('lgQrCanvas')
+  wrap.innerHTML = ''
+  lgQrInstance = new QRCodeStyling({
+    width: 180, height: 180,
+    data: url,
+    image: showLogo ? '/logo.png' : undefined,
+    qrOptions:            { errorCorrectionLevel: 'H' },
+    dotsOptions:          { color: '#15803d', type: lgQrStyleOpts.dot },
+    cornersSquareOptions: { color: '#15803d', type: lgQrStyleOpts.csq },
+    cornersDotOptions:    { color: '#166534', type: lgQrStyleOpts.cdot },
+    imageOptions:         { crossOrigin: 'anonymous', margin: 3, imageSize: 0.28 },
+    backgroundOptions:    { color: '#ffffff' }
+  })
+  lgQrInstance.append(wrap)
   document.getElementById('lgQrPlaceholder').style.display = 'none'
+  wrap.style.display = 'block'
   document.getElementById('lgQrSub').textContent = sub
-  document.getElementById('lgQrDownload').style.display = 'block'
-  // store for download
-  document.getElementById('lgQrDownload').dataset.src = apiUrl
-  document.getElementById('lgQrDownload').dataset.sub = sub
+  document.getElementById('lgQrActions').style.display = 'flex'
 }
 
 function lgClearQR() {
-  document.getElementById('lgQrImg').style.display = 'none'
+  lgQrInstance = null; lgQrLastUrl = ''; lgQrLastSub = ''
+  const wrap = document.getElementById('lgQrCanvas')
+  wrap.innerHTML = ''; wrap.style.display = 'none'
   document.getElementById('lgQrPlaceholder').style.display = ''
   document.getElementById('lgQrSub').textContent = ''
-  document.getElementById('lgQrDownload').style.display = 'none'
+  document.getElementById('lgQrActions').style.display = 'none'
 }
 
-function lgDownloadQR() {
-  const btn = document.getElementById('lgQrDownload')
-  const apiUrl = btn.dataset.src
-  const sub = btn.dataset.sub || 'qr'
-  if (!apiUrl) return
-  const filename = `qr_${sub.replace(/[^a-z0-9]/gi,'_').toLowerCase()}.png`
-  fetch(apiUrl)
-    .then(r => r.blob())
-    .then(blob => {
-      const a = document.createElement('a')
-      a.href = URL.createObjectURL(blob)
-      a.download = filename
-      a.click()
-      setTimeout(() => URL.revokeObjectURL(a.href), 1000)
-    })
+async function lgDownloadQR() {
+  if (!lgQrInstance) return
+  lgQrInstance.download({ name: `qr_${(lgQrLastSub||'qr').replace(/[^a-z0-9]/gi,'_').toLowerCase()}`, extension: 'png' })
+}
+
+async function lgCopyQR() {
+  if (!lgQrInstance) return
+  const btn = document.getElementById('lgQrCopyBtn')
+  try {
+    const blob = await lgQrInstance.getRawData('png')
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+    btn.textContent = '✓ Copied!'
+    setTimeout(() => { btn.textContent = '⎘ Copy Image' }, 2000)
+  } catch (e) {
+    btn.textContent = '✗ Failed'
+    setTimeout(() => { btn.textContent = '⎘ Copy Image' }, 2000)
+    console.warn('[lgCopyQR]', e)
+  }
 }
 
 function lgCopy() {
