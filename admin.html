@@ -1916,7 +1916,9 @@ function lgQrStyleChanged() {
 async function lgRenderQR(url, sub) {
   lgQrLastUrl = url; lgQrLastSub = sub
   const SIZE    = 600   // render at high res — crisp when pasted to WhatsApp/email
+  const TEXT_H  = 58    // extra height below QR for the URL label
   const DISPLAY = 180   // CSS display size keeps the panel compact
+  const DISPLAY_H = Math.round(DISPLAY * (SIZE + TEXT_H) / SIZE)
   const showLogo = document.getElementById('lgQrLogo')?.checked !== false
   const wrap = document.getElementById('lgQrCanvas')
   wrap.innerHTML = ''
@@ -1934,8 +1936,8 @@ async function lgRenderQR(url, sub) {
 
   // Step 2: draw QR onto canvas
   const canvas = document.createElement('canvas')
-  canvas.width = SIZE; canvas.height = SIZE
-  canvas.style.cssText = `width:${DISPLAY}px;height:${DISPLAY}px;border-radius:6px`
+  canvas.width = SIZE; canvas.height = SIZE + TEXT_H
+  canvas.style.cssText = `width:${DISPLAY}px;height:${DISPLAY_H}px;border-radius:6px`
   const ctx = canvas.getContext('2d')
   const qrBmp = await createImageBitmap(qrBlob)
   ctx.drawImage(qrBmp, 0, 0, SIZE, SIZE)
@@ -1985,6 +1987,17 @@ async function lgRenderQR(url, sub) {
       ctx.drawImage(logo, minX, minY, srcW, srcH, dx, dy, dw, dh)
     } catch (e) { console.warn('[lgRenderQR] logo failed', e) }
   }
+
+  // Step 4: draw URL label below QR
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, SIZE, SIZE, TEXT_H)
+  await document.fonts.ready
+  const fontSize = Math.round(SIZE * 0.052)
+  ctx.font = `600 ${fontSize}px Inter, -apple-system, BlinkMacSystemFont, Arial, sans-serif`
+  ctx.fillStyle = '#15803d'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText('www.communitycarpool.org', SIZE / 2, SIZE + TEXT_H / 2)
 
   wrap.appendChild(canvas)
   lgQrCanvas = canvas
@@ -2115,7 +2128,10 @@ function lgRenderLinkList(el) {
         </div>
         <div style="font-size:11px;font-family:monospace;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(h.url)}</div>
       </div>
-      <button class="btn btn-ghost btn-sm" style="flex-shrink:0;font-size:11px" data-idx="${i}" onclick="lgHistoryCopy(this)">Copy</button>
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        <button class="btn btn-ghost btn-sm" style="font-size:11px" data-idx="${i}" onclick="lgHistoryCopy(this)">Copy URL</button>
+        <button class="btn btn-ghost btn-sm" style="font-size:11px" data-idx="${i}" onclick="lgRegenQR(this)">↻ QR</button>
+      </div>
     </div>`).join('')
 }
 
@@ -2124,8 +2140,16 @@ function lgHistoryCopy(btn) {
   if (!url) return
   navigator.clipboard.writeText(url).then(() => {
     btn.textContent = '✓'
-    setTimeout(() => { btn.textContent = 'Copy' }, 1500)
+    setTimeout(() => { btn.textContent = 'Copy URL' }, 1500)
   })
+}
+
+function lgRegenQR(btn) {
+  const entry = lgCurrentLinks[parseInt(btn.dataset.idx)]
+  if (!entry) return
+  lgRenderQR(entry.url, entry.display)
+  // Scroll QR panel into view
+  document.getElementById('lgQrWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' })
 }
 
 async function lgApiSave(entry) {
