@@ -187,11 +187,12 @@ Deno.serve(async (req) => {
         status: 'closed', resolved_at: new Date().toISOString(), closed_by_admin_id: admin.admin_id, notify_user: notifyUser
       }).eq('ticket_id', ticketId)
       if (error) throw error
+      let emailSent = false
       if (notifyUser && ticket.email) {
         const { data: userRow } = await supabase.from('users').select('name').eq('email', ticket.email.toLowerCase()).single()
         const firstName = userRow?.name?.split(' ')[0] || ''
         const greeting = firstName ? `Dear ${firstName},` : 'Dear valued member,'
-        await sendEmail(ticket.email, `Your support ticket #${ticketId} has been closed`,
+        emailSent = await sendEmail(ticket.email, `Your support ticket #${ticketId} has been closed`,
           `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f3f4f6;font-family:Inter,Arial,sans-serif">
           <div style="max-width:560px;margin:32px auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08)">
             <div style="background:#15803d;padding:20px 28px"><span style="color:white;font-size:17px;font-weight:700">Community Carpool</span></div>
@@ -209,8 +210,8 @@ Deno.serve(async (req) => {
         const { data: user } = await supabase.from('users').select('user_id').eq('email', ticket.email.toLowerCase()).single()
         if (user) await supabase.from('user_notifications').insert({ user_id: user.user_id, message: `Your support ticket #${ticketId} has been reviewed and closed.`, type: 'ticket_closed' })
       }
-      await logAction(admin, 'tickets.close', ticket.email, { ticketId, notifyUser }, clientIP)
-      return json({ success: true })
+      await logAction(admin, 'tickets.close', ticket.email, { ticketId, notifyUser, emailSent }, clientIP)
+      return json({ success: true, emailSent, notifyUser })
     }
 
     // ── DELETIONS (admin + super_admin) ────────────────────────────────────────

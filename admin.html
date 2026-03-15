@@ -1494,7 +1494,11 @@ async function closeTicket(id, notifyUser, e) {
   e.stopPropagation()
   const data = await apiPost('tickets.close', { ticketId: id, notifyUser })
   if (data.success) {
-    showToast(notifyUser ? 'Ticket closed & user notified ✓' : 'Ticket closed ✓', 'success')
+    if (notifyUser && data.emailSent === false) {
+      showToast('Ticket closed ✓ — but email delivery failed (RESEND_API_KEY not configured?)', 'error')
+    } else {
+      showToast(notifyUser ? 'Ticket closed & email sent to user ✓' : 'Ticket closed ✓', 'success')
+    }
     ticketExpandedId = null
     loadTickets()
   } else showToast(data.error || 'Error closing ticket', 'error')
