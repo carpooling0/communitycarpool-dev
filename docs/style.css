@@ -317,13 +317,24 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
   .sidebar { display: none; }
 }
 @media (max-width: 600px) {
+  /* Nav */
+  .topnav { padding: 0 16px; gap: 10px; }
+  .topnav-divider { display: none; }
+  .topnav-section { display: none; }
+  .topnav-logo span { font-size: 13px; }
+  .topnav-home { font-size: 13px; white-space: nowrap; }
+
+  /* Homepage */
   .cards-grid, .cards-grid.two-col { grid-template-columns: 1fr; }
   body { font-size: 17px; }
+  .home-hero { padding: 36px 20px 28px; }
   .home-hero h1 { font-size: 28px; }
   .home-hero p { font-size: 18px; }
   .doc-card-title { font-size: 18px; }
   .doc-card-desc { font-size: 15px; }
   .doc-card-links a { font-size: 15px; }
+
+  /* Article pages */
   .article-title { font-size: 24px; }
   .article-lead { font-size: 17px; }
   .article-main h2 { font-size: 21px; }
