@@ -23,11 +23,13 @@
     .tag-red { background:#fef2f2;color:#991b1b; }
     .tag-blue { background:#eff6ff;color:#1d4ed8; }
     .tag-gray { background:#f3f4f6;color:#374151; }
+    .check { color:#15803d; font-weight:700; }
+    .cross { color:#dc2626; font-weight:700; }
   </style>
 </head>
 <body>
 <nav class="topnav">
-  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/><span>Community Carpool</span></a>
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/></a>
   <div class="topnav-divider"></div>
   <span class="topnav-section">Super-Admin Docs</span>
   <div class="topnav-spacer"></div>
@@ -99,83 +101,201 @@
     <div class="sa-badge">🔒 Super-Admin Only</div>
     <div class="article-eyebrow">👥 Operations</div>
     <h1 class="article-title">Managing team access</h1>
-    <p class="article-lead">The admin panel uses a dedicated role-based access control system separate from Supabase Auth. Admin accounts are stored in the <code>admin_users</code> table and sessions in <code>admin_sessions</code>. Only Super-Admins can add or modify admin accounts.</p>
+    <p class="article-lead">The admin panel uses its own role-based access control system, completely separate from Supabase Auth. Admin accounts live in the <code>admin_users</code> table. Sessions live in <code>admin_sessions</code>. Authentication is handled by the <code>admin-auth</code> edge function, and all panel operations go through <code>admin-api</code>. Only Super-Admins can add or modify admin accounts.</p>
 
-    <div class="callout info">
-      <div class="callout-icon">ℹ️</div>
-      <div class="callout-body">The admin panel and its authentication system (<code>admin-auth</code> and <code>admin-api</code> edge functions) are planned/in progress. Until deployed, admin operations are performed directly via the Supabase dashboard and SQL Editor.</div>
-    </div>
+    <h2>How admin sessions work</h2>
+    <p>When an admin logs in successfully, <code>admin-auth</code> creates a session record in the <code>admin_sessions</code> table and returns the session token to the browser. The token is stored in <code>localStorage</code> and sent in the <code>Authorization: Bearer &lt;token&gt;</code> header on every subsequent request to <code>admin-api</code>.</p>
+    <ul>
+      <li>Sessions expire after <strong>24 hours</strong> from login. After expiry, the admin is redirected to the login page.</li>
+      <li>On every <code>admin-api</code> call, the session token is validated: it must exist in <code>admin_sessions</code>, not be expired, and belong to an account where <code>is_active = true</code> and <code>role_expires_at</code> (if set) has not passed.</li>
+      <li>Logging out invalidates the session record in the database immediately.</li>
+    </ul>
 
-    <h2>Admin roles</h2>
+    <h2>Role-based access control (RBAC)</h2>
+    <p>There are three roles. Each role has a strict scope — a role cannot perform actions above its tier, regardless of what it requests from <code>admin-api</code>.</p>
+
     <table>
-      <thead><tr><th>Role</th><th>Access level</th><th>Can do</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Capability</th>
+          <th><span class="tag tag-blue">support</span></th>
+          <th><span class="tag tag-amber">admin</span></th>
+          <th><span class="tag tag-red">super_admin</span></th>
+        </tr>
+      </thead>
       <tbody>
         <tr>
-          <td><span class="tag tag-red">super_admin</span></td>
-          <td>Full</td>
-          <td>Everything: manage team, view all data, process deletions, edit config, access audit log, blacklist users, manage organisations</td>
+          <td>View support tickets</td>
+          <td><span class="check">Yes</span></td>
+          <td><span class="check">Yes</span></td>
+          <td><span class="check">Yes</span></td>
         </tr>
         <tr>
-          <td><span class="tag tag-amber">admin</span></td>
-          <td>Operational</td>
-          <td>View/search users, process deletions, manage support tickets, add to blacklist, view audit log</td>
+          <td>Add internal notes to tickets</td>
+          <td><span class="check">Yes</span></td>
+          <td><span class="check">Yes</span></td>
+          <td><span class="check">Yes</span></td>
         </tr>
         <tr>
-          <td><span class="tag tag-blue">support</span></td>
-          <td>Limited</td>
-          <td>View and respond to support tickets only. Cannot access user data or process deletions.</td>
+          <td>Send replies to ticket submitters</td>
+          <td><span class="check">Yes</span></td>
+          <td><span class="check">Yes</span></td>
+          <td><span class="check">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Close tickets</td>
+          <td><span class="check">Yes</span></td>
+          <td><span class="check">Yes</span></td>
+          <td><span class="check">Yes</span></td>
+        </tr>
+        <tr>
+          <td>View deletion queue</td>
+          <td><span class="cross">No</span></td>
+          <td><span class="check">Yes</span></td>
+          <td><span class="check">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Cancel a pending deletion</td>
+          <td><span class="cross">No</span></td>
+          <td><span class="check">Yes</span></td>
+          <td><span class="check">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Process deletions (requires PIN)</td>
+          <td><span class="cross">No</span></td>
+          <td><span class="check">Yes — with deletion PIN</span></td>
+          <td><span class="check">Yes — with deletion PIN</span></td>
+        </tr>
+        <tr>
+          <td>User lookup by email or ID</td>
+          <td><span class="cross">No</span></td>
+          <td><span class="check">Yes</span></td>
+          <td><span class="check">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Blacklist / unblacklist users</td>
+          <td><span class="cross">No</span></td>
+          <td><span class="check">Yes</span></td>
+          <td><span class="check">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Campaign &amp; referral links</td>
+          <td><span class="cross">No</span></td>
+          <td><span class="check">Yes</span></td>
+          <td><span class="check">Yes</span></td>
+        </tr>
+        <tr>
+          <td>View audit log</td>
+          <td><span class="cross">No</span></td>
+          <td><span class="cross">No</span></td>
+          <td><span class="check">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Team management (add/edit/deactivate admins)</td>
+          <td><span class="cross">No</span></td>
+          <td><span class="cross">No</span></td>
+          <td><span class="check">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Access Super-Admin docs</td>
+          <td><span class="cross">No</span></td>
+          <td><span class="cross">No</span></td>
+          <td><span class="check">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Edit config table</td>
+          <td><span class="cross">No</span></td>
+          <td><span class="cross">No</span></td>
+          <td><span class="check">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Manage organisations</td>
+          <td><span class="cross">No</span></td>
+          <td><span class="cross">No</span></td>
+          <td><span class="check">Yes</span></td>
         </tr>
       </tbody>
     </table>
 
+    <h2>The deletion PIN</h2>
+    <p>Any admin with the <code>admin</code> or <code>super_admin</code> role can trigger account deletions from the panel. Because deletion is <strong>irreversible</strong>, the panel requires a separate 6-digit PIN to confirm the action — in addition to the admin being logged in.</p>
+    <ul>
+      <li>The PIN is stored as a hash in <code>admin_users.deletion_pin</code> using the same PBKDF2 method as the login password.</li>
+      <li>It is set when an admin account is created and can only be changed by a super_admin (or by the admin themselves if the panel provides a self-service change flow).</li>
+      <li>Every admin with <code>admin</code> or <code>super_admin</code> role <strong>must</strong> have a deletion PIN set — accounts without one cannot perform deletions.</li>
+      <li>The PIN is not the same as the login password — they are stored and verified separately.</li>
+    </ul>
+    <p>To reset a deletion PIN via SQL:</p>
+    <pre><code>-- Generate a PBKDF2 hash of the new PIN externally, then update:
+UPDATE admin_users
+SET deletion_pin = '[saltHex:hashHex — generated programmatically]'
+WHERE email = 'admin@example.com';</code></pre>
+
     <h2>Adding a new admin</h2>
-    <p>Until the admin panel Team section is live, add accounts directly via SQL:</p>
-    <pre><code>-- Generate a PBKDF2 hash of the password externally, then insert:
-INSERT INTO admin_users (email, name, role, password_hash, deletion_pin, is_active)
+    <p>New admin accounts can be created from the Team panel (super_admin only). To add an account directly via SQL (e.g. for the first super_admin seed):</p>
+    <pre><code>INSERT INTO admin_users (email, name, role, password_hash, deletion_pin, is_active)
 VALUES (
   'newadmin@example.com',
   'Admin Name',
   'admin',
-  '[saltHex:hashHex — generate programmatically]',
-  '[hashed 6-digit PIN]',
+  '[REDACTED — saltHex:hashHex, generated programmatically]',
+  '[REDACTED — hashed 6-digit PIN]',
   true
 );</code></pre>
-    <p>Password hashing uses PBKDF2 via Deno's <code>crypto.subtle</code>: 16-byte random salt, 100,000 iterations, SHA-256, output as hex. Format stored: <code>saltHex:hashHex</code>. Generate this using a small script or the admin-auth edge function's own hashing utility.</p>
+    <p>Password hashing: PBKDF2 via Deno's <code>crypto.subtle</code> — 16-byte random salt, 100,000 iterations, SHA-256 digest, output as hex. Format: <code>saltHex:hashHex</code>. Use a small utility script or the <code>admin-auth</code> function's own hashing helper to generate these values.</p>
 
-    <h2>Deactivating an admin</h2>
-    <pre><code>-- Immediately prevents login
-UPDATE admin_users SET is_active = false WHERE email = 'leavingadmin@example.com';</code></pre>
-    <p>Sessions belonging to deactivated accounts are rejected on next validation. The account remains in the DB for audit log purposes.</p>
-
-    <h2>Setting role expiry</h2>
-    <p>For temporary access (e.g. a contractor or seasonal support agent):</p>
+    <h2>Role expiry</h2>
+    <p>The <code>role_expires_at</code> field auto-revokes access after a specified date. This is useful for contractors, seasonal support staff, or any temporary access arrangement.</p>
     <pre><code>UPDATE admin_users
-SET role_expires_at = '2026-06-30 23:59:59+04'
-WHERE email = 'temp@example.com';</code></pre>
-    <p>After the expiry date, login will be rejected with "Access expired" even if <code>is_active = true</code>.</p>
+SET role_expires_at = '2026-09-30 23:59:59+04'
+WHERE email = 'contractor@example.com';</code></pre>
+    <p>After the expiry timestamp passes, the admin's login is rejected with an "Access expired" error — even if <code>is_active</code> is still <code>true</code>. Set <code>role_expires_at = NULL</code> to remove the expiry and restore indefinite access.</p>
 
-    <h2>IP restriction</h2>
-    <p>To restrict an admin to specific IP addresses:</p>
+    <h2>IP allowlist</h2>
+    <p>The <code>allowed_ips</code> field restricts an admin account to a list of specific IP addresses. Login attempts from any IP not in the list are rejected.</p>
     <pre><code>UPDATE admin_users
 SET allowed_ips = ARRAY['203.0.113.10', '198.51.100.0']
 WHERE email = 'admin@example.com';</code></pre>
-    <p>Login attempts from other IPs will be rejected. Leave as <code>NULL</code> (default) to allow login from any IP.</p>
+    <p>Set <code>allowed_ips = NULL</code> (the default) to allow login from any IP. This field is most useful for machine accounts or admins who always access from a fixed office IP.</p>
 
-    <h2>Deletion PIN</h2>
-    <p>A separate 6-digit PIN is required to confirm any "Delete Now" action in the admin panel. This prevents accidental irreversible deletions. The PIN is hashed separately from the login password and stored in <code>admin_users.deletion_pin</code>.</p>
-    <p>To reset a deletion PIN: update the hashed PIN value in the database using the same hashing method as the password.</p>
+    <h2>Deactivating an admin</h2>
+    <p>Setting <code>is_active = false</code> immediately prevents all logins and rejects any in-flight session validation — the effect is instant.</p>
+    <pre><code>UPDATE admin_users SET is_active = false WHERE email = 'leavingadmin@example.com';</code></pre>
+    <p>The account remains in the database so that all historical <code>admin_actions</code> audit log entries remain attributable. Do not delete admin accounts unless legally required.</p>
 
     <h2>Seeding the first Super-Admin</h2>
-    <p>The first Super-Admin account must be seeded directly in the database (there is no admin panel to log into yet). Run the INSERT above with <code>role = 'super_admin'</code>. Once logged in, subsequent accounts can be managed through the Team panel.</p>
+    <p>The first super_admin account must be seeded directly in the database, since there is no panel to log into yet. Run the INSERT statement above with <code>role = 'super_admin'</code>. Once you can log in, all subsequent accounts can be managed from the Team panel.</p>
+
+    <h2>Urgent access revocation</h2>
+    <p>If you need to immediately cut off a team member's access (e.g. unexpected departure or security incident), the fastest path is:</p>
+    <ol>
+      <li><strong>Set <code>is_active = false</code></strong> via the Supabase SQL Editor or the admin panel Team page — this takes effect immediately for all subsequent API calls.</li>
+      <li>Invalidate any open sessions by deleting them from <code>admin_sessions</code>:<br>
+        <pre><code>DELETE FROM admin_sessions
+WHERE admin_id = (SELECT admin_id FROM admin_users WHERE email = 'leavingadmin@example.com');</code></pre>
+      </li>
+      <li>If they had access to any shared secrets (Resend API key, Supabase service role key, etc.), rotate those immediately — see <a href="rotating-secrets.html">Rotating secrets</a>.</li>
+    </ol>
 
     <h2>Offboarding checklist</h2>
     <p>When a team member leaves:</p>
     <ul>
       <li>Set <code>is_active = false</code> on their admin account immediately</li>
-      <li>Rotate any shared secrets they had access to (see <a href="rotating-secrets.html">Rotating secrets</a>)</li>
-      <li>Remove their SSH keys or personal access tokens from any GitHub account</li>
-      <li>Update shared service logins (Resend, Google Cloud Console, domain registrar) if they used shared credentials</li>
-      <li>Review recent <code>admin_actions</code> log entries for their account</li>
+      <li>Delete their active sessions from <code>admin_sessions</code></li>
+      <li>Rotate any shared secrets they had access to — see <a href="rotating-secrets.html">Rotating secrets</a></li>
+      <li>Remove their personal access tokens and SSH keys from GitHub (if applicable)</li>
+      <li>Update any shared service logins they could access (Resend dashboard, Google Cloud Console, domain registrar)</li>
+      <li>Review recent <code>admin_actions</code> and <code>admin_audit_log</code> entries for their account to confirm no unexpected actions were taken</li>
+    </ul>
+
+    <h2>Best practices</h2>
+    <ul>
+      <li><strong>Never share admin credentials.</strong> Every team member must have their own account. Shared accounts make the audit log meaningless.</li>
+      <li><strong>Always set role expiry for contractors and temporary staff.</strong> It is easier to extend access than to remember to revoke it.</li>
+      <li><strong>Always set a deletion PIN for admin+ roles.</strong> Accounts without a PIN cannot process deletions — this is by design, not a gap to work around.</li>
+      <li><strong>Use IP allowlists for high-privilege accounts</strong> where practical, especially for super_admin accounts that are rarely used from unknown networks.</li>
+      <li><strong>Assign the least privileged role that meets the need.</strong> Support staff handling tickets do not need the <code>admin</code> role.</li>
+      <li><strong>Review the audit log periodically.</strong> The <code>admin_actions</code> table is your primary accountability trail for anything that changes user data.</li>
     </ul>
 
     <div class="article-nav">

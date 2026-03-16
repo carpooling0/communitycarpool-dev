@@ -10,28 +10,12 @@
   <link rel="stylesheet" href="../style.css">
   <style>
     .home-page { max-width: 1060px; margin: 0 auto; padding: 0 24px 80px; }
-    .warning-banner {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin: 0 auto 32px;
-      max-width: 1060px;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      color: #7f1d1d;
-      font-size: 14px;
-      line-height: 1.55;
-    }
-    .warning-banner-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
-    .warning-banner strong { display: block; font-size: 15px; margin-bottom: 3px; color: #991b1b; }
   </style>
 </head>
 <body>
 
 <nav class="topnav">
-  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/><span>Community Carpool</span></a>
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/></a>
   <div class="topnav-divider"></div>
   <span class="topnav-section">Super-Admin Docs</span>
   <div class="topnav-spacer"></div>
@@ -42,17 +26,7 @@
 
   <div class="home-hero" style="padding-top:48px;">
     <h1>Super-Admin Docs</h1>
-    <p>Operational reference for Super-Admins. Contains sensitive system information — keep confidential.</p>
-  </div>
-
-  <div class="warning-banner" style="padding: 0 24px;">
-    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px 20px;display:flex;align-items:flex-start;gap:12px;color:#7f1d1d;font-size:14px;line-height:1.55;">
-      <div style="font-size:20px;flex-shrink:0;margin-top:1px;">🔒</div>
-      <div>
-        <strong>Restricted Access — Super-Admins Only</strong>
-        This section contains sensitive operational information including system credentials, database schemas, deployment procedures, and incident runbooks. Do not share these docs with anyone who is not a verified Super-Admin. If you have reached this page in error, return to the <a href="../../admin.html" style="color:#991b1b;">Admin Panel</a>.
-      </div>
-    </div>
+    <p>Operational reference for Super-Admins. Use the sections below to find procedures, schemas, and runbooks.</p>
   </div>
 
   <div class="cards-grid">
@@ -116,35 +90,44 @@
     </div>
 
     <div class="doc-card">
-      <div class="doc-card-icon">👥</div>
-      <div class="doc-card-title">Operations</div>
-      <div class="doc-card-desc">Team access, support tickets, blacklist, and organisations.</div>
+      <div class="doc-card-icon">🖥️</div>
+      <div class="doc-card-title">Admin Panel Guide</div>
+      <div class="doc-card-desc">How to use every panel in the admin dashboard.</div>
       <ul class="doc-card-links">
-        <li><a href="managing-team.html">Managing team access</a></li>
+        <li><a href="admin-panel-guide.html">Full admin panel walkthrough</a></li>
+        <li><a href="managing-team.html">Managing team &amp; roles</a></li>
         <li><a href="support-tickets.html">Support tickets</a></li>
         <li><a href="blacklist.html">Blacklist &amp; moderation</a></li>
-        <li><a href="organisations.html">Organisations</a></li>
+      </ul>
+    </div>
+
+    <div class="doc-card">
+      <div class="doc-card-icon">🏢</div>
+      <div class="doc-card-title">Organisations</div>
+      <div class="doc-card-desc">Partner orgs, building locations, and org_code flow.</div>
+      <ul class="doc-card-links">
+        <li><a href="organisations.html">Organisations &amp; buildings</a></li>
+        <li><a href="campaign-management.html">Campaign management</a></li>
       </ul>
     </div>
 
     <div class="doc-card">
       <div class="doc-card-icon">📋</div>
       <div class="doc-card-title">Processes</div>
-      <div class="doc-card-desc">T&amp;C updates, campaigns, and email templates.</div>
+      <div class="doc-card-desc">T&amp;C updates, email templates, and data requests.</div>
       <ul class="doc-card-links">
         <li><a href="terms-conditions.html">T&amp;C process</a></li>
-        <li><a href="campaign-management.html">Campaign management</a></li>
         <li><a href="email-templates.html">Email templates</a></li>
+        <li><a href="data-subject-requests.html">Data subject requests</a></li>
       </ul>
     </div>
 
     <div class="doc-card">
       <div class="doc-card-icon">🚨</div>
       <div class="doc-card-title">Compliance &amp; Incidents</div>
-      <div class="doc-card-desc">Monitoring, data requests, and incident runbooks.</div>
+      <div class="doc-card-desc">Monitoring, logs, and incident runbooks.</div>
       <ul class="doc-card-links">
         <li><a href="monitoring-logs.html">Monitoring &amp; logs</a></li>
-        <li><a href="data-subject-requests.html">Data subject requests</a></li>
         <li><a href="incident-runbook.html">Incident runbook</a></li>
       </ul>
     </div>

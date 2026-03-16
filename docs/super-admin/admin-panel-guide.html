@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel Guide | Super-Admin Docs</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .sa-badge { display:inline-flex;align-items:center;gap:5px;background:#fef2f2;color:#991b1b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:3px 10px;border-radius:20px;border:1px solid #fecaca;margin-bottom:18px; }
+    code { background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:1px 6px;font-size:13px;font-family:monospace; }
+    pre { background:#1e293b;color:#e2e8f0;border-radius:8px;padding:16px 20px;font-size:13px;line-height:1.6;overflow-x:auto;margin:14px 0; }
+    pre code { background:none;border:none;padding:0;color:inherit;font-size:inherit; }
+    table { width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px; }
+    th { background:#f8fafc;font-weight:700;text-align:left;padding:10px 14px;border:1px solid var(--border); }
+    td { padding:9px 14px;border:1px solid var(--border);vertical-align:top; }
+    tr:nth-child(even) td { background:#fafafa; }
+    .tag { display:inline-flex;align-items:center;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700; }
+    .tag-green { background:#dcfce7;color:#15803d; }
+    .tag-amber { background:#fef9c3;color:#92400e; }
+    .tag-red { background:#fef2f2;color:#991b1b; }
+    .tag-blue { background:#eff6ff;color:#1d4ed8; }
+    .tag-gray { background:#f3f4f6;color:#374151; }
+    .panel-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f0f9ff;
+      color: #0369a1;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid #bae6fd;
+      margin-bottom: 12px;
+    }
+    .role-table td:first-child { white-space: nowrap; font-weight: 600; }
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/></a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">Super-Admin Docs</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="index.html">← SA Docs home</a>
+</nav>
+
+<div class="article-shell">
+  <aside class="sidebar">
+    <nav id="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Platform Infrastructure</div>
+        <a class="sidebar-link" href="supabase.html">Supabase dashboards</a>
+        <a class="sidebar-link" href="github.html">GitHub &amp; deployment</a>
+        <a class="sidebar-link" href="dev-vs-prod.html">Dev vs Prod environments</a>
+        <a class="sidebar-link" href="cost-billing.html">Cost &amp; billing</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Integrations &amp; APIs</div>
+        <a class="sidebar-link" href="email-providers.html">Email — Resend &amp; SES</a>
+        <a class="sidebar-link" href="maps.html">Google Maps &amp; Mapbox</a>
+        <a class="sidebar-link" href="dns.html">DNS records</a>
+        <a class="sidebar-link" href="apis-connections.html">All APIs &amp; connections</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Database</div>
+        <a class="sidebar-link" href="database-tables.html">Tables reference</a>
+        <a class="sidebar-link" href="database-migrations.html">Database migrations</a>
+        <a class="sidebar-link" href="database-backup.html">Backup &amp; recovery</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Edge Functions &amp; Automation</div>
+        <a class="sidebar-link" href="edge-functions.html">Edge functions reference</a>
+        <a class="sidebar-link" href="cron-jobs.html">Cron jobs &amp; scheduled tasks</a>
+        <a class="sidebar-link" href="deploying-edge-functions.html">Deploying edge functions</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Configuration</div>
+        <a class="sidebar-link" href="config-table.html">Config table</a>
+        <a class="sidebar-link" href="secrets.html">Secrets &amp; API keys</a>
+        <a class="sidebar-link" href="rotating-secrets.html">Rotating secrets</a>
+        <a class="sidebar-link" href="testing-mode.html">Testing mode</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Operations</div>
+        <a class="sidebar-link" href="managing-team.html">Managing team access</a>
+        <a class="sidebar-link" href="support-tickets.html">Support tickets</a>
+        <a class="sidebar-link" href="blacklist.html">Blacklist &amp; moderation</a>
+        <a class="sidebar-link" href="organisations.html">Organisations</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Processes</div>
+        <a class="sidebar-link" href="terms-conditions.html">T&amp;C process</a>
+        <a class="sidebar-link" href="campaign-management.html">Campaign management</a>
+        <a class="sidebar-link" href="email-templates.html">Email templates</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Compliance &amp; Incidents</div>
+        <a class="sidebar-link" href="monitoring-logs.html">Monitoring &amp; logs</a>
+        <a class="sidebar-link" href="data-subject-requests.html">Data subject requests</a>
+        <a class="sidebar-link" href="incident-runbook.html">Incident runbook</a>
+      </div>
+    </nav>
+  </aside>
+  <main class="article-main">
+    <div class="breadcrumb">
+      <a href="index.html">SA Docs</a><span class="breadcrumb-sep">/</span>
+      <span>Operations</span>
+    </div>
+    <div class="sa-badge">Super-Admin Only</div>
+    <div class="article-eyebrow">Operations</div>
+    <h1 class="article-title">Admin Panel Guide</h1>
+    <p class="article-lead">A complete reference for every panel in the Community Carpool admin panel — from logging in and reading the dashboard to handling deletions, managing the team, and exporting audit logs.</p>
+
+    <!-- ===================== LOGGING IN ===================== -->
+    <h2>Logging in</h2>
+    <div class="panel-label">Authentication</div>
+    <p>The admin panel is accessible at:</p>
+    <pre><code>https://communitycarpool.org/admin.html</code></pre>
+    <p>Enter your <strong>email address</strong> and <strong>password</strong> on the login screen. Both are [REDACTED] — contact a super_admin to obtain or reset credentials.</p>
+    <p><strong>Session expiry:</strong> Sessions remain active for as long as the browser tab is open. Closing the tab or navigating away does not immediately log you out, but the session token expires after a period of inactivity. If you see a "Session expired" or authentication error, simply log in again. Always log out manually (profile dropdown → Log out) when using a shared or public device.</p>
+    <div class="callout">
+      The admin panel uses its own credential system (the <code>admin_users</code> table), separate from the Supabase auth system used by end users. Your admin credentials do not give you access to the Supabase dashboard and vice versa.
+    </div>
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <h2>Dashboard panel</h2>
+    <div class="panel-label">Dashboard</div>
+    <p>The Dashboard is the first panel you see after logging in. It gives a live snapshot of platform health:</p>
+    <table>
+      <thead><tr><th>Metric</th><th>What it shows</th></tr></thead>
+      <tbody>
+        <tr><td>Total users</td><td>All registered users (distinct emails that have submitted a journey at least once).</td></tr>
+        <tr><td>Active submissions</td><td>Journey submissions with <code>journey_status = 'active'</code> — users currently seeking a carpool partner.</td></tr>
+        <tr><td>Total matches</td><td>All match pairs created by the matching engine, regardless of status.</td></tr>
+        <tr><td>Open support tickets</td><td>Support tickets with status <code>open</code> that have not yet been resolved.</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Growth chart:</strong> Below the metric cards is a line chart showing new submissions over time (grouped by week or month). Use this to spot seasonal trends, measure the impact of a campaign launch, or identify unexpected drop-offs in new sign-ups.</p>
+    <div class="callout">
+      Dashboard metrics are fetched live from the database each time you open the panel. There is no caching — what you see reflects the current state of the production database.
+    </div>
+
+    <!-- ===================== TICKETS ===================== -->
+    <h2>Tickets panel</h2>
+    <div class="panel-label">Tickets</div>
+    <p>The Tickets panel is where support requests submitted via the platform's support form are managed.</p>
+
+    <h3>Viewing and filtering tickets</h3>
+    <p>Tickets are listed in reverse chronological order (newest first). Use the status filter tabs to switch between:</p>
+    <ul>
+      <li><span class="tag tag-amber">open</span> — tickets awaiting a response or action</li>
+      <li><span class="tag tag-green">closed</span> — tickets that have been resolved</li>
+      <li><strong>All</strong> — shows every ticket regardless of status</li>
+    </ul>
+    <p>Each ticket row shows the submitter's email, ticket type (e.g. <code>technical</code>, <code>report_user</code>), submission date, and current status.</p>
+
+    <h3>Expanding a ticket</h3>
+    <p>Click any ticket row to expand it and see the full message body, any internal notes, and the reply history.</p>
+
+    <h3>Adding an internal note</h3>
+    <p>Internal notes are visible only to admin team members — they are never sent to the user. Use them to record investigation steps, assign responsibility, or flag for follow-up. Type in the "Internal note" field and click "Save note".</p>
+
+    <h3>Sending a reply to the user</h3>
+    <p>Type your response in the "Reply to user" field. Tick "Notify user" if you want the reply to be emailed to the user's address. Click "Send reply". The reply is saved against the ticket in the database. If "Notify user" is ticked, an email is dispatched via the email provider (Resend).</p>
+
+    <h3>What "Notify user" does</h3>
+    <p>When ticked, the platform sends a transactional email to the user's address containing your reply text. If unticked, the reply is saved internally but the user receives no email notification. Untick it when making administrative notes that are not ready to share with the user.</p>
+
+    <h3>Closing a ticket</h3>
+    <p>Once the issue is resolved, click "Close ticket". The status changes to <code>closed</code> and the ticket moves to the Closed tab. Closed tickets can be re-opened if the user follows up.</p>
+
+    <!-- ===================== DELETIONS ===================== -->
+    <h2>Deletions panel</h2>
+    <div class="panel-label">Deletions</div>
+    <p>Users can request deletion of their account and data via the platform's unsubscribe flow. These requests are queued and processed either automatically by the nightly cron job or manually by an admin from this panel.</p>
+
+    <h3>Viewing pending deletion requests</h3>
+    <p>The panel lists all users with a pending deletion request (<code>deletion_requested_at IS NOT NULL</code> and <code>deletion_processed_at IS NULL</code>). For each request you can see:</p>
+    <ul>
+      <li>The user's email address</li>
+      <li>The date and time they requested deletion</li>
+      <li>A countdown timer showing how long until the request is automatically processed</li>
+    </ul>
+
+    <h3>What the timer means</h3>
+    <p>The platform enforces a cooling-off window (configured by <code>data_retention_days</code> in the config table — currently 30 days). Users have this window to cancel their request before data is permanently deleted. The timer in the panel shows the remaining cooling-off time. Once it reaches zero, the nightly cron job processes the deletion automatically.</p>
+
+    <h3>Cancelling a deletion (admin-initiated)</h3>
+    <p>An admin can cancel a pending deletion request on behalf of a user — for example, if the user contacts support saying they changed their mind and cannot find the cancellation link. To cancel:</p>
+    <ol>
+      <li>Locate the user in the Deletions panel.</li>
+      <li>Click "Cancel deletion".</li>
+      <li>Confirm the action in the prompt.</li>
+    </ol>
+    <p>Cancelling a deletion clears <code>deletion_requested_at</code> and <code>deletion_token</code> on the user's record. Their journey submission is restored to <code>active</code> status. The user receives a confirmation email that their deletion has been cancelled and their account is active again.</p>
+
+    <h3>Processing (confirming) a deletion manually</h3>
+    <p>If you need to process a deletion immediately — for example, in response to a formal data subject erasure request — rather than waiting for the cron:</p>
+    <ol>
+      <li>Locate the user in the Deletions panel.</li>
+      <li>Click "Process now".</li>
+      <li>You will be prompted to enter your 6-digit deletion PIN. This is a separate PIN from your login password, set when your admin account was created (or changed in your profile settings). It acts as a second confirmation to prevent accidental irreversible deletions.</li>
+      <li>Enter the PIN and confirm.</li>
+    </ol>
+    <div class="callout">
+      <strong>Deletion is irreversible.</strong> Once processed, the user's personal data is permanently removed or anonymised. This includes their name, email, submission details, and match history. This action cannot be undone. Always double-check you have the correct user before proceeding.
+    </div>
+
+    <h3>What gets deleted</h3>
+    <p>Processing a deletion removes or anonymises:</p>
+    <ul>
+      <li>The user's row in the <code>users</code> table (name, email, phone, org affiliation)</li>
+      <li>Their active journey submission(s)</li>
+      <li>Their match records (both sides of any match they were part of)</li>
+      <li>Their email preferences</li>
+      <li>Any support tickets they submitted</li>
+    </ul>
+
+    <!-- ===================== USERS ===================== -->
+    <h2>Users panel</h2>
+    <div class="panel-label">Users</div>
+    <p>The Users panel lets you look up any user by email address and inspect or manage their account.</p>
+
+    <h3>Searching by email</h3>
+    <p>Type the full or partial email address in the search field and press Enter. Matching users are listed below. Click a result to expand the user's full profile.</p>
+
+    <h3>What is shown</h3>
+    <p>The expanded user profile shows:</p>
+    <ul>
+      <li><strong>Profile:</strong> Name, email, registration date, org affiliation (if any), and current blacklist status.</li>
+      <li><strong>Submissions:</strong> All journey submissions associated with this user — origin, destination, days/times, and current status.</li>
+      <li><strong>Matches:</strong> All matches the user is part of, with match strength, the other party's details, and the current match status (new, interest_expressed, contact_revealed, expired).</li>
+      <li><strong>Blacklist status:</strong> Whether the user is currently blacklisted and, if so, the reason and the admin who applied it.</li>
+    </ul>
+
+    <h3>Blacklisting a user</h3>
+    <p>Blacklisting prevents a user from receiving new matches and from appearing as a potential match for other users. To blacklist:</p>
+    <ol>
+      <li>Find the user via the search field.</li>
+      <li>Click "Blacklist user".</li>
+      <li>Enter the reason (this is recorded in the audit log and visible to all admins).</li>
+      <li>Confirm.</li>
+    </ol>
+    <p>The user's <code>is_blacklisted</code> flag is set to <code>true</code>. They are not notified. Their existing active submission remains in the database but is skipped during match-finding.</p>
+
+    <h3>Removing a blacklist</h3>
+    <p>If a blacklist was applied in error or the situation has been resolved:</p>
+    <ol>
+      <li>Find the user in the Users panel.</li>
+      <li>Click "Remove blacklist".</li>
+      <li>Confirm.</li>
+    </ol>
+    <p>The <code>is_blacklisted</code> flag is cleared. The user will be included in future match-finding runs again. The unblacklist action is recorded in the audit log.</p>
+
+    <!-- ===================== CAMPAIGN LINKS ===================== -->
+    <h2>Campaign Links panel</h2>
+    <div class="panel-label">Campaign Links</div>
+    <p>The Campaign Links panel generates trackable referral links and QR codes for distribution in marketing campaigns or partner onboarding packs.</p>
+
+    <h3>Two modes</h3>
+    <table>
+      <thead><tr><th>Mode</th><th>What it generates</th><th>When to use</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Individual link</strong></td>
+          <td>A single URL with a unique identifier, designed to be shared with one person or a small group. Useful for tracking which specific individual or channel drove a sign-up.</td>
+          <td>Sending to a specific person, influencer, or community leader whose referrals you want to attribute individually.</td>
+        </tr>
+        <tr>
+          <td><strong>Campaign link</strong></td>
+          <td>A URL with UTM parameters (<code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code>) for bulk distribution. All click-throughs from this link are grouped under the same campaign in analytics.</td>
+          <td>Email blasts, social media posts, printed materials, or partner org referral links.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>UTM parameters</h3>
+    <p>When generating a Campaign link, you fill in three fields that become UTM parameters on the URL:</p>
+    <table>
+      <thead><tr><th>Field</th><th>URL parameter</th><th>Example value</th><th>What it tracks</th></tr></thead>
+      <tbody>
+        <tr><td>Source</td><td><code>utm_source</code></td><td><code>email</code>, <code>whatsapp</code>, <code>poster</code></td><td>The channel or platform the link was placed on</td></tr>
+        <tr><td>Medium</td><td><code>utm_medium</code></td><td><code>internal</code>, <code>social</code>, <code>print</code></td><td>The marketing medium</td></tr>
+        <tr><td>Campaign</td><td><code>utm_campaign</code></td><td><code>acme-launch-mar26</code></td><td>The specific campaign name for grouping in analytics</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Generating a QR code</h3>
+    <p>After filling in the link details, click "Generate QR code". A QR image is displayed on screen. Click "Download QR" to save it as a PNG file suitable for printing on posters, flyers, or email graphics.</p>
+
+    <h3>Copying the link</h3>
+    <p>Click "Copy link" next to the generated URL to copy it to your clipboard. Paste it into emails, WhatsApp messages, or any other distribution channel.</p>
+
+    <!-- ===================== AUDIT LOG ===================== -->
+    <h2>Audit Log panel</h2>
+    <div class="panel-label">Audit Log</div>
+    <p>The Audit Log records every significant admin action taken within the admin panel. It is the primary accountability trail for the platform.</p>
+
+    <h3>What is recorded</h3>
+    <p>Every entry includes:</p>
+    <ul>
+      <li><strong>Timestamp:</strong> The exact date and time the action was taken (UTC).</li>
+      <li><strong>Admin:</strong> The name and email of the admin team member who performed the action.</li>
+      <li><strong>Action:</strong> A description of what was done (e.g. "Blacklisted user", "Cancelled deletion", "Closed ticket", "Added team member").</li>
+      <li><strong>Entity email:</strong> The email address of the user or entity that was affected by the action.</li>
+      <li><strong>Notes:</strong> Any additional context recorded at the time (e.g. the blacklist reason).</li>
+    </ul>
+
+    <h3>Filtering the log</h3>
+    <p>Use the filter controls to narrow the log by:</p>
+    <ul>
+      <li><strong>Date range:</strong> Show only entries within a specific period.</li>
+      <li><strong>Admin:</strong> Show only actions performed by a specific team member.</li>
+      <li><strong>Action type:</strong> Filter to a specific category of action (e.g. blacklist, deletion, ticket).</li>
+    </ul>
+
+    <h3>Exporting to CSV</h3>
+    <p>Click "Export CSV" to download the current filtered view as a CSV file. Use this for compliance reporting, incident investigations, or sharing with a super_admin for review.</p>
+
+    <!-- ===================== TEAM ===================== -->
+    <h2>Team panel</h2>
+    <div class="panel-label">Team</div>
+    <p>The Team panel is where super_admins manage who has access to the admin panel and at what permission level.</p>
+
+    <h3>The three roles</h3>
+    <table class="role-table">
+      <thead><tr><th>Role</th><th>What they can access</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-gray">support</span></td>
+          <td>Tickets panel only. Can view, reply to, and close tickets. Cannot access Users, Deletions, Audit Log, Team, or Campaign Links. Suitable for frontline support staff.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">admin</span></td>
+          <td>Everything support can do, plus: Users panel (search, blacklist, unblacklist), Deletions panel (view and cancel deletions — but cannot process/confirm a deletion without a deletion PIN), Campaign Links. Cannot manage team members or view the Audit Log.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-red">super_admin</span></td>
+          <td>Full access to all panels including Team management, Audit Log, and the ability to process (confirm) deletions. Can add, edit, and deactivate any team member. Should be restricted to two or three trusted individuals.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Adding a new team member</h3>
+    <ol>
+      <li>Go to Team panel and click "Add team member".</li>
+      <li>Fill in the following fields:</li>
+    </ol>
+    <table>
+      <thead><tr><th>Field</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Name</td><td>The team member's full name. Appears in the audit log against their actions.</td></tr>
+        <tr><td>Email</td><td>Their email address. Used as their login username.</td></tr>
+        <tr><td>Role</td><td>Select <code>support</code>, <code>admin</code>, or <code>super_admin</code>.</td></tr>
+        <tr><td>Password</td><td>Set an initial password. The team member should change it on first login (profile dropdown → Change password).</td></tr>
+        <tr><td>Deletion PIN</td><td>A 6-digit PIN required to confirm irreversible deletion actions. Required for all roles, even if the role cannot perform deletions — it must be set for future role upgrades. Communicate it to the team member separately from the password.</td></tr>
+        <tr><td>Access expiry date</td><td>Optional. If set, the account is automatically deactivated on this date. Useful for contractors or temporary cover. Leave blank for permanent access.</td></tr>
+      </tbody>
+    </table>
+    <ol start="3">
+      <li>Click "Save". The new team member can now log in immediately.</li>
+    </ol>
+    <div class="callout">
+      Never share credentials over unencrypted channels. Send the email address and a temporary password via separate secure messages. Instruct the new team member to change their password on first login.
+    </div>
+
+    <h3>Editing an existing team member</h3>
+    <p>Click the edit icon next to any team member in the list to modify their name, role, or access expiry date. You can also reset their password from here if they are locked out.</p>
+
+    <h3>Deactivating access</h3>
+    <p>To revoke access for a team member who has left or no longer needs access:</p>
+    <ol>
+      <li>Click the edit icon next to their row.</li>
+      <li>Toggle "Active" to off (or set an expiry date in the past).</li>
+      <li>Save.</li>
+    </ol>
+    <p>Deactivated accounts cannot log in. Their name still appears in the audit log against historical actions they took. Do not delete team member records — deactivate them so the audit trail is preserved.</p>
+
+    <!-- ===================== PROFILE / PASSWORD ===================== -->
+    <h2>Changing your password and deletion PIN</h2>
+    <div class="panel-label">Profile</div>
+    <p>Your login password and deletion PIN can both be changed from your profile dropdown:</p>
+    <ol>
+      <li>Click your name or avatar in the top-right corner of the admin panel.</li>
+      <li>Select "Change password" or "Change deletion PIN" from the dropdown menu.</li>
+      <li>For a password change: enter your current password, then your new password twice, and confirm.</li>
+      <li>For a PIN change: enter your current PIN, then your new 6-digit PIN twice, and confirm.</li>
+    </ol>
+    <div class="callout">
+      <strong>Keep your deletion PIN separate from your password.</strong> The PIN is an additional safeguard specifically for irreversible deletion actions. Do not write it down in the same place as your password. If you forget your PIN, a super_admin can reset it from the Team panel.
+    </div>
+
+    <!-- ===================== SA DOCS LINK ===================== -->
+    <h2>Super-Admin Docs link</h2>
+    <p>The Super-Admin Docs (this documentation site) can be accessed from within the admin panel at any time. Click your name in the top-right profile dropdown and select "Super-Admin Docs". The docs open in a new tab.</p>
+    <p>The docs are hosted as static HTML files in the <code>docs/super-admin/</code> directory of the production codebase and served at:</p>
+    <pre><code>https://communitycarpool.org/docs/super-admin/index.html</code></pre>
+
+    <div class="article-nav">
+      <a class="prev" href="managing-team.html"><span class="nav-dir">← Previous</span><span class="nav-title">Managing team access</span></a>
+      <a class="next" href="support-tickets.html"><span class="nav-dir">Next →</span><span class="nav-title">Support tickets</span></a>
+    </div>
+  </main>
+</div>
+</body>
+</html>

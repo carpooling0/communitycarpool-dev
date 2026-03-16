@@ -23,11 +23,15 @@
     .tag-red { background:#fef2f2;color:#991b1b; }
     .tag-blue { background:#eff6ff;color:#1d4ed8; }
     .tag-gray { background:#f3f4f6;color:#374151; }
+    .checklist { list-style:none;padding:0;margin:0; }
+    .checklist li { padding:6px 0 6px 28px;position:relative;border-bottom:1px solid var(--border); }
+    .checklist li:last-child { border-bottom:none; }
+    .checklist li::before { content:"☐";position:absolute;left:0;font-size:16px;line-height:1;top:6px; }
   </style>
 </head>
 <body>
 <nav class="topnav">
-  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/><span>Community Carpool</span></a>
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/></a>
   <div class="topnav-divider"></div>
   <span class="topnav-section">Super-Admin Docs</span>
   <div class="topnav-spacer"></div>
@@ -96,76 +100,261 @@
       <a href="index.html">SA Docs</a><span class="breadcrumb-sep">/</span>
       <span>Operations</span>
     </div>
-    <div class="sa-badge">🔒 Super-Admin Only</div>
-    <div class="article-eyebrow">👥 Operations</div>
+    <div class="sa-badge">Super-Admin Only</div>
+    <div class="article-eyebrow">Operations</div>
     <h1 class="article-title">Organisations</h1>
-    <p class="article-lead">Partner organisations can be onboarded to Community Carpool to encourage carpooling among their employees or members. Each organisation gets a short code that can be used in referral links and tracked in analytics.</p>
+    <p class="article-lead">Partner organisations — companies, residential communities, or other groups — can be onboarded to Community Carpool so their employees or members can carpool together. Each organisation gets a unique short code, optional custom branding, named building locations, and configurable matching rules.</p>
 
-    <h2>How organisations work</h2>
-    <p>When a user submits a journey with an <code>org_code</code>, it is stored in both <code>users.org_code</code> and <code>submissions.org_code</code>. This enables:</p>
+    <h2>What organisations are and why they exist</h2>
+    <p>An organisation record represents a company or community that has partnered with Community Carpool to encourage carpooling among its members. Organisations exist to:</p>
     <ul>
-      <li>Filtering submissions and matches by organisation in analytics queries</li>
-      <li>Organisation-specific referral links (e.g. <code>communitycarpool.org/?org=ACME</code>) that pre-fill the org_code on the form</li>
-      <li>Future: showing a user's organisation in their profile and prioritising intra-org matches</li>
+      <li>Attribute submissions and matches to a specific partner, enabling per-org analytics</li>
+      <li>Show a custom welcome message or logo on the submission form when a user arrives via an org link</li>
+      <li>Offer named building locations (e.g. "Tower A", "HQ Lobby") as quick-select options on the form, making it faster for employees to pick their exact office location</li>
+      <li>Control whether org users can only match within their org or also match with the general public (<code>allow_cross_matching</code>)</li>
+      <li>Generate trackable referral links for distribution to the partner's team</li>
     </ul>
 
-    <h2>Viewing current organisations</h2>
-    <pre><code>SELECT org_id, org_code, name, domain, is_active FROM organisations ORDER BY name;</code></pre>
+    <h2>How users join an organisation</h2>
+    <p>Users do not register or "join" an org in a traditional sense. Instead, they arrive at the submission form via a URL that includes an <code>org</code> query parameter:</p>
+    <pre><code class="language-sql">https://communitycarpool.org/?org=ACME</code></pre>
+    <p>When the form loads:</p>
+    <ol>
+      <li>The form reads the <code>org</code> query parameter from the URL.</li>
+      <li>It looks up the org in the <code>organisations</code> table to fetch the display name, logo, and custom welcome message.</li>
+      <li>If the org has named building locations in <code>org_locations</code>, those appear as quick-select chips in the "From" and "To" location fields.</li>
+      <li>When the user submits the form, the <code>orgCode</code> value is sent to the <code>submit-journey</code> edge function.</li>
+      <li>The edge function resolves the <code>org_code</code> to an <code>org_id</code> and stores it on the <code>submissions</code> row.</li>
+    </ol>
+    <div class="callout">
+      <strong>No opt-in required.</strong> There is no separate sign-up flow for an organisation. Any user who arrives via an org link and completes a submission is automatically associated with that org. If a user submits without an org link, their submission has no org affiliation.
+    </div>
 
-    <h2>Adding a new organisation</h2>
-    <pre><code>INSERT INTO organisations (org_code, name, domain, is_active)
-VALUES ('ACME', 'Acme Corporation', 'acme.com', true);</code></pre>
-    <p>Fields:</p>
-    <ul>
-      <li><strong>org_code</strong> — short, uppercase, unique identifier used in URLs (e.g. <code>ACME</code>, <code>DIFC</code>, <code>JVC</code>)</li>
-      <li><strong>name</strong> — full organisation name as displayed to users</li>
-      <li><strong>domain</strong> — email domain (for future auto-detection of org when user signs up with a company email)</li>
-      <li><strong>is_active</strong> — when false, org is excluded from dropdowns and analytics</li>
-    </ul>
-
-    <h2>Deactivating an organisation</h2>
-    <pre><code>UPDATE organisations SET is_active = false WHERE org_code = 'ACME';</code></pre>
-    <p>Existing users and submissions with this org_code are not affected — the org_code remains on their records. Deactivation only prevents new submissions referencing this org.</p>
-
-    <h2>Analytics by organisation</h2>
-    <pre><code>-- Submissions by org (top 10)
-SELECT org_code, COUNT(*) as submission_count
-FROM submissions
-WHERE journey_status = 'active'
-GROUP BY org_code
-ORDER BY submission_count DESC
-LIMIT 10;
-
--- Users by org
-SELECT org_code, COUNT(*) as user_count
-FROM users
-WHERE org_code IS NOT NULL
-GROUP BY org_code
-ORDER BY user_count DESC;</code></pre>
-
-    <h2>Referral links</h2>
-    <p>Generate org-specific links for distribution to partner organisations:</p>
+    <h2>The allow_cross_matching flag</h2>
+    <p>Each organisation has an <code>allow_cross_matching</code> boolean (default <code>false</code>) that controls who org users can be matched with:</p>
     <table>
-      <thead><tr><th>Link type</th><th>Format</th><th>Effect</th></tr></thead>
+      <thead><tr><th>Value</th><th>Behaviour</th><th>When to use</th></tr></thead>
       <tbody>
         <tr>
-          <td>Org pre-fill</td>
-          <td><code>communitycarpool.org/?org=ORGCODE</code></td>
-          <td>Pre-fills the organisation field on the submission form</td>
+          <td><code>false</code> (default)</td>
+          <td>Org users only match with other users from the same org. They will not appear as matches for public (non-org) users, and public users will not appear as matches for them.</td>
+          <td>Corporate clients who want a private, employees-only pool. Useful when the org has enough volume to sustain intra-org matching.</td>
         </tr>
         <tr>
-          <td>Referral tracking</td>
-          <td><code>communitycarpool.org/?ref=ORGCODE</code></td>
-          <td>Tracked for analytics (future UTM support)</td>
-        </tr>
-        <tr>
-          <td>Combined</td>
-          <td><code>communitycarpool.org/?org=ORGCODE&ref=ORGCODE</code></td>
-          <td>Pre-fills and tracks</td>
+          <td><code>true</code></td>
+          <td>Org users are treated like public users for matching purposes — they can match with anyone, including non-org users.</td>
+          <td>Smaller orgs or residential communities where intra-org volume is low and mixing with the public pool increases match quality.</td>
         </tr>
       </tbody>
     </table>
-    <p>QR codes pointing to these URLs can be generated with any standard QR code tool and distributed on posters, internal communications, or emails.</p>
+    <div class="callout">
+      Changing <code>allow_cross_matching</code> only affects future match-finding runs. It does not retroactively create or remove existing matches.
+    </div>
+
+    <h2>Creating a new organisation</h2>
+    <p>Run the following SQL in Supabase SQL Editor (production project):</p>
+    <pre><code class="language-sql">-- Step 1: Create the organisation record
+INSERT INTO organisations (org_code, org_name, logo_url, custom_message, allow_cross_matching, is_active)
+VALUES (
+  'ACME',                                        -- short uppercase code, used in URLs
+  'Acme Corporation',                            -- full display name shown on form
+  'https://acmecorp.com/logo.png',               -- optional: URL to org logo (or NULL)
+  'Welcome, Acme team! Find a carpool partner.', -- optional: shown on form (or NULL)
+  false,                                         -- false = intra-org matches only
+  true                                           -- is_active = true
+);</code></pre>
+
+    <p><strong>Field reference:</strong></p>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>org_code</code></td><td>text</td><td>Yes</td><td>Short uppercase identifier used in URLs and query params (e.g. <code>EMAAR</code>, <code>ACME</code>). Must be unique. No spaces.</td></tr>
+        <tr><td><code>org_name</code></td><td>text</td><td>Yes</td><td>Full display name shown to users on the submission form and in admin analytics.</td></tr>
+        <tr><td><code>logo_url</code></td><td>text</td><td>No</td><td>Publicly accessible URL to the org's logo image. Displayed on the form header when an org is active. Leave <code>NULL</code> if not provided.</td></tr>
+        <tr><td><code>custom_message</code></td><td>text</td><td>No</td><td>Short welcome message shown on the submission form (e.g. "Welcome, Emaar employees!"). Leave <code>NULL</code> to show the default message.</td></tr>
+        <tr><td><code>allow_cross_matching</code></td><td>boolean</td><td>No</td><td>Defaults to <code>false</code>. Set <code>true</code> to allow org users to match with non-org users.</td></tr>
+        <tr><td><code>is_active</code></td><td>boolean</td><td>No</td><td>Defaults to <code>true</code>. Set <code>false</code> to deactivate without deleting.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      After inserting the org, confirm it was created and note the auto-generated <code>org_id</code>:<br>
+      <code>SELECT org_id, org_code, org_name, is_active FROM organisations WHERE org_code = 'ACME';</code>
+    </div>
+
+    <h2>Managing org locations (buildings)</h2>
+    <p>Each org can have any number of named building locations stored in the <code>org_locations</code> table. These appear as quick-select chips in the form's "From" and "To" location fields when a user arrives via that org's link. Clicking a chip pre-fills the location field with that building's coordinates, saving the user from typing an address.</p>
+
+    <h3>Viewing locations for an org</h3>
+    <pre><code class="language-sql">SELECT l.location_id, l.location_name, l.location_latlng, l.is_active
+FROM org_locations l
+JOIN organisations o ON o.org_id = l.org_id
+WHERE o.org_code = 'ACME'
+ORDER BY l.location_name;</code></pre>
+
+    <h3>Adding a building location</h3>
+    <p>Coordinates must be in <code>"lat,lng"</code> format (decimal degrees). You can get them from Google Maps by right-clicking a location and copying the coordinates.</p>
+    <pre><code class="language-sql">INSERT INTO org_locations (org_id, location_name, location_latlng, is_active)
+VALUES (
+  (SELECT org_id FROM organisations WHERE org_code = 'ACME'),
+  'HQ Lobby',       -- display name shown on the form chip
+  '25.1972,55.2744', -- lat,lng as a text string
+  true
+);
+
+-- Add more buildings as needed
+INSERT INTO org_locations (org_id, location_name, location_latlng, is_active)
+VALUES (
+  (SELECT org_id FROM organisations WHERE org_code = 'ACME'),
+  'Tower A Entrance',
+  '25.1985,55.2761',
+  true
+);</code></pre>
+
+    <h3>Deactivating a building location</h3>
+    <p>Set <code>is_active = false</code> to hide a location from the form without deleting it:</p>
+    <pre><code class="language-sql">UPDATE org_locations
+SET is_active = false
+WHERE location_id = 42; -- use the location_id from the SELECT query above</code></pre>
+
+    <h3>Reactivating a building location</h3>
+    <pre><code class="language-sql">UPDATE org_locations
+SET is_active = true
+WHERE location_id = 42;</code></pre>
+
+    <div class="callout">
+      <strong>Coordinate accuracy matters.</strong> Building locations are used as the pre-filled "From" or "To" point in the submission. Inaccurate coordinates will cause poor match distances. Always verify coordinates in Google Maps before inserting.
+    </div>
+
+    <h2>Updating org details</h2>
+
+    <h3>Updating name, logo, or custom message</h3>
+    <pre><code class="language-sql">UPDATE organisations
+SET
+  org_name       = 'Acme Corporation Ltd',
+  logo_url       = 'https://cdn.acmecorp.com/logo-v2.png',
+  custom_message = 'Welcome, Acme team! Your carpool partner awaits.'
+WHERE org_code = 'ACME';</code></pre>
+
+    <h3>Removing logo or custom message (set to NULL)</h3>
+    <pre><code class="language-sql">UPDATE organisations
+SET logo_url = NULL, custom_message = NULL
+WHERE org_code = 'ACME';</code></pre>
+
+    <h2>Toggling allow_cross_matching</h2>
+    <p>Enable cross-matching for an org that is too small to sustain an intra-org pool:</p>
+    <pre><code class="language-sql">-- Enable cross-matching (org users match with public pool too)
+UPDATE organisations SET allow_cross_matching = true WHERE org_code = 'ACME';
+
+-- Disable cross-matching (org users only match within their org)
+UPDATE organisations SET allow_cross_matching = false WHERE org_code = 'ACME';</code></pre>
+
+    <p><strong>When to enable it:</strong> If an org has fewer than ~30–40 active submissions, intra-org matching alone is unlikely to produce good results. Enabling cross-matching lets those users benefit from the wider public pool while still being tracked as org users in analytics.</p>
+
+    <h2>Deactivating and reactivating an org</h2>
+    <p>Deactivation prevents the org's landing page from loading (the form will ignore an inactive org code) and excludes the org from new matching logic. It does not delete any data.</p>
+
+    <h3>Deactivate</h3>
+    <pre><code class="language-sql">UPDATE organisations SET is_active = false WHERE org_code = 'ACME';</code></pre>
+
+    <h3>Reactivate</h3>
+    <pre><code class="language-sql">UPDATE organisations SET is_active = true WHERE org_code = 'ACME';</code></pre>
+
+    <h3>What happens to existing data when an org is deactivated</h3>
+    <ul>
+      <li><strong>Existing submissions:</strong> Unaffected. All active submissions from org users remain active and continue to be eligible for matching (subject to <code>allow_cross_matching</code> logic).</li>
+      <li><strong>Existing matches:</strong> Unaffected. Confirmed matches between org users are not removed.</li>
+      <li><strong>New submissions via the org link:</strong> If a user arrives via <code>?org=ACME</code> and the org is inactive, the form treats them as a public user — no org branding, no org locations, and no <code>org_id</code> stored on their submission.</li>
+      <li><strong>Building locations:</strong> Org locations remain in the database but are not shown on the form while the org is inactive.</li>
+    </ul>
+    <div class="callout">
+      Deactivation is reversible. Reactivating an org immediately restores org branding, building locations, and org-scoped matching for any new submissions.
+    </div>
+
+    <h2>Analytics queries</h2>
+
+    <h3>Submissions per org</h3>
+    <pre><code class="language-sql">SELECT
+  o.org_code,
+  o.org_name,
+  COUNT(s.id) AS submission_count
+FROM organisations o
+LEFT JOIN submissions s ON s.org_id = o.org_id AND s.journey_status = 'active'
+GROUP BY o.org_id, o.org_code, o.org_name
+ORDER BY submission_count DESC;</code></pre>
+
+    <h3>Matches per org (at least one side is from the org)</h3>
+    <pre><code class="language-sql">SELECT
+  o.org_code,
+  o.org_name,
+  COUNT(DISTINCT m.id) AS match_count
+FROM organisations o
+JOIN submissions s ON s.org_id = o.org_id
+JOIN matches m ON m.sub_a_id = s.id OR m.sub_b_id = s.id
+GROUP BY o.org_id, o.org_code, o.org_name
+ORDER BY match_count DESC;</code></pre>
+
+    <h3>Most active users per org (by submission count)</h3>
+    <pre><code class="language-sql">SELECT
+  o.org_code,
+  u.name,
+  u.email,
+  COUNT(s.id) AS submissions
+FROM organisations o
+JOIN submissions s ON s.org_id = o.org_id
+JOIN users u ON u.id = s.user_id
+WHERE s.journey_status = 'active'
+GROUP BY o.org_code, u.id, u.name, u.email
+ORDER BY o.org_code, submissions DESC;</code></pre>
+
+    <h3>Org growth over time (submissions per org per month)</h3>
+    <pre><code class="language-sql">SELECT
+  o.org_code,
+  DATE_TRUNC('month', s.created_at) AS month,
+  COUNT(*) AS new_submissions
+FROM submissions s
+JOIN organisations o ON o.org_id = s.org_id
+GROUP BY o.org_code, month
+ORDER BY o.org_code, month;</code></pre>
+
+    <h2>Referral links</h2>
+    <p>Generate org-specific links to send to the partner. The <code>org</code> parameter pre-fills the org on the form:</p>
+    <table>
+      <thead><tr><th>Purpose</th><th>URL format</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Standard org link</td>
+          <td><code>https://communitycarpool.org/?org=ORGCODE</code></td>
+          <td>Loads the form with org branding, building locations, and custom message. Stores <code>org_id</code> on submission.</td>
+        </tr>
+        <tr>
+          <td>With UTM tracking</td>
+          <td><code>https://communitycarpool.org/?org=ORGCODE&amp;utm_source=email&amp;utm_medium=internal&amp;utm_campaign=launch</code></td>
+          <td>Same as above, plus UTM parameters for campaign analytics in any analytics platform.</td>
+        </tr>
+        <tr>
+          <td>QR code for posters</td>
+          <td>Generate a QR code pointing to the standard org link</td>
+          <td>Print on office posters, elevator wraps, or canteen screens.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>QR codes can be generated from the Campaign Links panel in the admin panel, which also handles UTM parameters. See <a href="campaign-management.html">Campaign management</a> for details.</p>
+
+    <h2>Onboarding checklist for a new partner organisation</h2>
+    <p>Use this checklist when onboarding a new partner:</p>
+    <ol>
+      <li>Agree the <code>org_code</code> with the partner (short, uppercase, no spaces — e.g. <code>EMAAR</code>).</li>
+      <li>Collect the org's full display name, logo URL (publicly hosted), and any custom welcome message.</li>
+      <li>Decide on <code>allow_cross_matching</code>: <code>false</code> for large corps with their own pool, <code>true</code> for smaller orgs.</li>
+      <li>Collect named building locations with lat/lng (right-click in Google Maps to get coordinates).</li>
+      <li>Run the INSERT into <code>organisations</code> (see "Creating a new organisation" above).</li>
+      <li>Run INSERTs into <code>org_locations</code> for each building (see "Managing org locations" above).</li>
+      <li>Verify: load <code>https://communitycarpool.org/?org=ORGCODE</code> in a browser and confirm the org name, logo, custom message, and building chips all appear correctly.</li>
+      <li>Generate the referral link (and QR code if needed) from the admin panel's Campaign Links section.</li>
+      <li>Send the link/QR code to the partner contact for distribution to their team.</li>
+      <li>Monitor submissions via the analytics queries above over the first 2–4 weeks to confirm uptake.</li>
+    </ol>
 
     <div class="article-nav">
       <a class="prev" href="blacklist.html"><span class="nav-dir">← Previous</span><span class="nav-title">Blacklist &amp; moderation</span></a>
