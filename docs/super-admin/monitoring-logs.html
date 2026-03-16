@@ -185,6 +185,93 @@ LIMIT 50;</code></pre>
       <li>Bounced emails indicate invalid addresses — consider investigating if a user reports not receiving emails</li>
     </ol>
 
+    <h2>Checking current usage by service</h2>
+    <p>Check these dashboards monthly — or any time you suspect you're approaching a limit. Each service is on a free or low-volume tier; exceeding limits triggers either throttling or unexpected charges.</p>
+
+    <h3>Resend — emails sent</h3>
+    <table>
+      <tr><th>What to check</th><th>Where to find it</th><th>Free limit</th></tr>
+      <tr><td>Emails sent this month</td><td><a href="https://resend.com/overview" target="_blank">resend.com/overview</a> — "Emails sent" counter on the dashboard homepage</td><td>3,000 / month</td></tr>
+      <tr><td>Daily send count</td><td><a href="https://resend.com/overview" target="_blank">resend.com/overview</a> — daily chart below the counter</td><td>100 / day</td></tr>
+      <tr><td>Bounce &amp; complaint rate</td><td><a href="https://resend.com/emails" target="_blank">resend.com/emails</a> — filter by "bounced" or "complained"</td><td>Keep bounce rate &lt; 5%; complaint rate &lt; 0.1%</td></tr>
+      <tr><td>Domain verification status</td><td><a href="https://resend.com/domains" target="_blank">resend.com/domains</a> — should show "Verified" green tick</td><td>—</td></tr>
+    </table>
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">If you hit 3,000 emails/month you will need to upgrade to the Starter plan ($20/month for 50,000 emails). The free tier has a hard stop — emails over the limit are rejected, not queued.</div>
+    </div>
+
+    <h3>AWS SES — sending quota &amp; usage</h3>
+    <p>SES is the standby email provider (currently inactive — Resend is active). Check SES usage if Resend is ever disabled and emails switch to SES.</p>
+    <table>
+      <tr><th>What to check</th><th>Where to find it</th><th>Sandbox limit</th></tr>
+      <tr><td>Current sending quota</td><td><a href="https://eu-west-1.console.aws.amazon.com/ses/home?region=eu-west-1#/account" target="_blank">AWS Console → SES → Account dashboard</a> — "Sending quota" card shows max per 24h and current send rate</td><td>200 emails / 24h (sandbox)</td></tr>
+      <tr><td>Emails sent today</td><td>Same page — "Emails sent in the last 24 hours" counter</td><td>—</td></tr>
+      <tr><td>Sending statistics</td><td>AWS Console → SES → <strong>Reputation</strong> — shows bounce rate, complaint rate, rejection count</td><td>Bounce &lt; 5%, complaint &lt; 0.1%</td></tr>
+      <tr><td>Production access status</td><td>SES → Account dashboard — shows "Sandbox" or "Production". Sandbox = only verified email addresses can receive mail.</td><td>—</td></tr>
+    </table>
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">SES is currently in Sandbox mode, which restricts sending to verified addresses only. To send to real users, you would need to request Production access via the AWS console. This has not been done — Resend handles all live sends for now.</div>
+    </div>
+
+    <h3>Mapbox — API requests</h3>
+    <table>
+      <tr><th>What to check</th><th>Where to find it</th><th>Free limit</th></tr>
+      <tr><td>Monthly request count</td><td><a href="https://account.mapbox.com/statistics" target="_blank">account.mapbox.com/statistics</a> — "Requests" chart, filter by month</td><td>100,000 requests / month</td></tr>
+      <tr><td>Requests by token</td><td><a href="https://account.mapbox.com/access-tokens" target="_blank">account.mapbox.com/access-tokens</a> — click a token to see its usage</td><td>—</td></tr>
+      <tr><td>Billing this month</td><td><a href="https://account.mapbox.com/billing" target="_blank">account.mapbox.com/billing</a> — shows $0.00 while under free tier</td><td>$0 up to 100K requests</td></tr>
+    </table>
+    <p>Mapbox is used for the match map (displaying matched journey routes). Each page load of <code>matches.html</code> that renders a map counts as requests. With 124 users and polling every 5 minutes, current usage is very low.</p>
+
+    <h3>Google Maps — API requests &amp; spend</h3>
+    <table>
+      <tr><th>What to check</th><th>Where to find it</th><th>Free credit</th></tr>
+      <tr><td>API usage this month</td><td><a href="https://console.cloud.google.com/apis/dashboard" target="_blank">Google Cloud Console → APIs &amp; Services → Dashboard</a> — select the Maps-related API (Places API / Autocomplete)</td><td>$200 free credit / month</td></tr>
+      <tr><td>Current spend</td><td><a href="https://console.cloud.google.com/billing" target="_blank">Google Cloud Console → Billing → Overview</a> — shows month-to-date cost</td><td>—</td></tr>
+      <tr><td>Request count breakdown</td><td>APIs &amp; Services → Dashboard → click the API name → Metrics tab</td><td>—</td></tr>
+      <tr><td>Set a spend alert</td><td>Billing → Budgets &amp; Alerts → Create Budget — set a monthly budget (e.g. $10) and alert at 50%/100%</td><td>—</td></tr>
+    </table>
+    <p>Google Maps is used for address autocomplete on the journey submission form (<code>index.html</code>). Each autocomplete session costs ~$0.00283. At current scale, monthly cost is well within the $200 free credit.</p>
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">If the platform scales significantly, Google Maps autocomplete charges can grow quickly. Set a billing alert now to avoid surprise charges. See <a href="maps.html">Google Maps &amp; Mapbox</a> for key restrictions to apply to the API key.</div>
+    </div>
+
+    <h3>GitHub Pages — bandwidth</h3>
+    <table>
+      <tr><th>What to check</th><th>Where to find it</th><th>Free limit</th></tr>
+      <tr><td>Bandwidth used this month</td><td><a href="https://github.com/carpooling0/communitycarpool/settings/pages" target="_blank">GitHub → carpooling0/communitycarpool → Settings → Pages</a> — bandwidth counter (if visible on your plan)</td><td>100 GB / month</td></tr>
+      <tr><td>Builds remaining</td><td>Same page — GitHub Pages has a limit of 10 builds/hour</td><td>10 builds / hour</td></tr>
+      <tr><td>Repository size</td><td>GitHub → Repository → Settings → scroll down to "Danger Zone" → repository size shown; or <code>git count-objects -vH</code> locally</td><td>Soft limit: 1 GB repo size</td></tr>
+    </table>
+    <p>GitHub Pages bandwidth is essentially unlimited at current scale — the site is lightweight static HTML/CSS/JS with no large assets. You would need millions of page views per month to approach the 100 GB limit. The more likely constraint is <strong>repository size</strong> if large files (images, zips) are ever committed accidentally.</p>
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">GitHub does not provide a self-serve bandwidth dashboard for Pages on free accounts. If you want detailed traffic analytics, add a free tool like <a href="https://plausible.io" target="_blank">Plausible</a> or <a href="https://analytics.google.com" target="_blank">Google Analytics</a> to track page views and sessions.</div>
+    </div>
+
+    <h3>Supabase — database, storage &amp; function invocations</h3>
+    <table>
+      <tr><th>What to check</th><th>Where to find it</th><th>Free limit</th></tr>
+      <tr><td>Database size</td><td><a href="https://supabase.com/dashboard/project/tbkjealpnoriwdosvmju/settings/database" target="_blank">Supabase → Settings → Database</a> — "Database size" shown in MB</td><td>500 MB (Free tier)</td></tr>
+      <tr><td>Edge function invocations</td><td><a href="https://supabase.com/dashboard/project/tbkjealpnoriwdosvmju/functions" target="_blank">Supabase → Edge Functions</a> — each function shows total invocation count</td><td>500,000 / month</td></tr>
+      <tr><td>Bandwidth (egress)</td><td><a href="https://supabase.com/dashboard/project/tbkjealpnoriwdosvmju/reports/api-overview" target="_blank">Supabase → Reports → API</a></td><td>5 GB / month</td></tr>
+      <tr><td>Overall usage vs limits</td><td><a href="https://supabase.com/dashboard/org/[your-org-slug]/billing" target="_blank">Supabase → Organisation → Billing &amp; Usage</a> — shows all quota meters in one view</td><td>Free tier</td></tr>
+      <tr><td>Active connections</td><td>Supabase → Reports → Database — connection count chart</td><td>60 connections (Free tier)</td></tr>
+    </table>
+
+    <h3>Quick monthly check — all services in 5 minutes</h3>
+    <table>
+      <tr><th>#</th><th>Service</th><th>URL</th><th>What to note</th></tr>
+      <tr><td>1</td><td>Resend</td><td><a href="https://resend.com/overview" target="_blank">resend.com/overview</a></td><td>Emails used / 3,000 this month</td></tr>
+      <tr><td>2</td><td>Supabase</td><td><a href="https://supabase.com/dashboard/project/tbkjealpnoriwdosvmju/reports/api-overview" target="_blank">Supabase Reports</a></td><td>DB size, function invocations, egress</td></tr>
+      <tr><td>3</td><td>Mapbox</td><td><a href="https://account.mapbox.com/statistics" target="_blank">account.mapbox.com/statistics</a></td><td>Requests used / 100,000 this month</td></tr>
+      <tr><td>4</td><td>Google Cloud</td><td><a href="https://console.cloud.google.com/billing" target="_blank">GCP Billing</a></td><td>Maps spend — should be $0</td></tr>
+      <tr><td>5</td><td>AWS SES</td><td><a href="https://eu-west-1.console.aws.amazon.com/ses/home?region=eu-west-1#/account" target="_blank">SES Account</a></td><td>Only relevant if Resend is disabled</td></tr>
+      <tr><td>6</td><td>GitHub</td><td><a href="https://github.com/carpooling0/communitycarpool/settings/pages" target="_blank">GitHub Pages settings</a></td><td>Repo size; any deploy failures?</td></tr>
+    </table>
+
     <h2>Setting up alerting (recommended)</h2>
     <p>No automated alerting is currently configured. Recommended future setup:</p>
     <ul>
