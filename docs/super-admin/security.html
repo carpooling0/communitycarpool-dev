@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Security Hardening | Super-Admin Docs</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="sa-style.css">
+  <style>
+    .sa-badge { display:inline-flex;align-items:center;gap:5px;background:#fef2f2;color:#991b1b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:3px 10px;border-radius:20px;border:1px solid #fecaca;margin-bottom:18px; }
+    code { background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:1px 6px;font-size:13px;font-family:monospace; }
+    pre { background:#1e293b;color:#e2e8f0;border-radius:8px;padding:16px 20px;font-size:13px;line-height:1.6;overflow-x:auto;margin:14px 0; }
+    pre code { background:none;border:none;padding:0;color:inherit;font-size:inherit; }
+    table { width:100%;border-collapse:collapse;margin:14px 0; }
+    th { background:#f8fafc;font-weight:700;text-align:left;padding:10px 14px;border:1px solid var(--border); }
+    td { padding:9px 14px;border:1px solid var(--border);vertical-align:top; }
+    tr:nth-child(even) td { background:#fafafa; }
+    .tag { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .tag-green { background:#dcfce7;color:#15803d; }
+    .tag-amber { background:#fef9c3;color:#92400e; }
+    .tag-red { background:#fef2f2;color:#991b1b; }
+    .tag-blue { background:#eff6ff;color:#1d4ed8; }
+    .tag-gray { background:#f3f4f6;color:#374151; }
+    .check-list { list-style:none;padding:0;margin:0; }
+    .check-list li { padding:6px 0;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;gap:10px; }
+    .check-list li:last-child { border-bottom:none; }
+    .check-list .chk { font-size:15px;flex-shrink:0;margin-top:1px; }
+    .gap-list { list-style:none;padding:0;margin:0; }
+    .gap-list li { padding:8px 0 8px 0;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;gap:10px; }
+    .gap-list li:last-child { border-bottom:none; }
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/></a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">Super-Admin Docs</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="index.html">← SA Docs home</a>
+</nav>
+
+<div class="article-shell">
+  <aside class="sidebar">
+    <nav id="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Platform Infrastructure</div>
+        <a class="sidebar-link" href="supabase.html">Supabase dashboards</a>
+        <a class="sidebar-link" href="github.html">GitHub &amp; deployment</a>
+        <a class="sidebar-link" href="dev-vs-prod.html">Dev vs Prod environments</a>
+        <a class="sidebar-link" href="cost-billing.html">Cost &amp; billing</a>
+        <a class="sidebar-link" href="architecture.html">System architecture</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Integrations &amp; APIs</div>
+        <a class="sidebar-link" href="email-providers.html">Email — Resend &amp; SES</a>
+        <a class="sidebar-link" href="maps.html">Google Maps &amp; Mapbox</a>
+        <a class="sidebar-link" href="dns.html">DNS records</a>
+        <a class="sidebar-link" href="apis-connections.html">All APIs &amp; connections</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Database</div>
+        <a class="sidebar-link" href="database-tables.html">Tables reference</a>
+        <a class="sidebar-link" href="database-migrations.html">Database migrations</a>
+        <a class="sidebar-link" href="database-backup.html">Backup &amp; recovery</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Edge Functions &amp; Automation</div>
+        <a class="sidebar-link" href="edge-functions.html">Edge functions reference</a>
+        <a class="sidebar-link" href="cron-jobs.html">Cron jobs &amp; scheduled tasks</a>
+        <a class="sidebar-link" href="deploying-edge-functions.html">Deploying edge functions</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Configuration</div>
+        <a class="sidebar-link" href="config-table.html">Config table</a>
+        <a class="sidebar-link" href="secrets.html">Secrets &amp; API keys</a>
+        <a class="sidebar-link" href="rotating-secrets.html">Rotating secrets</a>
+        <a class="sidebar-link" href="testing-mode.html">Testing mode</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Operations</div>
+        <a class="sidebar-link" href="managing-team.html">Managing team access</a>
+        <a class="sidebar-link" href="support-tickets.html">Support tickets</a>
+        <a class="sidebar-link" href="blacklist.html">Blacklist &amp; moderation</a>
+        <a class="sidebar-link" href="organisations.html">Organisations</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Processes</div>
+        <a class="sidebar-link" href="terms-conditions.html">T&amp;C process</a>
+        <a class="sidebar-link" href="campaign-management.html">Campaign management</a>
+        <a class="sidebar-link" href="email-templates.html">Email templates</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Compliance &amp; Incidents</div>
+        <a class="sidebar-link" href="monitoring-logs.html">Monitoring &amp; logs</a>
+        <a class="sidebar-link" href="data-subject-requests.html">Data subject requests</a>
+        <a class="sidebar-link" href="incident-runbook.html">Incident runbook</a>
+        <a class="sidebar-link active" href="security.html">Security hardening</a>
+      </div>
+    </nav>
+  </aside>
+  <main class="article-main">
+    <div class="breadcrumb">
+      <a href="index.html">SA Docs</a><span class="breadcrumb-sep">/</span>
+      <span>Compliance &amp; Incidents</span>
+    </div>
+    <div class="sa-badge">🔒 Super-Admin Only</div>
+    <div class="article-eyebrow">🛡️ Compliance &amp; Incidents</div>
+    <h1 class="article-title">Security hardening</h1>
+    <p class="article-lead">A complete picture of how Community Carpool is secured at every layer — database, API, admin access, email, and credentials — plus known gaps and the steps to address them.</p>
+
+    <h2>Security model overview</h2>
+    <p>The platform has no traditional server or VPC to protect. Instead, security is enforced at three distinct boundaries:</p>
+    <table>
+      <tr><th>Boundary</th><th>Mechanism</th><th>What it protects</th></tr>
+      <tr><td><strong>Database (Supabase)</strong></td><td>Row Level Security (RLS) with no policies</td><td>Direct table access — anon and authenticated roles are completely blocked. Only the service role key bypasses RLS.</td></tr>
+      <tr><td><strong>API (Edge Functions)</strong></td><td>Session tokens, JWT verification, input validation</td><td>All write and read operations on user data. Each function validates the caller before touching the DB.</td></tr>
+      <tr><td><strong>Admin panel</strong></td><td>PBKDF2 password hashing, session tokens, role gates, optional IP allowlist, deletion PIN</td><td>All admin operations. No direct DB access for Admin or Support roles.</td></tr>
+    </table>
+
+    <h2>Database security — Row Level Security (RLS)</h2>
+
+    <h3>How RLS works here</h3>
+    <p>Supabase exposes three database roles: <code>anon</code> (unauthenticated browser requests), <code>authenticated</code> (signed-in Supabase Auth users — not used here), and <code>service_role</code> (edge functions, Supabase dashboard).</p>
+    <p>When RLS is <strong>enabled with zero policies</strong>, the default PostgreSQL behaviour is <em>deny all</em> for <code>anon</code> and <code>authenticated</code>. The <code>service_role</code> bypasses RLS entirely. This means:</p>
+    <ul>
+      <li>Any browser hitting the Supabase REST API with the anon key gets an empty result or permission denied — even if they know the table name</li>
+      <li>Edge functions (service role) continue to work normally</li>
+      <li>No explicit deny policies are needed — absence of allow policies achieves the same result</li>
+    </ul>
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>The anon key is public.</strong> It is shipped in <code>config.js</code> and visible in any browser's DevTools. It is designed to be public — security relies entirely on RLS blocking what the anon role can do, not on keeping the key secret.</div>
+    </div>
+
+    <h3>Current RLS status (as of March 2026)</h3>
+    <table>
+      <tr><th>Table</th><th>RLS</th><th>Policies</th><th>Notes</th></tr>
+      <tr><td>users</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon. Service role only.</td></tr>
+      <tr><td>submissions</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>matches</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>support_tickets</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>blacklist</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>config</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon. Config values never exposed to browser.</td></tr>
+      <tr><td>organisations</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>org_locations</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>admin_users</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Admin credentials — deny-all for anon.</td></tr>
+      <tr><td>admin_sessions</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Active session tokens — deny-all for anon.</td></tr>
+      <tr><td>admin_actions</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Audit log — deny-all for anon.</td></tr>
+      <tr><td>admin_audit_log</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>deletion_log</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>email_events</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>referral_links</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>user_attribution</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>user_notifications</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>events</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>event_types</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>feedback</td><td><span class="tag tag-green">ON</span></td><td>0</td><td>Deny-all for anon.</td></tr>
+      <tr><td>spatial_ref_sys</td><td><span class="tag tag-gray">N/A</span></td><td>—</td><td>PostGIS system table. RLS cannot be enabled — this is a Postgres/PostGIS restriction, not a gap. Contains only coordinate system metadata, no user data.</td></tr>
+    </table>
+
+    <h3>Verifying RLS in Supabase</h3>
+    <p>To confirm RLS status at any time, run this query in the <a href="https://supabase.com/dashboard/project/jboohdwihsiuvyrfeftp/editor" target="_blank">Supabase SQL editor</a>:</p>
+    <pre><code>SELECT tablename, rowsecurity AS rls_enabled,
+  (SELECT COUNT(*) FROM pg_policies p
+   WHERE p.tablename = t.tablename AND p.schemaname = 'public') AS policy_count
+FROM pg_tables t
+WHERE t.schemaname = 'public'
+ORDER BY tablename;</code></pre>
+    <p>Every table should show <code>rls_enabled = true</code>. If a new table is created via migration and RLS is not explicitly enabled, it will default to <code>false</code> — always include <code>ALTER TABLE &lt;name&gt; ENABLE ROW LEVEL SECURITY;</code> in every migration that creates a table.</p>
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Supabase Security Advisor</strong> (Dashboard → Advisors → Security) flags tables with RLS disabled. Check it after every migration. The only expected flag is <code>spatial_ref_sys</code> which cannot be fixed — suppress it if possible.</div>
+    </div>
+
+    <h2>Edge function security</h2>
+
+    <h3>JWT verification</h3>
+    <p>Each edge function has a <code>verify_jwt</code> setting in its config. Functions that are callable from the browser (user-facing) use <code>verify_jwt: true</code>, which means Supabase validates that the <code>Authorization</code> header contains a valid, unexpired anon JWT before the function code even runs. Functions that should only be called by cron jobs use <code>verify_jwt: false</code> and implement their own caller validation internally.</p>
+    <table>
+      <tr><th>Function</th><th>verify_jwt</th><th>Caller</th></tr>
+      <tr><td>submit-journey</td><td><span class="tag tag-green">true</span></td><td>Browser (index.html)</td></tr>
+      <tr><td>get-matches-page</td><td><span class="tag tag-green">true</span></td><td>Browser (matches.html via match_page_token)</td></tr>
+      <tr><td>update-match-status</td><td><span class="tag tag-green">true</span></td><td>Browser (matches.html)</td></tr>
+      <tr><td>find-matches</td><td><span class="tag tag-green">true</span></td><td>Called internally by submit-journey</td></tr>
+      <tr><td>submit-support-ticket</td><td><span class="tag tag-green">true</span></td><td>Browser (support.html)</td></tr>
+      <tr><td>manage-deletion</td><td><span class="tag tag-green">true</span></td><td>Browser (deletion email link)</td></tr>
+      <tr><td>update-email-prefs</td><td><span class="tag tag-green">true</span></td><td>Browser (unsubscribe.html)</td></tr>
+      <tr><td>batch-send-emails</td><td><span class="tag tag-amber">false</span></td><td>Supabase cron only — checks for Supabase internal invocation header</td></tr>
+      <tr><td>process-deletions</td><td><span class="tag tag-amber">false</span></td><td>Supabase cron only</td></tr>
+      <tr><td>admin-auth</td><td><span class="tag tag-amber">false</span></td><td>Admin panel — own session token system</td></tr>
+      <tr><td>admin-api</td><td><span class="tag tag-amber">false</span></td><td>Admin panel — validates <code>Bearer &lt;session_token&gt;</code> from admin_sessions table</td></tr>
+    </table>
+
+    <h3>CORS</h3>
+    <p>All edge functions return CORS headers that restrict which origins can call them. The allowed origin is set to <code>https://communitycarpool.org</code> (prod) or <code>https://dev.communitycarpool.org</code> (dev). A random origin cannot call the functions from a different website.</p>
+    <p>Check CORS config in the function source: look for <code>Access-Control-Allow-Origin</code> in the response headers.</p>
+
+    <h3>Input validation</h3>
+    <p>Edge functions validate all required fields before touching the database. Key checks in place:</p>
+    <ul>
+      <li><strong>submit-journey</strong> — validates email format, required fields, checks max_active_submissions config, validates org_code if provided</li>
+      <li><strong>submit-support-ticket</strong> — rejects <code>type: "deletion"</code> (must use the manage-deletion flow), validates email, subject, message</li>
+      <li><strong>manage-deletion</strong> — validates token exists and is unexpired; unregistered emails silently return 200 to avoid email enumeration</li>
+      <li><strong>update-match-status</strong> — validates that the requesting user actually owns the submission involved in the match before allowing interest/decline</li>
+      <li><strong>admin-api</strong> — validates session token on every request; enforces role-based access per action before executing</li>
+    </ul>
+
+    <h3>Token-based user authentication</h3>
+    <p>CCP does not use Supabase Auth or passwords for end users. Authentication is token-based:</p>
+    <ul>
+      <li>When a match is found, the user receives a unique <code>match_page_token</code> in an email link</li>
+      <li>The token is stored (hashed in future; currently plain) in the <code>users</code> table as <code>match_page_token</code></li>
+      <li>Tokens expire after <code>match_token_expiry_days</code> (currently 120 days) — configurable in the config table</li>
+      <li><code>get-matches-page</code> validates the token on every call; expired tokens return 401</li>
+      <li>If a user's account is deleted, the token is also deleted — the link becomes permanently dead</li>
+    </ul>
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Future improvement:</strong> The <code>match_page_token</code> is currently stored as plain text in the DB. It should be hashed (e.g. SHA-256) so that a DB read does not reveal usable tokens. Low urgency given RLS protects the table, but worth tracking.</div>
+    </div>
+
+    <h2>Admin panel security</h2>
+
+    <h3>Authentication</h3>
+    <p>Admin users authenticate via the <code>admin-auth</code> edge function. Login checks run in this order:</p>
+    <ol>
+      <li>Email exists in <code>admin_users</code> table and <code>is_active = true</code> → else 401</li>
+      <li>PBKDF2 password verify (16-byte salt, 32-byte key, 100,000 iterations, SHA-256) → else 401</li>
+      <li><code>role_expires_at</code> is set and <code>now() &gt; role_expires_at</code> → 403 "Access expired"</li>
+      <li><code>allowed_ips</code> is set and request IP not in list → 403 "IP not allowed"</li>
+      <li>Session token created (32-byte random hex), stored in <code>admin_sessions</code> with 8-hour expiry</li>
+    </ol>
+
+    <h3>Role-based access</h3>
+    <p>Three roles control what each admin can see and do:</p>
+    <table>
+      <tr><th>Role</th><th>Panels accessible</th><th>Destructive actions</th></tr>
+      <tr><td><span class="tag tag-green">super_admin</span></td><td>All (Dashboard, Tickets, Deletions, Users, Campaigns, Audit Log, Team)</td><td>User deletion (PIN required), team management, all admin operations</td></tr>
+      <tr><td><span class="tag tag-blue">admin</span></td><td>Dashboard, Tickets, Deletions, Users, Campaigns</td><td>User deletion (PIN required), blacklist, cancel deletions</td></tr>
+      <tr><td><span class="tag tag-gray">support</span></td><td>Dashboard, Tickets only</td><td>None — read + close tickets only</td></tr>
+    </table>
+    <p>Role checks happen server-side in <code>admin-api</code> on every request — the frontend role-gating is UI convenience only and cannot be bypassed to gain elevated access.</p>
+
+    <h3>Deletion PIN</h3>
+    <p>Permanent user deletion requires a 6-digit PIN separate from the login password. The PIN hash is stored in <code>admin_users.deletion_pin_hash</code> using the same PBKDF2 algorithm. This means:</p>
+    <ul>
+      <li>Knowing an admin's password does not grant deletion capability</li>
+      <li>A stolen browser session cannot delete users without the PIN</li>
+      <li>PINs are set at account creation and can be reset by a Super-Admin</li>
+    </ul>
+
+    <h3>IP allowlisting</h3>
+    <p>The <code>allowed_ips</code> column on <code>admin_users</code> accepts an array of permitted IP addresses. When set, login is rejected from any other IP with a 403. This is optional per admin — leave <code>NULL</code> to allow any IP. Recommended for Super-Admin accounts where the admin has a fixed IP.</p>
+
+    <h3>Role expiry</h3>
+    <p>The <code>role_expires_at</code> column automatically locks out an admin after a date without needing manual deactivation. Useful for temporary access grants or contractors. After the date, login returns 403 — existing sessions already in use will fail on the next API call.</p>
+
+    <h3>Session management</h3>
+    <p>Sessions are stored in the <code>admin_sessions</code> table with a 8-hour expiry. The session token is a 32-byte random hex string stored in <code>localStorage</code> in the browser. On logout, the session row is deleted. On expiry, the next API call returns 401 and the browser redirects to the login screen.</p>
+
+    <h2>Email security — SPF, DKIM, DMARC</h2>
+    <p>Email authentication prevents spoofing of the <code>communitycarpool.org</code> domain. See <a href="dns.html">DNS records</a> for exact record values.</p>
+    <table>
+      <tr><th>Record</th><th>Status</th><th>What it does</th></tr>
+      <tr>
+        <td>SPF on <code>send.communitycarpool.org</code></td>
+        <td><span class="tag tag-green">Active</span></td>
+        <td>Authorises AWS SES to send email from the <code>send.</code> subdomain. Without SPF, receiving servers may mark SES mail as spam.</td>
+      </tr>
+      <tr>
+        <td>DKIM (3 CNAMEs) for SES</td>
+        <td><span class="tag tag-green">Active</span></td>
+        <td>Cryptographically signs every outbound SES email. Allows receiving servers to verify the message was not tampered with in transit.</td>
+      </tr>
+      <tr>
+        <td>DKIM for Resend</td>
+        <td><span class="tag tag-green">Active</span></td>
+        <td>Resend DKIM configured on the root domain for Resend-sent emails.</td>
+      </tr>
+      <tr>
+        <td>MX on <code>send.communitycarpool.org</code></td>
+        <td><span class="tag tag-green">Active</span></td>
+        <td>Routes SES bounce/complaint feedback to Amazon's feedback processing endpoint.</td>
+      </tr>
+      <tr>
+        <td>DMARC on <code>communitycarpool.org</code></td>
+        <td><span class="tag tag-amber">Monitoring only</span></td>
+        <td>Current policy: <code>p=none</code> — reports are generated but no enforcement action is taken. Spoofed emails will still reach inboxes. See upgrade path below.</td>
+      </tr>
+    </table>
+
+    <h3>DMARC upgrade path</h3>
+    <p>The current <code>p=none</code> policy is a monitoring stance. To enforce it:</p>
+    <ol>
+      <li><strong>Add a <code>rua=</code> address</strong> — point DMARC aggregate reports to a mailbox you check (e.g. <code>rua=mailto:carpooling0@gmail.com</code>). This lets you see whether any legitimate mail is failing DMARC before you tighten the policy.</li>
+      <li><strong>Upgrade to <code>p=quarantine</code></strong> — failing emails go to the spam folder instead of the inbox. Monitor for 2–4 weeks.</li>
+      <li><strong>Upgrade to <code>p=reject</code></strong> — failing emails are outright rejected. This is the gold standard and prevents all domain spoofing.</li>
+    </ol>
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">Do not jump straight to <code>p=reject</code> without monitoring first. If any legitimate sending path (Resend, SES, or a third-party tool like Google Workspace) is not correctly DKIM-signed and SPF-aligned, those emails will be rejected by the receiving server.</div>
+    </div>
+
+    <h2>Credentials &amp; secrets security</h2>
+    <table>
+      <tr><th>Credential</th><th>Where it lives</th><th>Who can see it</th></tr>
+      <tr><td>Supabase service role key</td><td>Supabase Vault (edge function secrets) — never in code or git</td><td>Super-Admin via Supabase dashboard only</td></tr>
+      <tr><td>RESEND_API_KEY</td><td>Supabase Vault</td><td>Super-Admin via Supabase dashboard only</td></tr>
+      <tr><td>Google Maps API key</td><td><code>config.js</code> — intentionally public, restricted by HTTP referrer in GCP</td><td>Anyone who views page source (safe by design)</td></tr>
+      <tr><td>Mapbox token</td><td><code>config.js</code> — intentionally public, scoped to map tiles only</td><td>Anyone who views page source (safe by design)</td></tr>
+      <tr><td>Supabase anon key</td><td><code>config.js</code> — intentionally public; RLS blocks all meaningful access</td><td>Anyone who views page source (safe by design)</td></tr>
+      <tr><td>Admin passwords</td><td>PBKDF2 hashes in <code>admin_users</code> table only — plaintext never stored</td><td>Nobody — hashes only, not reversible</td></tr>
+      <tr><td>Admin deletion PINs</td><td>PBKDF2 hashes in <code>admin_users.deletion_pin_hash</code></td><td>Nobody — hashes only</td></tr>
+      <tr><td>Porkbun account credentials</td><td>Team password manager only</td><td>Super-Admin</td></tr>
+      <tr><td>AWS credentials (SES standby)</td><td>Supabase Vault — AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY</td><td>Super-Admin via Supabase dashboard only</td></tr>
+    </table>
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Never commit secrets to git.</strong> The repositories are public. Run <code>git log --all --full-diff -p -- config.js</code> periodically to verify no secrets have been accidentally committed. If a secret is ever found in git history, treat it as compromised and rotate immediately — <em>deleting the commit does not remove it from forks or caches.</em></div>
+    </div>
+
+    <h2>GitHub &amp; deployment security</h2>
+    <ul>
+      <li><strong>Public repositories</strong> — both <code>carpooling0/communitycarpool</code> and <code>carpooling0/communitycarpool-dev</code> are public. Never push anything that contains a secret, personal data, or internal credentials.</li>
+      <li><strong>Two-remote discipline</strong> — always push to <code>dev-repo</code> (dev) unless explicitly deploying to production. Pushing to <code>origin</code> (prod) immediately goes live.</li>
+      <li><strong>No branch protection on main</strong> — force push is possible. Be careful. Consider enabling branch protection on the prod repo.</li>
+      <li><strong>GitHub Actions not used</strong> — deployment is fully manual (push to repo → GitHub Pages rebuilds). There are no CI secrets or workflow files to audit.</li>
+      <li><strong>super-admin docs</strong> — currently excluded from the production GitHub repo. They are served only from the dev environment. Do not push them to the prod repo until this policy is reviewed.</li>
+    </ul>
+
+    <h2>Known security gaps &amp; mitigations</h2>
+    <table>
+      <tr><th>Gap</th><th>Risk level</th><th>Current mitigation</th><th>Recommended fix</th></tr>
+      <tr>
+        <td>No rate limiting on edge functions</td>
+        <td><span class="tag tag-amber">Medium</span></td>
+        <td>Supabase's free tier has function invocation limits (500K/month) that act as a soft cap</td>
+        <td>Add Supabase's built-in rate limiting, or implement a per-IP counter in Redis/Upstash</td>
+      </tr>
+      <tr>
+        <td>match_page_token stored as plain text</td>
+        <td><span class="tag tag-amber">Low–Medium</span></td>
+        <td>RLS blocks anon access to <code>users</code> table; service role access is logged</td>
+        <td>Hash tokens with SHA-256 before storing; compare hash on validation</td>
+      </tr>
+      <tr>
+        <td>DMARC policy is <code>p=none</code> (no enforcement)</td>
+        <td><span class="tag tag-amber">Medium</span></td>
+        <td>DKIM signing in place — most modern mail clients validate DKIM</td>
+        <td>Add <code>rua=</code> address, monitor reports, then upgrade to <code>p=quarantine</code> then <code>p=reject</code></td>
+      </tr>
+      <tr>
+        <td>No automated security alerting</td>
+        <td><span class="tag tag-amber">Medium</span></td>
+        <td>Manual log review in Supabase dashboard</td>
+        <td>Set up Supabase log drains or a third-party log aggregator with alerting rules</td>
+      </tr>
+      <tr>
+        <td>Admin session tokens in localStorage</td>
+        <td><span class="tag tag-amber">Low–Medium</span></td>
+        <td>Tokens expire in 8 hours; logout deletes the session row server-side</td>
+        <td>Consider <code>httpOnly</code> cookies if the admin panel moves to a separate origin; currently not possible with a static site</td>
+      </tr>
+      <tr>
+        <td>No branch protection on prod repo</td>
+        <td><span class="tag tag-amber">Low–Medium</span></td>
+        <td>Only Super-Admin has push access via PAT</td>
+        <td>Enable branch protection on <code>carpooling0/communitycarpool</code> main branch: require PR review before merge</td>
+      </tr>
+      <tr>
+        <td>AWS SES credentials not yet set</td>
+        <td><span class="tag tag-gray">Low</span></td>
+        <td>Resend is active; SES is standby only — no emails go through SES currently</td>
+        <td>Set AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, SES_FROM_EMAIL in Supabase Vault when SES is needed</td>
+      </tr>
+      <tr>
+        <td>spatial_ref_sys table has RLS disabled</td>
+        <td><span class="tag tag-gray">None</span></td>
+        <td>PostGIS system table — contains only coordinate reference system metadata, no user data</td>
+        <td>No action needed. PostgreSQL does not support enabling RLS on this table.</td>
+      </tr>
+    </table>
+
+    <h2>Security checklist — new team member onboarding</h2>
+    <ul class="check-list">
+      <li><span class="chk">☐</span><span>Receive credentials via team password manager only — never via email or chat</span></li>
+      <li><span class="chk">☐</span><span>Confirm which Supabase project is dev vs prod before running any SQL or deploying functions</span></li>
+      <li><span class="chk">☐</span><span>Never push to <code>origin</code> (prod GitHub repo) unless deploying an approved change</span></li>
+      <li><span class="chk">☐</span><span>Never copy secrets into code, config files, or commit messages</span></li>
+      <li><span class="chk">☐</span><span>Do not share admin panel credentials — each team member has their own <code>admin_users</code> row</span></li>
+      <li><span class="chk">☐</span><span>Review the Supabase Security Advisor after any migration to check for new RLS gaps</span></li>
+      <li><span class="chk">☐</span><span>When adding a new table: always include <code>ALTER TABLE &lt;name&gt; ENABLE ROW LEVEL SECURITY;</code> in the migration</span></li>
+    </ul>
+
+    <h2>Security checklist — after any team member offboarding</h2>
+    <ul class="check-list">
+      <li><span class="chk">☐</span><span>Set <code>is_active = false</code> on their <code>admin_users</code> row immediately</span></li>
+      <li><span class="chk">☐</span><span>Delete any active rows in <code>admin_sessions</code> for that admin_id</span></li>
+      <li><span class="chk">☐</span><span>Rotate any secrets they had access to (see <a href="rotating-secrets.html">Rotating secrets</a>)</span></li>
+      <li><span class="chk">☐</span><span>Remove them from the team password manager</span></li>
+      <li><span class="chk">☐</span><span>Revoke their GitHub access if they were a repo collaborator</span></li>
+      <li><span class="chk">☐</span><span>Rotate Porkbun account password if they had DNS access</span></li>
+    </ul>
+
+    <h2>Security checklist — after adding a new table</h2>
+    <ul class="check-list">
+      <li><span class="chk">☐</span><span>Migration includes <code>ALTER TABLE &lt;name&gt; ENABLE ROW LEVEL SECURITY;</code></span></li>
+      <li><span class="chk">☐</span><span>Run the RLS status query above to confirm <code>rls_enabled = true</code></span></li>
+      <li><span class="chk">☐</span><span>Check Supabase Security Advisor — no new unresolved warnings</span></li>
+      <li><span class="chk">☐</span><span>Document the table in <a href="database-tables.html">Tables reference</a></span></li>
+    </ul>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">For incident response steps (suspected breach, data leak, function behaving unexpectedly), see the <a href="incident-runbook.html">Incident runbook</a>. For secret rotation procedures, see <a href="rotating-secrets.html">Rotating secrets</a>.</div>
+    </div>
+
+    <div class="article-nav">
+      <a class="prev" href="incident-runbook.html"><span class="nav-dir">← Previous</span><span class="nav-title">Incident runbook</span></a>
+    </div>
+  </main>
+</div>
+</body>
+</html>
