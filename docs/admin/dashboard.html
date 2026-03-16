@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reading the Dashboard | Admin Panel Guide</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="admin-style.css">
+  <style>
+    .admin-badge { display:inline-flex;align-items:center;gap:5px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:3px 10px;border-radius:20px;border:1px solid #bfdbfe;margin-bottom:18px; }
+    .role-badge { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .role-admin { background:#eff6ff;color:#1d4ed8; }
+    .role-support { background:#f0fdf4;color:#15803d; }
+    .role-superadmin { background:#1e293b;color:#f8fafc; }
+    code { background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:1px 6px;font-size:13px;font-family:monospace; }
+    pre { background:#1e293b;color:#e2e8f0;border-radius:8px;padding:16px 20px;font-size:13px;line-height:1.6;overflow-x:auto;margin:14px 0; }
+    pre code { background:none;border:none;padding:0;color:inherit;font-size:inherit; }
+    table { width:100%;border-collapse:collapse;margin:14px 0; }
+    th { background:#f8fafc;font-weight:700;text-align:left;padding:10px 14px;border:1px solid var(--border); }
+    td { padding:9px 14px;border:1px solid var(--border);vertical-align:top; }
+    tr:nth-child(even) td { background:#fafafa; }
+    .tag { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .tag-green { background:#dcfce7;color:#15803d; }
+    .tag-amber { background:#fef9c3;color:#92400e; }
+    .tag-red { background:#fef2f2;color:#991b1b; }
+    .tag-blue { background:#eff6ff;color:#1d4ed8; }
+    .tag-gray { background:#f3f4f6;color:#374151; }
+    .sa-note { background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin:14px 0;font-size:14px; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/></a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">Admin Panel Guide</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="../../admin.html">← Admin Panel</a>
+</nav>
+
+<div class="article-shell">
+  <aside class="sidebar">
+    <nav id="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Getting Started</div>
+        <a class="sidebar-link" href="getting-started.html">Login &amp; navigation</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Dashboard</div>
+        <a class="sidebar-link active" href="dashboard.html">Reading the dashboard</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Operations</div>
+        <a class="sidebar-link" href="tickets.html">Support tickets</a>
+        <a class="sidebar-link" href="deletions.html">Deletion requests</a>
+        <a class="sidebar-link" href="users.html">User search &amp; blacklist</a>
+        <a class="sidebar-link" href="campaigns.html">Campaign links</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Guidelines</div>
+        <a class="sidebar-link" href="guidelines.html">Responsibilities &amp; escalation</a>
+      </div>
+    </nav>
+  </aside>
+  <main class="article-main">
+    <div class="breadcrumb">
+      <a href="index.html">Admin Panel Guide</a><span class="breadcrumb-sep">/</span>
+      <span>Dashboard</span>
+    </div>
+    <div class="admin-badge">👤 Admin Panel Guide</div>
+    <div class="article-eyebrow">📊 Dashboard</div>
+    <h1 class="article-title">Reading the dashboard</h1>
+    <p class="article-lead">The dashboard gives you a real-time overview of platform health. Use it to understand how the carpool matching is performing and spot anything that needs attention.</p>
+
+    <h2>Refreshing</h2>
+    <p>Click the <strong>Refresh</strong> button at the top of the dashboard to load the latest data. The dashboard does not auto-update in the background — refresh manually whenever you want current figures. The timestamp next to the Refresh button shows when the data was last loaded.</p>
+
+    <h2 id="kpi">Row 1 — KPI strip</h2>
+    <p>Five cards across the top summarise the platform at a glance. Hover the <strong>ⓘ</strong> icon on any card to see a tooltip with a more detailed explanation.</p>
+    <table>
+      <thead><tr><th>Card</th><th>What it shows</th><th>When to act</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Total Users</strong></td>
+          <td>All registered users, plus a weekly trend arrow showing growth or decline</td>
+          <td>A consistently downward trend may indicate users are not finding value — flag to Super-Admin for investigation</td>
+        </tr>
+        <tr>
+          <td><strong>Active Journeys</strong></td>
+          <td>Submissions currently active (not expired or deleted)</td>
+          <td>A low number relative to total users may mean many users registered but never submitted a journey</td>
+        </tr>
+        <tr>
+          <td><strong>Total Matches</strong></td>
+          <td>All-time matches found across all time, plus a weekly trend</td>
+          <td>A flat or falling trend over multiple weeks may indicate the matching algorithm has an issue — escalate to Super-Admin</td>
+        </tr>
+        <tr>
+          <td><strong>Match Rate</strong></td>
+          <td>Percentage of active journeys that have at least one match found</td>
+          <td>Below 50% means the majority of active users have found nobody — could indicate a geographic spread issue or thin pool in specific areas</td>
+        </tr>
+        <tr>
+          <td><strong>Pending Actions</strong></td>
+          <td>Open support tickets plus pending deletion requests, combined into one count</td>
+          <td>Any non-zero value means there is work waiting for you — switch to the Tickets or Deletions panel to act</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Row 2 — Growth chart</h2>
+    <p>A bar chart showing new users and new submissions over time. Use the toggle buttons at the top of the chart to switch between <strong>Weeks</strong>, <strong>Months</strong>, and <strong>Years</strong> view.</p>
+    <p>Two bars appear side-by-side for each period: <strong>blue</strong> = new users registered, <strong>green</strong> = new journey submissions. Hover any bar to see the exact count.</p>
+    <p>This chart is most useful for spotting the effect of specific campaigns or outreach activity — for example, if a partner organisation distributed a QR code, you should see a spike in both bars for that week. Compare against the Campaign Links panel to correlate spikes with attribution codes.</p>
+
+    <h2 id="quality">Row 3 — Journey &amp; Matching Quality</h2>
+    <p>Four cards showing how well the matching is working for current users.</p>
+    <table>
+      <thead><tr><th>Card</th><th>What it means</th><th>When to act</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Submissions with 0 matches</strong></td>
+          <td>Active journeys that have not found a single match yet</td>
+          <td>A high absolute number suggests the pool is too thin in certain areas or the matching radius is too tight — escalate to Super-Admin to investigate geographic distribution</td>
+        </tr>
+        <tr>
+          <td><strong>Notification backlog</strong></td>
+          <td>Matches found but where the match notification email has not been sent yet</td>
+          <td>This is expected to be non-zero when <code>testing_mode=true</code>. In production, a non-zero backlog means the batch-send-emails cron job may not be running — escalate to Super-Admin immediately</td>
+        </tr>
+        <tr>
+          <td><strong>Avg matches per submission</strong></td>
+          <td>Average number of matches found per active journey</td>
+          <td>Below 1.0 is a very thin pool. Ideally above 2.0. Consistently low values may indicate the user base is too small or geographically dispersed for the current matching parameters</td>
+        </tr>
+        <tr>
+          <td><strong>Journey expiry rate</strong></td>
+          <td>Percentage of all journeys that have expired with zero matches found</td>
+          <td>A high rate means users are leaving (journeys expiring) before finding anyone — this is a retention and pool-density concern to flag to Super-Admin</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="engagement">Row 4 — User Engagement</h2>
+    <p>Four cards showing how users are interacting with the platform after registering.</p>
+    <table>
+      <thead><tr><th>Card</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Active users</strong></td>
+          <td>Users who currently have at least one active journey. The core engaged segment.</td>
+        </tr>
+        <tr>
+          <td><strong>Inactive 30+ days</strong></td>
+          <td>Users who have not visited their matches page in over 30 days. A churn signal — these users may have forgotten about the platform or given up after not finding matches.</td>
+        </tr>
+        <tr>
+          <td><strong>Return users</strong></td>
+          <td>Users who have submitted more than one journey over their lifetime (i.e. they came back after a first journey expired). A positive retention signal.</td>
+        </tr>
+        <tr>
+          <td><strong>One-way interest rate</strong></td>
+          <td>The rate at which user A expresses interest in a match but user B never responds. A high one-way interest rate may indicate users who receive match emails but never click through — sometimes called a "ghost rate".</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Row 5 — Matching Performance</h2>
+    <p>Four cards focused on the speed and quality of the matching and response process.</p>
+    <table>
+      <thead><tr><th>Card</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Avg time to 1st match</strong></td>
+          <td>Average number of days from a user submitting their journey to their first match being found. Influenced by pool size and how frequently find-matches runs.</td>
+        </tr>
+        <tr>
+          <td><strong>Avg time to 2nd match</strong></td>
+          <td>Average days until a second match is found. A large gap between 1st and 2nd match timing may mean the pool is small enough that each user only has one or two viable matches.</td>
+        </tr>
+        <tr>
+          <td><strong>Match conversion rate</strong></td>
+          <td>Percentage of matches that result in both parties confirming mutual interest. A low conversion rate may mean match quality is poor (weak overlaps being sent) or emails are not reaching users.</td>
+        </tr>
+        <tr>
+          <td><strong>Avg response time</strong></td>
+          <td>Average number of days between user A expressing interest and user B responding. A high response time suggests users are not checking their email promptly or the match email is hard to act on.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Rows 6–8 — Charts and operational health</h2>
+    <p>The lower portion of the dashboard contains a set of charts and summary panels for deeper analysis. These are read-only reference panels.</p>
+    <ul>
+      <li><strong>Match strength distribution</strong> — bar chart breaking down all matches into High / Medium / Low strength bands. A distribution skewed heavily toward Low suggests the matching radius may be capturing poor-fit pairs.</li>
+      <li><strong>Top countries / cities</strong> — where users are located. Useful for understanding geographic coverage and informing where to focus outreach.</li>
+      <li><strong>Submissions by day / hour</strong> — heatmap or bar chart showing when users typically submit journeys. Useful for timing campaigns and communications.</li>
+      <li><strong>Distance preference breakdown</strong> — how users have set their maximum acceptable distance. Helps identify whether tightening or relaxing the default distance would improve match rates.</li>
+      <li><strong>Ticket resolution time</strong> — average days between ticket creation and closure. Use this to monitor whether tickets are being handled in a timely manner.</li>
+      <li><strong>Organisation breakdown</strong> — how many users are attributed to each partner organisation. Useful for reporting to org partners.</li>
+      <li><strong>Blacklist count</strong> — total number of emails currently on the blacklist. A sharp rise may indicate a spam or abuse wave.</li>
+    </ul>
+
+    <h2>What to do with this data</h2>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">The dashboard is <strong>read-only</strong> — you cannot take any direct actions from here. Use it to identify issues, then switch to the Tickets or Deletions panels to act on specific items. For infrastructure concerns (for example, a non-zero notification backlog in production, or a sudden drop in match rate), escalate to a Super-Admin rather than investigating the underlying system yourself.</div>
+    </div>
+
+    <div class="article-nav">
+      <a class="prev" href="getting-started.html"><span class="nav-dir">← Previous</span><span class="nav-title">Login &amp; navigation</span></a>
+      <a class="next" href="tickets.html"><span class="nav-dir">Next →</span><span class="nav-title">Support tickets</span></a>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login &amp; Navigation | Admin Panel Guide</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="admin-style.css">
+  <style>
+    .admin-badge { display:inline-flex;align-items:center;gap:5px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:3px 10px;border-radius:20px;border:1px solid #bfdbfe;margin-bottom:18px; }
+    .role-badge { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .role-admin { background:#eff6ff;color:#1d4ed8; }
+    .role-support { background:#f0fdf4;color:#15803d; }
+    .role-superadmin { background:#1e293b;color:#f8fafc; }
+    code { background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:1px 6px;font-size:13px;font-family:monospace; }
+    pre { background:#1e293b;color:#e2e8f0;border-radius:8px;padding:16px 20px;font-size:13px;line-height:1.6;overflow-x:auto;margin:14px 0; }
+    pre code { background:none;border:none;padding:0;color:inherit;font-size:inherit; }
+    table { width:100%;border-collapse:collapse;margin:14px 0; }
+    th { background:#f8fafc;font-weight:700;text-align:left;padding:10px 14px;border:1px solid var(--border); }
+    td { padding:9px 14px;border:1px solid var(--border);vertical-align:top; }
+    tr:nth-child(even) td { background:#fafafa; }
+    .tag { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .tag-green { background:#dcfce7;color:#15803d; }
+    .tag-amber { background:#fef9c3;color:#92400e; }
+    .tag-red { background:#fef2f2;color:#991b1b; }
+    .tag-blue { background:#eff6ff;color:#1d4ed8; }
+    .tag-gray { background:#f3f4f6;color:#374151; }
+    .sa-note { background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin:14px 0;font-size:14px; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/></a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">Admin Panel Guide</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="../../admin.html">← Admin Panel</a>
+</nav>
+
+<div class="article-shell">
+  <aside class="sidebar">
+    <nav id="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Getting Started</div>
+        <a class="sidebar-link active" href="getting-started.html">Login &amp; navigation</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Dashboard</div>
+        <a class="sidebar-link" href="dashboard.html">Reading the dashboard</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Operations</div>
+        <a class="sidebar-link" href="tickets.html">Support tickets</a>
+        <a class="sidebar-link" href="deletions.html">Deletion requests</a>
+        <a class="sidebar-link" href="users.html">User search &amp; blacklist</a>
+        <a class="sidebar-link" href="campaigns.html">Campaign links</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Guidelines</div>
+        <a class="sidebar-link" href="guidelines.html">Responsibilities &amp; escalation</a>
+      </div>
+    </nav>
+  </aside>
+  <main class="article-main">
+    <div class="breadcrumb">
+      <a href="index.html">Admin Panel Guide</a><span class="breadcrumb-sep">/</span>
+      <span>Getting Started</span>
+    </div>
+    <div class="admin-badge">👤 Admin Panel Guide</div>
+    <div class="article-eyebrow">🚀 Getting Started</div>
+    <h1 class="article-title">Login &amp; navigation</h1>
+    <p class="article-lead">How to access the admin panel, navigate between panels, understand your role, and manage your session.</p>
+
+    <h2>Accessing the admin panel</h2>
+    <p>The admin panel is a separate login-protected page:</p>
+    <ul>
+      <li><strong>Development:</strong> <code>https://dev.communitycarpool.org/admin.html</code></li>
+      <li><strong>Production:</strong> <code>https://communitycarpool.org/admin.html</code></li>
+    </ul>
+    <p>You need an email address and password issued by a Super-Admin. These are separate credentials from any user account you may have on the platform.</p>
+    <p><strong>To sign in:</strong> enter your email and password, then click <strong>Sign In</strong>.</p>
+
+    <h3>Common login errors</h3>
+    <table>
+      <thead><tr><th>Error message</th><th>What it means</th><th>What to do</th></tr></thead>
+      <tbody>
+        <tr><td>"Invalid credentials"</td><td>Email or password is incorrect</td><td>Double-check your email and password. Contact a Super-Admin if you cannot log in.</td></tr>
+        <tr><td>"Access expired. Contact Super-Admin."</td><td>Your account's <code>role_expires_at</code> date has passed</td><td>Contact a Super-Admin to renew your access.</td></tr>
+        <tr><td>"IP not allowed."</td><td>An IP restriction has been set on your account and you are accessing from a different IP</td><td>Connect from your usual network or contact a Super-Admin to update the IP allowlist for your account.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="navigation">Navigating panels</h2>
+    <p>The admin panel has a two-part sidebar on the left:</p>
+    <ul>
+      <li><strong>Icon strip (48 px wide)</strong> — always visible, shows the CCP logo at the top and a Log Out button at the bottom</li>
+      <li><strong>Nav panel (200 px)</strong> — shows panel names grouped by section (Overview, Support, Admin, System)</li>
+    </ul>
+    <p>Click any nav item to switch to that panel — the main area updates without a page reload. Click the chevron (‹) button at the top-right of the nav panel to collapse it to icon-only view, giving you more space. Click it again to expand.</p>
+    <p>Your name and role appear at the bottom of the sidebar, above the Log Out button.</p>
+
+    <h2 id="roles">What you can see (by role)</h2>
+    <p>The panels visible in your sidebar depend on your assigned role. Panels not listed below your role level are hidden automatically.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Panel</th>
+          <th><span class="role-badge role-support">Support</span></th>
+          <th><span class="role-badge role-admin">Admin</span></th>
+          <th><span class="role-badge role-superadmin">Super-Admin</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Dashboard</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Tickets</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Deletions</td><td>—</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Users</td><td>—</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Campaign Links</td><td>—</td><td>✓</td><td>✓</td></tr>
+        <tr><td>Audit Log</td><td>—</td><td>—</td><td>✓</td></tr>
+        <tr><td>Team</td><td>—</td><td>—</td><td>✓</td></tr>
+      </tbody>
+    </table>
+    <p>If a panel is not visible in your sidebar, your role does not have access to it. Contact a Super-Admin if you believe you need access to a specific panel.</p>
+
+    <h2 id="session">Session &amp; logout</h2>
+    <ul>
+      <li>Sessions last <strong>8 hours</strong> from the time you sign in</li>
+      <li>After 8 hours you are automatically signed out — you will see the login screen on your next action</li>
+      <li>Always click <strong>Log Out</strong> (bottom of the sidebar) when you are done, especially on a shared or work computer</li>
+      <li>If you are signed out unexpectedly before 8 hours, try logging in again — your session may have been invalidated (for example, if a Super-Admin reset your account). If this keeps happening, notify a Super-Admin.</li>
+    </ul>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">If you leave the admin panel open in a background tab for several hours and then switch back to it, you may find yourself already signed out. This is normal — just sign in again. Your work is not lost because all actions are written to the database immediately when you take them.</div>
+    </div>
+
+    <h2 id="password">Forgotten password / account issues</h2>
+    <ul>
+      <li>There is no self-service password reset — contact a Super-Admin to reset your password</li>
+      <li>Your password is hashed in the database and cannot be recovered by anyone — only reset</li>
+      <li>If you suspect your account credentials have been compromised (someone else may have your password), notify a Super-Admin immediately so they can deactivate your account and create a new one with fresh credentials</li>
+      <li>Never share your login credentials with anyone, including colleagues — each team member must have their own account</li>
+    </ul>
+
+    <div class="article-nav">
+      <a class="next" href="dashboard.html"><span class="nav-dir">Next →</span><span class="nav-title">Reading the dashboard</span></a>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

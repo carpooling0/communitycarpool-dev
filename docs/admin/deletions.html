@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Deletion Requests | Admin Panel Guide</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="admin-style.css">
+  <style>
+    .admin-badge { display:inline-flex;align-items:center;gap:5px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:3px 10px;border-radius:20px;border:1px solid #bfdbfe;margin-bottom:18px; }
+    .role-badge { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .role-admin { background:#eff6ff;color:#1d4ed8; }
+    .role-support { background:#f0fdf4;color:#15803d; }
+    .role-superadmin { background:#1e293b;color:#f8fafc; }
+    code { background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:1px 6px;font-size:13px;font-family:monospace; }
+    pre { background:#1e293b;color:#e2e8f0;border-radius:8px;padding:16px 20px;font-size:13px;line-height:1.6;overflow-x:auto;margin:14px 0; }
+    pre code { background:none;border:none;padding:0;color:inherit;font-size:inherit; }
+    table { width:100%;border-collapse:collapse;margin:14px 0; }
+    th { background:#f8fafc;font-weight:700;text-align:left;padding:10px 14px;border:1px solid var(--border); }
+    td { padding:9px 14px;border:1px solid var(--border);vertical-align:top; }
+    tr:nth-child(even) td { background:#fafafa; }
+    .tag { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .tag-green { background:#dcfce7;color:#15803d; }
+    .tag-amber { background:#fef9c3;color:#92400e; }
+    .tag-red { background:#fef2f2;color:#991b1b; }
+    .tag-blue { background:#eff6ff;color:#1d4ed8; }
+    .tag-gray { background:#f3f4f6;color:#374151; }
+    .sa-note { background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin:14px 0;font-size:14px; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/></a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">Admin Panel Guide</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="../../admin.html">← Admin Panel</a>
+</nav>
+
+<div class="article-shell">
+  <aside class="sidebar">
+    <nav id="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Getting Started</div>
+        <a class="sidebar-link" href="getting-started.html">Login &amp; navigation</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Dashboard</div>
+        <a class="sidebar-link" href="dashboard.html">Reading the dashboard</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Operations</div>
+        <a class="sidebar-link" href="tickets.html">Support tickets</a>
+        <a class="sidebar-link active" href="deletions.html">Deletion requests</a>
+        <a class="sidebar-link" href="users.html">User search &amp; blacklist</a>
+        <a class="sidebar-link" href="campaigns.html">Campaign links</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Guidelines</div>
+        <a class="sidebar-link" href="guidelines.html">Responsibilities &amp; escalation</a>
+      </div>
+    </nav>
+  </aside>
+  <main class="article-main">
+    <div class="breadcrumb">
+      <a href="index.html">Admin Panel Guide</a><span class="breadcrumb-sep">/</span>
+      <span>Operations</span>
+    </div>
+    <div class="admin-badge" style="background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;">🔑 Admin &amp; Super-Admin only</div>
+    <div class="article-eyebrow">🗑️ Operations</div>
+    <h1 class="article-title">Deletion requests</h1>
+    <p class="article-lead">When a user requests account deletion from their matches page, a deletion request is created. You can cancel the request (reverting the user's account to active) or process it immediately using your 6-digit PIN.</p>
+
+    <div class="callout tip">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body">This panel is available to <strong>Admin</strong> and <strong>Super-Admin</strong> roles only. If you have a Support role and need access, contact a Super-Admin.</div>
+    </div>
+
+    <h2>How deletion requests are created</h2>
+    <p>The deletion flow is fully automated and user-initiated:</p>
+    <ol>
+      <li>A user clicks <strong>"Delete my account"</strong> on their matches page (matches.html)</li>
+      <li>They receive an email with a one-time confirmation link</li>
+      <li>After clicking the confirmation link, their account enters <code>deletion_pending</code> state</li>
+      <li>A <strong>scheduled deletion date</strong> is set: the confirmation date plus the configured <code>data_retention_days</code> (currently 30 days)</li>
+      <li>Their active journey submissions are paused during this window — they will not appear in new matches</li>
+      <li>The automated cron job (<code>process-deletions</code>) runs daily at <strong>22:00 UTC (02:00 Dubai time)</strong> and permanently deletes accounts whose scheduled deletion date has passed</li>
+    </ol>
+    <p>All accounts in this pending state appear in the Deletions panel until they are either cancelled or processed.</p>
+
+    <h2>The Deletions panel</h2>
+    <p>The panel shows a table of all accounts currently pending deletion. If no deletions are pending, a checkmark and "No pending deletion requests." is displayed — this is the ideal state.</p>
+    <table>
+      <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Name</strong></td><td>The user's registered name</td></tr>
+        <tr><td><strong>Email</strong></td><td>The user's email address</td></tr>
+        <tr><td><strong>Requested</strong></td><td>The date and time the user confirmed the deletion request</td></tr>
+        <tr><td><strong>Scheduled deletion</strong></td><td>The automatic deletion date — this is when the cron job will delete the account if no action is taken (Requested date + 30 days)</td></tr>
+        <tr><td><strong>Days left</strong></td><td>A countdown chip showing how many days remain before automatic deletion. Coloured by urgency.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Days left chip colours</h3>
+    <table>
+      <thead><tr><th>Colour</th><th>Days remaining</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-red">3 days or fewer</span></td><td>0–3</td><td>Act soon if you intend to cancel. Account will be auto-deleted within 3 days.</td></tr>
+        <tr><td><span class="tag tag-amber">4–7 days</span></td><td>4–7</td><td>Monitor — medium urgency if a cancellation may be needed</td></tr>
+        <tr><td><span class="tag tag-green">More than 7 days</span></td><td>8+</td><td>No immediate urgency</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Cancelling a deletion request</h2>
+    <p><strong>When to use this:</strong> a user contacts you saying they clicked "Delete my account" by mistake, or they changed their mind and want their account restored.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Verify the user's identity</h3>
+          <p>Confirm that the person requesting the cancellation is the account holder. The most reliable method is to confirm they are emailing you from the same address shown in the Deletions panel. Do not cancel based on a message sent from a different email address without further verification.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Find the user in the Deletions panel</h3>
+          <p>Locate their row. Confirm the name and email match the person who contacted you.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Click Cancel</h3>
+          <p>Click the <strong>Cancel</strong> button on their row. No PIN is required for cancellation. A confirmation prompt will appear — confirm to proceed.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Account is restored immediately</h3>
+          <p>The account reverts to full active status. Their journeys go back to active, their deletion token is cleared, and they will start appearing in new matches again. Inform the user that their account is active again.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>What happens in the system when you cancel</h3>
+    <ul>
+      <li><code>deletion_requested_at</code> and <code>deletion_token</code> are cleared from the users record</li>
+      <li>Their submission statuses revert from <code>paused</code> back to <code>active</code></li>
+      <li>Their match records return to <code>notified</code> status</li>
+      <li>The cancellation is logged in the admin audit log</li>
+    </ul>
+
+    <h2>Deleting immediately (Delete Now)</h2>
+    <p><strong>When to use this:</strong> there is an urgent reason to delete the account before the scheduled date. Valid reasons include a confirmed harassment case requiring immediate removal, a legal or GDPR request, or a direct user request for immediate deletion that cannot wait 30 days.</p>
+
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Deletion is permanent and cannot be undone.</strong> There is no recycle bin, no recovery path, and no way to restore the data after deletion. If you are unsure whether to delete or cancel, cancel first and investigate. You can always delete later; you cannot undo a deletion.</div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Click Delete Now</h3>
+          <p>Click the <strong>Delete Now</strong> button on the user's row.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Enter your deletion PIN</h3>
+          <p>A confirmation modal appears with a warning and a 6-digit PIN field. Enter your <strong>deletion PIN</strong> — this is a separate credential from your login password. You received it when your admin account was created. If you have forgotten it, contact a Super-Admin to reset it.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Confirm you have the right user</h3>
+          <p>Before clicking the final confirm button, check the name and email in the modal one more time. This is your last opportunity to verify you are deleting the correct account.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Click Delete Permanently</h3>
+          <p>Click <strong>Delete Permanently</strong>. The deletion executes immediately. The row disappears from the Deletions panel.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>What gets deleted</h3>
+    <p>Deletions occur in a specific order to respect foreign key relationships:</p>
+    <ol>
+      <li>All <code>events</code> linked to the user's submissions</li>
+      <li>All <code>matches</code> involving any of the user's submissions</li>
+      <li>All <code>submissions</code> belonging to the user</li>
+      <li>The <code>users</code> record itself</li>
+    </ol>
+    <p>A <code>deletion_log</code> entry is created as a permanent record of the deletion (email hash, date, and who processed it). This log entry is retained even after the user record is gone.</p>
+
+    <h2>Empty state</h2>
+    <p>When there are no pending deletion requests, the panel displays a checkmark icon and the message "No pending deletion requests." This is the expected and ideal state.</p>
+
+    <h2>Important notes</h2>
+    <ul>
+      <li>Check the Deletions panel at least twice a week — especially scan for red chips (≤3 days) which indicate accounts approaching auto-deletion</li>
+      <li>Your deletion PIN is personal and authorises permanent data deletion — do not share it with anyone, including other admins or Super-Admins</li>
+      <li>If you forget your deletion PIN, ask a Super-Admin to reset it — they can set a new one for you without seeing the old one</li>
+      <li>All Delete Now actions are logged in the audit log with your admin account name and timestamp</li>
+    </ul>
+
+    <div class="article-nav">
+      <a class="prev" href="tickets.html"><span class="nav-dir">← Previous</span><span class="nav-title">Support tickets</span></a>
+      <a class="next" href="users.html"><span class="nav-dir">Next →</span><span class="nav-title">User search &amp; blacklist</span></a>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

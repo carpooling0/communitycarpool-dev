@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel Guide | Community Carpool</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="admin-style.css">
+  <style>
+    .home-page { max-width: 1060px; margin: 0 auto; padding: 0 24px 80px; }
+    .tip-callout { background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin-top:36px;display:flex;gap:14px;align-items:flex-start;font-size:15px;color:#14532d;line-height:1.6; }
+    .tip-callout-icon { font-size:20px;flex-shrink:0;margin-top:1px; }
+    .tip-callout a { color:#15803d;font-weight:600;text-decoration:underline; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/></a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">Admin Panel Guide</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="../../admin.html">← Admin Panel</a>
+</nav>
+
+<div class="home-page">
+
+  <div class="home-hero" style="padding-top:48px;">
+    <h1>👤 Admin Panel Guide</h1>
+    <p>Your operational reference for the Community Carpool admin panel. Find step-by-step guides for every panel you have access to.</p>
+  </div>
+
+  <div class="cards-grid">
+
+    <div class="doc-card">
+      <div class="doc-card-icon">🚀</div>
+      <div class="doc-card-title">Getting Started</div>
+      <div class="doc-card-desc">Login, navigation, session expiry, and roles overview.</div>
+      <ul class="doc-card-links">
+        <li><a href="getting-started.html">Login &amp; navigation</a></li>
+        <li><a href="getting-started.html#roles">What you can see by role</a></li>
+        <li><a href="getting-started.html#session">Session &amp; logout</a></li>
+        <li><a href="getting-started.html#password">Forgotten password / account issues</a></li>
+      </ul>
+    </div>
+
+    <div class="doc-card">
+      <div class="doc-card-icon">📊</div>
+      <div class="doc-card-title">Dashboard</div>
+      <div class="doc-card-desc">KPI cards, growth chart, journey quality metrics, and behavioural patterns.</div>
+      <ul class="doc-card-links">
+        <li><a href="dashboard.html">Reading the dashboard</a></li>
+        <li><a href="dashboard.html#kpi">KPI strip</a></li>
+        <li><a href="dashboard.html#quality">Journey &amp; matching quality</a></li>
+        <li><a href="dashboard.html#engagement">User engagement metrics</a></li>
+      </ul>
+    </div>
+
+    <div class="doc-card">
+      <div class="doc-card-icon">🎫</div>
+      <div class="doc-card-title">Operations</div>
+      <div class="doc-card-desc">Support tickets, deletion requests, user search &amp; blacklist, and campaign links.</div>
+      <ul class="doc-card-links">
+        <li><a href="tickets.html">Support tickets</a></li>
+        <li><a href="deletions.html">Deletion requests</a></li>
+        <li><a href="users.html">User search &amp; blacklist</a></li>
+        <li><a href="campaigns.html">Campaign links</a></li>
+      </ul>
+    </div>
+
+    <div class="doc-card">
+      <div class="doc-card-icon">🛡️</div>
+      <div class="doc-card-title">Guidelines</div>
+      <div class="doc-card-desc">Your responsibilities, dos and don'ts, and when to escalate to Super-Admin.</div>
+      <ul class="doc-card-links">
+        <li><a href="guidelines.html">Responsibilities &amp; escalation</a></li>
+        <li><a href="guidelines.html#dos">Do's and don'ts</a></li>
+        <li><a href="guidelines.html#security">Security practices</a></li>
+        <li><a href="guidelines.html#escalation">When to escalate</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="tip-callout">
+    <div class="tip-callout-icon">💡</div>
+    <div><strong>Super-Admin?</strong> The full technical reference — infrastructure, database, edge functions, secrets, and incident runbooks — is in the <a href="../super-admin/index.html">Super-Admin Docs</a>, accessible from your sidebar in the admin panel.</div>
+  </div>
+
+</div>
+
+</body>
+</html>

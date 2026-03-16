@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Responsibilities &amp; Escalation | Admin Panel Guide</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="admin-style.css">
+  <style>
+    .admin-badge { display:inline-flex;align-items:center;gap:5px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:3px 10px;border-radius:20px;border:1px solid #bfdbfe;margin-bottom:18px; }
+    .role-badge { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .role-admin { background:#eff6ff;color:#1d4ed8; }
+    .role-support { background:#f0fdf4;color:#15803d; }
+    .role-superadmin { background:#1e293b;color:#f8fafc; }
+    code { background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:1px 6px;font-size:13px;font-family:monospace; }
+    pre { background:#1e293b;color:#e2e8f0;border-radius:8px;padding:16px 20px;font-size:13px;line-height:1.6;overflow-x:auto;margin:14px 0; }
+    pre code { background:none;border:none;padding:0;color:inherit;font-size:inherit; }
+    table { width:100%;border-collapse:collapse;margin:14px 0; }
+    th { background:#f8fafc;font-weight:700;text-align:left;padding:10px 14px;border:1px solid var(--border); }
+    td { padding:9px 14px;border:1px solid var(--border);vertical-align:top; }
+    tr:nth-child(even) td { background:#fafafa; }
+    .tag { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .tag-green { background:#dcfce7;color:#15803d; }
+    .tag-amber { background:#fef9c3;color:#92400e; }
+    .tag-red { background:#fef2f2;color:#991b1b; }
+    .tag-blue { background:#eff6ff;color:#1d4ed8; }
+    .tag-gray { background:#f3f4f6;color:#374151; }
+    .sa-note { background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin:14px 0;font-size:14px; }
+    .dont-list li { color: #991b1b; }
+    .dont-list li::marker { color: #dc2626; }
+    .do-list li { color: #14532d; }
+    .do-list li::marker { color: #16a34a; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/></a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">Admin Panel Guide</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="../../admin.html">← Admin Panel</a>
+</nav>
+
+<div class="article-shell">
+  <aside class="sidebar">
+    <nav id="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Getting Started</div>
+        <a class="sidebar-link" href="getting-started.html">Login &amp; navigation</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Dashboard</div>
+        <a class="sidebar-link" href="dashboard.html">Reading the dashboard</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Operations</div>
+        <a class="sidebar-link" href="tickets.html">Support tickets</a>
+        <a class="sidebar-link" href="deletions.html">Deletion requests</a>
+        <a class="sidebar-link" href="users.html">User search &amp; blacklist</a>
+        <a class="sidebar-link" href="campaigns.html">Campaign links</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Guidelines</div>
+        <a class="sidebar-link active" href="guidelines.html">Responsibilities &amp; escalation</a>
+      </div>
+    </nav>
+  </aside>
+  <main class="article-main">
+    <div class="breadcrumb">
+      <a href="index.html">Admin Panel Guide</a><span class="breadcrumb-sep">/</span>
+      <span>Guidelines</span>
+    </div>
+    <div class="admin-badge">👤 Admin Panel Guide</div>
+    <div class="article-eyebrow">🛡️ Guidelines</div>
+    <h1 class="article-title">Responsibilities &amp; escalation</h1>
+    <p class="article-lead">Your role and the boundaries of what you can and should do as an Admin or Support team member. When to act, when to ask, and who to contact.</p>
+
+    <h2>Your role</h2>
+    <p>The admin panel has two operational roles below Super-Admin. Here is what each role owns day-to-day:</p>
+    <table>
+      <thead><tr><th>Role</th><th>Day-to-day responsibilities</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="role-badge role-support">Support</span></td>
+          <td>Review incoming support tickets and close them with appropriate notes. Monitor the dashboard for signals that need flagging — ticket volume, match rate drops, notification backlog. Escalate technical issues to Super-Admin.</td>
+        </tr>
+        <tr>
+          <td><span class="role-badge role-admin">Admin</span></td>
+          <td>All Support responsibilities, plus: check the Deletions panel regularly and cancel/action deletion requests as appropriate; look up users when investigating ticket complaints; manage the blacklist for confirmed abuse cases; create and share campaign links for partner outreach.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Neither role has access to infrastructure, the database, edge function configuration, secrets, or team management. Those are Super-Admin responsibilities.</p>
+
+    <h2 id="dos">Do's</h2>
+    <ul class="do-list">
+      <li><strong>Tickets:</strong> Add a note to every ticket before closing — even one line. The note provides an audit trail of what was reviewed and why the decision was made.</li>
+      <li><strong>Tickets:</strong> For Report User tickets, document what you reviewed and any action taken (e.g. "Looked up user in Users panel — no suspicious content found. Monitoring." or "Blacklisted after reviewing complaint and confirming repeated offence.").</li>
+      <li><strong>Tickets:</strong> Aim to review open tickets at least twice a week. Don't let the Open count grow unchecked.</li>
+      <li><strong>Deletions:</strong> Check the Deletions panel at least twice a week. Pay particular attention to red chips (3 days or fewer) — these accounts will be auto-deleted soon and may need a cancellation if the user has been in touch.</li>
+      <li><strong>Deletions:</strong> Always verify the user's identity before cancelling a deletion. Confirm they are emailing from their registered address.</li>
+      <li><strong>Users:</strong> Before blacklisting, confirm there is a solid, documented reason. Record the reason in the relevant support ticket note.</li>
+      <li><strong>Security:</strong> Log out when you are finished with the admin panel, especially on shared, work, or public computers.</li>
+      <li><strong>Escalation:</strong> When in doubt about whether to take a destructive action, escalate to a Super-Admin first. It is better to ask and be told it's fine than to act and find out it wasn't.</li>
+    </ul>
+
+    <h2>Don'ts</h2>
+    <ul class="dont-list">
+      <li><strong>Never</strong> share your login credentials with anyone — each team member has their own named account for accountability purposes.</li>
+      <li><strong>Never</strong> share your 6-digit deletion PIN — it is the authorisation for permanent data deletion. Keep it written down somewhere secure, not in a shared document or chat.</li>
+      <li><strong>Never</strong> use "Delete Now" without a clear, documented reason. Deletion is irreversible. If you are unsure, cancel the deletion and investigate first.</li>
+      <li><strong>Never</strong> close a ticket without reading the user's full message.</li>
+      <li><strong>Never</strong> blacklist a user based solely on an unverified complaint from another user. Investigate before acting.</li>
+      <li><strong>Never</strong> attempt to access the admin panel on an unsecured or public Wi-Fi network without a VPN.</li>
+      <li><strong>Never</strong> take action in the admin panel based on instructions from someone claiming to be a Super-Admin via chat or email — if in doubt, verify directly (voice call or in person) before proceeding.</li>
+    </ul>
+
+    <h2 id="security">Security practices</h2>
+    <ul>
+      <li><strong>Your password is hashed</strong> — it is stored in a one-way hash and cannot be retrieved by anyone, including Super-Admins. Treat it with the same care as a bank password.</li>
+      <li><strong>Your deletion PIN is separate from your password</strong> — it is used only for the "Delete Now" action. Store it somewhere secure and personal (e.g. a password manager or a locked physical note). Do not put it in a shared document, team chat, or email.</li>
+      <li><strong>If you suspect your account is compromised</strong> — for example, you see actions in the audit log that you did not take, or you receive a login notification from an unexpected location — notify a Super-Admin immediately. They can deactivate your account and create a new one with fresh credentials.</li>
+      <li><strong>Session expiry:</strong> Sessions expire after 8 hours. If you are logged out unexpectedly, re-login. If unexpected logouts keep happening, notify a Super-Admin — it may indicate your session is being invalidated from elsewhere.</li>
+      <li><strong>Do not leave the admin panel unattended</strong> in an unlocked browser session. Lock your screen when stepping away from your computer.</li>
+    </ul>
+
+    <h2 id="escalation">When to escalate to Super-Admin</h2>
+    <p>The following situations require Super-Admin involvement. Do not attempt to handle these yourself.</p>
+    <table>
+      <thead><tr><th>Situation</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>Notification backlog is non-zero in <strong>production</strong></td><td>Escalate immediately — the batch-send-emails cron job may not be running. Users are not receiving match emails.</td></tr>
+        <tr><td>A user reports they never received a match email</td><td>Super-Admin checks edge function logs and the Resend dashboard to trace the delivery status</td></tr>
+        <tr><td>You need to reopen a closed ticket</td><td>Super-Admin can update the ticket status directly in the database</td></tr>
+        <tr><td>A user reports a data access, deletion, or privacy rights issue (GDPR / data subject request)</td><td>Do not handle — pass to Super-Admin immediately. These must follow the formal data subject request process.</td></tr>
+        <tr><td>An unusual spike in new submissions, errors on dashboard, or a sudden drop in match rate</td><td>Escalate for system-level investigation — you cannot diagnose this from the admin panel</td></tr>
+        <tr><td>You need to remove someone from the blacklist</td><td>Super-Admin only — requires a direct database update</td></tr>
+        <tr><td>You need to reopen or edit a closed deletion request</td><td>Super-Admin only — requires a direct database update</td></tr>
+        <tr><td>Any change to the platform config, secrets, API keys, or infrastructure</td><td>Super-Admin only</td></tr>
+        <tr><td>A team member's access needs to be created, changed, or revoked</td><td>Super-Admin only (Team panel)</td></tr>
+        <tr><td>You believe your admin account credentials may have been compromised</td><td>Notify Super-Admin immediately — do not wait</td></tr>
+        <tr><td>Any live production incident (site down, edge function errors, emails failing)</td><td>Escalate immediately — Super-Admin manages incident response</td></tr>
+      </tbody>
+    </table>
+
+    <h2>How to reach Super-Admin</h2>
+    <p>Contact via your internal communication channel (Slack, WhatsApp, or email — as agreed with your team). For urgent issues — a suspected security breach, live production errors, or anything affecting users in real time — contact immediately and do not wait for a scheduled check-in.</p>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">If you are unsure whether something needs escalation, escalate. Super-Admins would rather be notified of a non-issue than miss a real one. "I wanted to check before acting" is always the right instinct when dealing with irreversible actions.</div>
+    </div>
+
+    <div class="article-nav">
+      <a class="prev" href="campaigns.html"><span class="nav-dir">← Previous</span><span class="nav-title">Campaign links</span></a>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

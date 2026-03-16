@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Search &amp; Blacklist | Admin Panel Guide</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="admin-style.css">
+  <style>
+    .admin-badge { display:inline-flex;align-items:center;gap:5px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:3px 10px;border-radius:20px;border:1px solid #bfdbfe;margin-bottom:18px; }
+    .role-badge { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .role-admin { background:#eff6ff;color:#1d4ed8; }
+    .role-support { background:#f0fdf4;color:#15803d; }
+    .role-superadmin { background:#1e293b;color:#f8fafc; }
+    code { background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:1px 6px;font-size:13px;font-family:monospace; }
+    pre { background:#1e293b;color:#e2e8f0;border-radius:8px;padding:16px 20px;font-size:13px;line-height:1.6;overflow-x:auto;margin:14px 0; }
+    pre code { background:none;border:none;padding:0;color:inherit;font-size:inherit; }
+    table { width:100%;border-collapse:collapse;margin:14px 0; }
+    th { background:#f8fafc;font-weight:700;text-align:left;padding:10px 14px;border:1px solid var(--border); }
+    td { padding:9px 14px;border:1px solid var(--border);vertical-align:top; }
+    tr:nth-child(even) td { background:#fafafa; }
+    .tag { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .tag-green { background:#dcfce7;color:#15803d; }
+    .tag-amber { background:#fef9c3;color:#92400e; }
+    .tag-red { background:#fef2f2;color:#991b1b; }
+    .tag-blue { background:#eff6ff;color:#1d4ed8; }
+    .tag-gray { background:#f3f4f6;color:#374151; }
+    .sa-note { background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin:14px 0;font-size:14px; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/></a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">Admin Panel Guide</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="../../admin.html">← Admin Panel</a>
+</nav>
+
+<div class="article-shell">
+  <aside class="sidebar">
+    <nav id="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Getting Started</div>
+        <a class="sidebar-link" href="getting-started.html">Login &amp; navigation</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Dashboard</div>
+        <a class="sidebar-link" href="dashboard.html">Reading the dashboard</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Operations</div>
+        <a class="sidebar-link" href="tickets.html">Support tickets</a>
+        <a class="sidebar-link" href="deletions.html">Deletion requests</a>
+        <a class="sidebar-link active" href="users.html">User search &amp; blacklist</a>
+        <a class="sidebar-link" href="campaigns.html">Campaign links</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Guidelines</div>
+        <a class="sidebar-link" href="guidelines.html">Responsibilities &amp; escalation</a>
+      </div>
+    </nav>
+  </aside>
+  <main class="article-main">
+    <div class="breadcrumb">
+      <a href="index.html">Admin Panel Guide</a><span class="breadcrumb-sep">/</span>
+      <span>Operations</span>
+    </div>
+    <div class="admin-badge" style="background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;">🔑 Admin &amp; Super-Admin only</div>
+    <div class="article-eyebrow">👥 Operations</div>
+    <h1 class="article-title">User search &amp; blacklist</h1>
+    <p class="article-lead">Look up any registered user by email to view their account details, journeys, and match history. You can also add a user to the blacklist to prevent future submissions.</p>
+
+    <div class="callout tip">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body">This panel is available to <strong>Admin</strong> and <strong>Super-Admin</strong> roles only. If you have a Support role and need access, contact a Super-Admin.</div>
+    </div>
+
+    <h2>Searching for a user</h2>
+    <p>Type an email address — full or partial — in the search bar and press <strong>Enter</strong> or click the search button.</p>
+    <ul>
+      <li><strong>If found:</strong> a user card appears below the search bar with the user's account details</li>
+      <li><strong>If not found:</strong> a "No user found" message appears. The email may not be registered, may have been deleted, or you may have a typo — try with just the domain or username portion to narrow it down</li>
+    </ul>
+    <p>The search checks the <code>users</code> table. Deleted accounts are not searchable here (they have been permanently removed from the database).</p>
+
+    <h2>User card</h2>
+    <p>The user card shows the following at a glance:</p>
+    <table>
+      <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Name</strong></td><td>The user's registered full name</td></tr>
+        <tr><td><strong>Email</strong></td><td>Their email address</td></tr>
+        <tr><td><strong>Joined</strong></td><td>Account creation date</td></tr>
+        <tr><td><strong>Last seen</strong></td><td>The last time they visited their matches page (matches.html). This is the most reliable activity signal.</td></tr>
+        <tr><td><strong>Journey count</strong></td><td>Total number of journeys ever submitted under this account (includes active, expired, and any that were paused during deletion pending)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Journeys</h2>
+    <p>Click the <strong>Journeys</strong> section or expand arrow to see the full list of submissions for this user. Each journey shows:</p>
+    <ul>
+      <li><strong>From location</strong> — the user's origin address / area</li>
+      <li><strong>To location</strong> — their destination</li>
+      <li><strong>Created date</strong> — when the journey was submitted</li>
+      <li><strong>Status</strong> — current status of the journey (see badges below)</li>
+      <li><strong>Match count</strong> — how many matches have been found for this journey</li>
+    </ul>
+
+    <h3>Journey status badges</h3>
+    <table>
+      <thead><tr><th>Badge</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-green">Active</span></td><td>Journey is live and being matched against other active journeys</td></tr>
+        <tr><td><span class="tag tag-gray">Expired</span></td><td>Journey has passed its expiry date — it is no longer being matched but its data is retained</td></tr>
+        <tr><td><span class="tag tag-red">Deletion pending</span></td><td>The account has a pending deletion request — this journey will be deleted on the scheduled deletion date</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Matches per journey</h2>
+    <p>Click any journey row to expand and view its matches. This is useful when investigating a user complaint about missing matches or when reviewing a Report User ticket.</p>
+    <table>
+      <thead><tr><th>Column</th><th>What it shows</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Match ID</strong></td><td>Internal reference number for the match record</td></tr>
+        <tr><td><strong>Other party</strong></td><td>The matched user's name, masked as "A**** B." — first initial, masked surname. This is by design: full contact details are only exchanged when both parties express mutual interest via the match email.</td></tr>
+        <tr><td><strong>Strength</strong></td><td>Match quality as a percentage (e.g. 89%) based on route and timing overlap. Higher = better fit.</td></tr>
+        <tr><td><strong>Status</strong></td><td>Current status: <code>new</code> (match found, email not sent), <code>notified</code> (email sent to both parties), <code>mutual_confirmed</code> (both expressed interest), <code>declined</code> (one or both declined)</td></tr>
+        <tr><td><strong>Notified</strong></td><td>Timestamp when the match notification email was sent to both parties</td></tr>
+        <tr><td><strong>Interest A</strong></td><td>When this user expressed interest in the match (clicked the interest button in their match email)</td></tr>
+        <tr><td><strong>Interest B</strong></td><td>When the other party expressed interest</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Why is the other party masked?</strong> Privacy is by design — contact details are only exchanged between users when both parties explicitly express interest via the match email. This protects users from unsolicited contact. Do not attempt to look up the other party separately to share their details with the first user.</div>
+    </div>
+
+    <h2>This panel is read-only</h2>
+    <p>The Users panel is for viewing information only. From this panel, you <strong>cannot</strong>:</p>
+    <ul>
+      <li>Approve or decline matches on behalf of users</li>
+      <li>Change a journey's status or expiry date</li>
+      <li>Edit user details (name, email, preferences)</li>
+      <li>Send emails to users</li>
+      <li>Resend match notification emails</li>
+    </ul>
+    <p>If any of these actions are needed, escalate to a Super-Admin — they can perform direct database updates for legitimate operational reasons.</p>
+
+    <h2>Adding a user to the blacklist</h2>
+    <p>The <strong>Add to Blacklist</strong> button (red ghost button) appears at the bottom of the user card after a successful search.</p>
+
+    <h3>When to blacklist</h3>
+    <ul>
+      <li>The user has been confirmed (via a Report User ticket) to have harassed or threatened another user</li>
+      <li>The user is repeatedly submitting spam or abusive content in their journey entries</li>
+      <li>You have received a legal instruction to prevent this email from further activity on the platform</li>
+    </ul>
+    <p>Do not blacklist based solely on an unverified complaint. Investigate first — check their journeys for any concerning content, review the Report User ticket in full, and if in doubt, check with a Super-Admin before proceeding.</p>
+
+    <h3>How to blacklist</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Find the user</h3>
+          <p>Search for the user by email. Confirm you have the right account by checking their name and journey history.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Click Add to Blacklist</h3>
+          <p>Click the red <strong>Add to Blacklist</strong> button at the bottom of the user card.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Confirm</h3>
+          <p>A confirmation prompt will appear. Confirm the action to proceed. The user's email is added to the <code>blacklist</code> table immediately.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>What blacklisting does</h3>
+    <p>From the moment a user is blacklisted, any attempt to submit a new journey via the <code>submit-journey</code> edge function is rejected. They receive an error and cannot create a new submission.</p>
+
+    <h3>What blacklisting does NOT do</h3>
+    <ul>
+      <li>It does <strong>not</strong> delete their existing data — current journeys and matches remain in the database</li>
+      <li>It does <strong>not</strong> revoke their access to their matches page — they can still view existing matches and respond to interest</li>
+      <li>It does <strong>not</strong> send the user any notification that they have been blacklisted</li>
+      <li>It does <strong>not</strong> prevent them from registering a new account with a different email address (that would require Super-Admin–level controls)</li>
+    </ul>
+
+    <h3>Removing someone from the blacklist</h3>
+    <p>Removing an email from the blacklist currently requires Super-Admin intervention via a direct database update. If you believe a blacklisting was made in error or should be reversed, contact a Super-Admin with the reason.</p>
+
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">Blacklisting affects a real user's ability to participate in the platform. Confirm the reason is solid and documented before proceeding. Record your reasoning in the relevant support ticket notes so there is an audit trail.</div>
+    </div>
+
+    <div class="article-nav">
+      <a class="prev" href="deletions.html"><span class="nav-dir">← Previous</span><span class="nav-title">Deletion requests</span></a>
+      <a class="next" href="campaigns.html"><span class="nav-dir">Next →</span><span class="nav-title">Campaign links</span></a>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Campaign Links | Admin Panel Guide</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="admin-style.css">
+  <style>
+    .admin-badge { display:inline-flex;align-items:center;gap:5px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:3px 10px;border-radius:20px;border:1px solid #bfdbfe;margin-bottom:18px; }
+    .role-badge { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .role-admin { background:#eff6ff;color:#1d4ed8; }
+    .role-support { background:#f0fdf4;color:#15803d; }
+    .role-superadmin { background:#1e293b;color:#f8fafc; }
+    code { background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:1px 6px;font-size:13px;font-family:monospace; }
+    pre { background:#1e293b;color:#e2e8f0;border-radius:8px;padding:16px 20px;font-size:13px;line-height:1.6;overflow-x:auto;margin:14px 0; }
+    pre code { background:none;border:none;padding:0;color:inherit;font-size:inherit; }
+    table { width:100%;border-collapse:collapse;margin:14px 0; }
+    th { background:#f8fafc;font-weight:700;text-align:left;padding:10px 14px;border:1px solid var(--border); }
+    td { padding:9px 14px;border:1px solid var(--border);vertical-align:top; }
+    tr:nth-child(even) td { background:#fafafa; }
+    .tag { display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700; }
+    .tag-green { background:#dcfce7;color:#15803d; }
+    .tag-amber { background:#fef9c3;color:#92400e; }
+    .tag-red { background:#fef2f2;color:#991b1b; }
+    .tag-blue { background:#eff6ff;color:#1d4ed8; }
+    .tag-gray { background:#f3f4f6;color:#374151; }
+    .sa-note { background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin:14px 0;font-size:14px; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="topnav-logo" href="../../index.html"><img src="../../logo.png" alt="CCP"/></a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-section">Admin Panel Guide</span>
+  <div class="topnav-spacer"></div>
+  <a class="topnav-home" href="../../admin.html">← Admin Panel</a>
+</nav>
+
+<div class="article-shell">
+  <aside class="sidebar">
+    <nav id="sidebar-nav">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Getting Started</div>
+        <a class="sidebar-link" href="getting-started.html">Login &amp; navigation</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Dashboard</div>
+        <a class="sidebar-link" href="dashboard.html">Reading the dashboard</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Operations</div>
+        <a class="sidebar-link" href="tickets.html">Support tickets</a>
+        <a class="sidebar-link" href="deletions.html">Deletion requests</a>
+        <a class="sidebar-link" href="users.html">User search &amp; blacklist</a>
+        <a class="sidebar-link active" href="campaigns.html">Campaign links</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Guidelines</div>
+        <a class="sidebar-link" href="guidelines.html">Responsibilities &amp; escalation</a>
+      </div>
+    </nav>
+  </aside>
+  <main class="article-main">
+    <div class="breadcrumb">
+      <a href="index.html">Admin Panel Guide</a><span class="breadcrumb-sep">/</span>
+      <span>Operations</span>
+    </div>
+    <div class="admin-badge" style="background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;">🔑 Admin &amp; Super-Admin only</div>
+    <div class="article-eyebrow">🔗 Operations</div>
+    <h1 class="article-title">Campaign links</h1>
+    <p class="article-lead">Referral and tracking links for partner organisations and campaigns. Each link carries a unique code that attributes new user signups to a specific campaign, organisation, or outreach effort.</p>
+
+    <div class="callout tip">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body">This panel is available to <strong>Admin</strong> and <strong>Super-Admin</strong> roles only. If you have a Support role and need access, contact a Super-Admin.</div>
+    </div>
+
+    <h2>What is a campaign link?</h2>
+    <p>When a user visits the platform via a URL containing <code>?ref=CODE</code> and submits a journey, that code is recorded against their submission in the <code>user_attribution</code> table. This lets you see which campaigns, partner organisations, or outreach efforts are driving sign-ups — and how many journeys each source has generated.</p>
+
+    <p>Example URL:</p>
+    <pre><code>https://communitycarpool.org/?ref=ACME2026</code></pre>
+
+    <p>When this link is shared with ACME Corp employees, every user who arrives via that URL and submits a journey will be attributed to the <code>ACME2026</code> code.</p>
+
+    <h2>The Campaign Links panel</h2>
+    <p>The panel displays a table of all campaign links that have been created.</p>
+    <table>
+      <thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Code</strong></td><td>The unique referral code (e.g. <code>ACME2026</code>). This is appended to the URL as <code>?ref=CODE</code>.</td></tr>
+        <tr><td><strong>Label</strong></td><td>A human-readable name for the campaign — for internal reference (e.g. "ACME Corp — Office Poster March 2026")</td></tr>
+        <tr><td><strong>Organisation</strong></td><td>The linked organisation, if any. Shown as the org name if an org record is attached; blank if no org is linked.</td></tr>
+        <tr><td><strong>Created</strong></td><td>When the link was created and by whom</td></tr>
+        <tr><td><strong>Uses</strong></td><td>Total number of journey submissions that have used this code — the primary attribution metric</td></tr>
+        <tr><td><strong>Last used</strong></td><td>Date of the most recent submission attributed to this code</td></tr>
+        <tr><td><strong>QR</strong></td><td>Download button — click to download a QR code PNG that resolves to this campaign URL</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Creating a new campaign link</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Click + New Link</h3>
+          <p>Click the <strong>+ New Link</strong> button at the top of the Campaign Links panel. A creation form or modal will appear.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Fill in the details</h3>
+          <ul>
+            <li><strong>Label</strong> (required) — a descriptive internal name. Use a format that will still make sense in 6 months, e.g. <em>"ACME Corp — Office Poster March 2026"</em> or <em>"LinkedIn Campaign Q1 2026"</em></li>
+            <li><strong>Organisation</strong> (optional) — select from the dropdown if this link is for a specific partner org. Leave blank for general campaigns.</li>
+            <li><strong>Custom code</strong> (optional) — if you want a specific code (e.g. <code>ACME2026</code>), type it here. If left blank, a code is auto-generated (typically a short alphanumeric string). Codes must be unique — the system will warn you if the code is already in use.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Click Create</h3>
+          <p>The new link appears in the table immediately with a Uses count of 0. The shareable URL is displayed in the row.</p>
+        </div>
+      </div>
+    </div>
+
+    <h2>Sharing a campaign link</h2>
+    <p>Two formats are available for each link:</p>
+
+    <h3>Shareable URL</h3>
+    <p>Format: <code>https://communitycarpool.org/?ref=CODE</code></p>
+    <p>Share this with:</p>
+    <ul>
+      <li>HR teams at partner organisations (for internal distribution)</li>
+      <li>Community managers and org contacts</li>
+      <li>In email newsletters, Slack/Teams messages, or social media posts</li>
+      <li>In email signatures for staff involved in promoting the carpool programme</li>
+    </ul>
+
+    <h3>QR code</h3>
+    <p>Click the <strong>QR</strong> button in the table to download a PNG image of the QR code for that link. The QR code resolves to the campaign URL when scanned.</p>
+    <p>Use the QR code for:</p>
+    <ul>
+      <li>Print flyers and posters in office buildings</li>
+      <li>Presentation slides</li>
+      <li>Physical notice boards in partner organisation facilities</li>
+    </ul>
+    <p>The QR PNG is ready for print — you do not need to add any additional text to the image, though you may embed it in a designed flyer template.</p>
+
+    <h2>Viewing attribution data</h2>
+    <p>The <strong>Uses</strong> column shows the total number of journey submissions attributed to each code. This is the headline figure for reporting to a partner organisation — "X journeys submitted via your campaign link."</p>
+    <p>For more detailed attribution data (which specific users came through the link, or which journeys), a Super-Admin can run a SQL query directly:</p>
+    <pre><code>SELECT u.name, u.email, ua.ref_code, ua.created_at
+FROM user_attribution ua
+JOIN users u ON ua.user_id = u.user_id
+WHERE ua.ref_code = 'ACME2026'
+ORDER BY ua.created_at DESC;</code></pre>
+    <p>If you need this data for a report, request it from a Super-Admin.</p>
+
+    <h2>Notes and limitations</h2>
+    <ul>
+      <li><strong>Open links:</strong> Campaign links do not restrict who can use them — any user who visits the URL gets attributed to the code, regardless of whether they are associated with the named organisation. If an open link is shared publicly it can pick up unintended users.</li>
+      <li><strong>First-touch attribution:</strong> each user can only be attributed to one referral code — the first one they used. If they visit the site via two different campaign links before submitting, only the first code is recorded.</li>
+      <li><strong>No automated reporting:</strong> analytics are pull-based — check the panel or ask a Super-Admin for a query. There are no scheduled email summaries or automated reports to partners.</li>
+      <li><strong>Link deletion:</strong> campaign links cannot currently be deleted from the panel — contact a Super-Admin if a link needs to be removed.</li>
+    </ul>
+
+    <div class="article-nav">
+      <a class="prev" href="users.html"><span class="nav-dir">← Previous</span><span class="nav-title">User search &amp; blacklist</span></a>
+      <a class="next" href="guidelines.html"><span class="nav-dir">Next →</span><span class="nav-title">Responsibilities &amp; escalation</span></a>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>
