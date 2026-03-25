@@ -107,14 +107,26 @@ Deno.serve(async (req) => {
         })
       }
     } else {
-      const { data: newUser } = await supabase.from('users')
+      const { data: newUser, error: insertError } = await supabase.from('users')
         .insert({
           email: email.toLowerCase(), name: firstName, last_seen_at: new Date().toISOString(),
           ref_code: refCode || null,
           terms_accepted_version: termsVersion || null,
         })
         .select('user_id').single()
-      userId = newUser!.user_id
+      if (insertError) {
+        // Race condition: another concurrent request already inserted this email
+        // (unique constraint code 23505) — recover by fetching the existing row
+        if (insertError.code === '23505') {
+          const { data: raceUser } = await supabase.from('users').select('user_id').eq('email', email.toLowerCase()).single()
+          if (!raceUser) throw new Error(`User insert failed and recovery select returned nothing: ${insertError.message}`)
+          userId = raceUser.user_id
+        } else {
+          throw new Error(`Failed to create user: ${insertError.message}`)
+        }
+      } else {
+        userId = newUser!.user_id
+      }
       // Insert UTM attribution row for new user if any UTM params present
       if (utmSource || utmMedium || utmCampaign) {
         await supabase.from('user_attribution').insert({

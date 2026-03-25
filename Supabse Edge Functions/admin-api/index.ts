@@ -86,7 +86,7 @@ function buildReplyEmail(ticketId: number, noteText: string, firstName: string):
       <hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 20px">
       <p style="margin:0 0 4px;color:#374151;font-size:14px">Regards,</p>
       <p style="margin:0 0 20px;color:#374151;font-size:14px;font-weight:600">Community Carpool Team</p>
-      <p style="margin:0;color:#9ca3af;font-size:12px">This is a reply to your support ticket <strong style="color:#6b7280">#${ticketId}</strong>. For further assistance, please visit <a href="https://communitycarpool.org/help.html" style="color:#15803d;text-decoration:none">our help centre</a>.</p>
+      <p style="margin:0;color:#9ca3af;font-size:12px">This is a reply to your support ticket <strong style="color:#6b7280">#${ticketId}</strong>. For further assistance, please visit <a href="https://communitycarpool.org/support.html" style="color:#15803d;text-decoration:none">our help centre</a>.</p>
     </div>
   </div>
 </body></html>`
@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
               <hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 20px">
               <p style="margin:0 0 4px;color:#374151;font-size:14px">Regards,</p>
               <p style="margin:0 0 20px;color:#374151;font-size:14px;font-weight:600">Community Carpool Team</p>
-              <p style="margin:0;color:#9ca3af;font-size:12px">If you have further questions, please visit <a href="https://communitycarpool.org/help.html" style="color:#15803d;text-decoration:none">our help centre</a>.</p>
+              <p style="margin:0;color:#9ca3af;font-size:12px">If you have further questions, please visit <a href="https://communitycarpool.org/support.html" style="color:#15803d;text-decoration:none">our help centre</a>.</p>
             </div>
           </div></body></html>`
         )
