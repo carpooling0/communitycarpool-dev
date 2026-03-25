@@ -992,7 +992,7 @@
   <header class="header">
     <div class="header-inner">
       <a href="https://communitycarpool.org" class="logo">
-        <img src="logo_with_slogan.png" alt="Community Carpool">
+        <picture><source srcset="logo_with_slogan.webp" type="image/webp"><img src="logo_with_slogan.png" alt="Community Carpool"></picture>
       </a>
       <div class="header-user" id="headerUser"></div>
     </div>
@@ -1817,7 +1817,7 @@
     function showError(title, message) {
       document.getElementById('mainContent').innerHTML = `
         <div class="error-screen">
-          <img src="logo_with_slogan.png" alt="Community Carpool" style="height:64px;width:auto;">
+          <picture><source srcset="logo_with_slogan.webp" type="image/webp"><img src="logo_with_slogan.png" alt="Community Carpool" style="height:64px;width:auto;"></picture>
           <h2>${title}</h2>
           <p>${message}</p>
           <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; justify-content: center;">
