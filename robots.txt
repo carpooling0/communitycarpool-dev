@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /matches.html
+Disallow: /unsubscribe.html
+Disallow: /confirm-deletion.html
+Disallow: /docs/admin/
+Disallow: /docs/super-admin/
+
+Sitemap: https://communitycarpool.org/sitemap.xml
