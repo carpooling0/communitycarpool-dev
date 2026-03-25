@@ -6,6 +6,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
 }
 
+async function getTokenExpiry(): Promise<Date> {
+  const { data } = await supabase.from('config').select('value').eq('key', 'match_token_expiry_days').single()
+  const days = parseInt(data?.value || '120', 10)
+  const expiry = new Date()
+  expiry.setDate(expiry.getDate() - days)
+  return expiry
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
@@ -20,10 +28,12 @@ Deno.serve(async (req) => {
         })
       }
 
+      const tokenExpiry = await getTokenExpiry()
       const { data: user } = await supabase
         .from('users')
         .select('unsubscribed_matches, unsubscribed_reminders, unsubscribed_marketing')
         .eq('match_page_token', token)
+        .gt('token_created_at', tokenExpiry.toISOString())
         .single()
 
       if (!user) {
@@ -47,6 +57,21 @@ Deno.serve(async (req) => {
         })
       }
 
+      // Validate token with expiry check before allowing any preference changes
+      const tokenExpiry = await getTokenExpiry()
+      const { data: user } = await supabase
+        .from('users')
+        .select('user_id')
+        .eq('match_page_token', token)
+        .gt('token_created_at', tokenExpiry.toISOString())
+        .single()
+
+      if (!user) {
+        return new Response(JSON.stringify({ success: false, error: 'Invalid or expired token' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+
       const updateData: Record<string, any> = {}
       if (unsubscribedMatches   !== undefined) updateData.unsubscribed_matches   = unsubscribedMatches
       if (unsubscribedReminders !== undefined) updateData.unsubscribed_reminders = unsubscribedReminders
@@ -64,7 +89,7 @@ Deno.serve(async (req) => {
       const { error } = await supabase
         .from('users')
         .update(updateData)
-        .eq('match_page_token', token)
+        .eq('user_id', user.user_id)
 
       if (error) throw error
 
