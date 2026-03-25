@@ -1136,7 +1136,6 @@
         let userIP = '', userCountry = 'ae';
         let fromCountry = null; // ISO country code from Google Maps address_components (e.g. 'AE')
         let fromAutocomplete = null, toAutocomplete = null;
-        let editToken = null; // For editing via URL
 
         // ============================================
         // DOM
@@ -1152,48 +1151,6 @@
         const distanceSlider = document.getElementById('distanceSlider');
         const distanceValue = document.getElementById('distanceValue');
 
-        // ============================================
-        // CHECK FOR EDIT TOKEN IN URL
-        // ============================================
-        function checkEditToken() {
-            const params = new URLSearchParams(window.location.search);
-            editToken = params.get('edit');
-            if (editToken) {
-                console.log('Edit token found:', editToken);
-                // Fetch existing data and pre-fill form
-                loadFormData(editToken);
-            }
-        }
-
-        async function loadFormData(token) {
-            try {
-                const response = await fetch(APPS_SCRIPT_URL + '?action=getByToken&token=' + encodeURIComponent(token));
-                const data = await response.json();
-                if (data.found) {
-                    firstName.value = data.firstName || '';
-                    email.value = data.email || '';
-                    fromInput.value = data.fromLocation || '';
-                    toInput.value = data.toLocation || '';
-                    fromLocationText = data.fromLocation || '';
-                    toLocationText = data.toLocation || '';
-                    fromSelected = true;
-                    toSelected = true;
-                    if (data.distance) {
-                        const dist = parseInt(data.distance.split('-')[1] || data.distance);
-                        distanceSlider.value = dist;
-                        updateDistanceLabel();
-                    }
-                    setLocationStatus('from', 'success');
-                    setLocationStatus('to', 'success');
-                    updateProgress();
-                    submitBtn.textContent = 'Update My Journey';
-                }
-            } catch (e) {
-                console.log('Could not load form data:', e);
-            }
-        }
-
-        checkEditToken();
 
         // ============================================
         // REFERRAL / UTM CAPTURE — strip from URL immediately
@@ -1213,40 +1170,6 @@
             }
         })();
 
-        // ============================================
-        // CHECK FOR DELETE TOKEN IN URL
-        // ============================================
-        function checkDeleteToken() {
-            const params = new URLSearchParams(window.location.search);
-            const deleteToken = params.get('delete');
-            if (deleteToken) {
-                // Show confirmation dialog
-                if (confirm('Are you sure you want to delete your data? This action cannot be undone.')) {
-                    deleteUserData(deleteToken);
-                } else {
-                    // Redirect to home page
-                    window.location.href = SHARE_URL;
-                }
-            }
-        }
-
-        async function deleteUserData(token) {
-            try {
-                const response = await fetch(APPS_SCRIPT_URL + '?action=deleteByToken&token=' + encodeURIComponent(token));
-                const data = await response.json();
-                if (data.success) {
-                    alert('Your data has been deleted successfully.');
-                } else {
-                    alert('Could not delete data: ' + (data.message || 'Unknown error'));
-                }
-                window.location.href = SHARE_URL;
-            } catch (e) {
-                alert('Error deleting data. Please try again.');
-                console.log('Delete error:', e);
-            }
-        }
-
-        checkDeleteToken();
 
         // ============================================
         // IP DETECTION (CORS-friendly APIs)
@@ -1564,8 +1487,7 @@
             const finalToLocation = toLocationText || toInput.value.trim();
 
             const data = {
-                action: editToken ? 'update' : 'new',
-                editToken: editToken || '',
+
                 firstName: firstNameVal,
                 email: emailVal,
                 fromLocation: finalFromLocation,
