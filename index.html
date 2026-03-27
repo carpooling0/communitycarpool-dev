@@ -1814,6 +1814,9 @@
             }).catch(() => {}); // fire-and-forget, silent fail
         }
 
+        // Warm up submit-journey in the background while user fills the form
+        fetch(`${SUPABASE_URL}/functions/v1/submit-journey`, { method: 'OPTIONS' }).catch(() => {});
+
         // page_visited: fires once on load
         trackPageEvent('page_visited', {
             client: new URLSearchParams(window.location.search).get('client') || null,
