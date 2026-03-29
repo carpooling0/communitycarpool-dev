@@ -1,0 +1,107 @@
+/* =========================================================
+   Brand Guidelines — Layout & Typography Overrides
+   Fixes: hero height, section spacing, font readability
+   ========================================================= */
+
+/* 1. HERO / HEADER — reduce green bar height */
+.hero {
+  padding: 55px 40px 44px !important;
+  margin-top: 60px !important;
+}
+@media (max-width: 768px) {
+  .hero { padding: 40px 20px 36px !important; margin-top: 50px !important; }
+}
+header {
+  padding: 24px 40px !important;
+}
+
+/* 2. SECTIONS — reduce vertical whitespace */
+section {
+  padding: 48px 0 !important;
+  margin-bottom: 0 !important;
+}
+section.hero {
+  padding: 55px 40px 44px !important;
+}
+.section {
+  padding: 40px 0 !important;
+  margin-bottom: 32px !important;
+}
+.card-section {
+  margin-bottom: 40px !important;
+}
+
+/* Section headings — tighten top margin */
+section h2,
+h2 {
+  margin-top: 32px !important;
+  margin-bottom: 14px !important;
+  font-size: 30px !important;
+}
+section h3,
+h3 {
+  margin-top: 22px !important;
+  margin-bottom: 10px !important;
+  font-size: 20px !important;
+}
+
+/* Intro paragraphs under section headings */
+section .intro {
+  margin-bottom: 28px !important;
+}
+
+/* Main content area */
+main {
+  padding: 36px 40px !important;
+}
+
+/* Footer */
+footer {
+  padding: 32px 40px !important;
+  margin-top: 40px !important;
+}
+
+/* 3. FONT SIZES — minimum readable sizes */
+body {
+  font-size: 15px;
+}
+p, li {
+  font-size: 15px;
+  line-height: 1.65;
+}
+th, td {
+  font-size: 14px !important;
+  padding: 12px 16px !important;
+}
+
+/* Small labels that were 12px → 13px */
+.font-type,
+.weight-badge,
+.color-code,
+.token-value,
+.swatch,
+.tag,
+.badge,
+nav a,
+.nav-link,
+.label,
+small {
+  font-size: 13px !important;
+}
+
+/* Code blocks */
+code, pre, .code, .code-block {
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+}
+
+/* Cards and boxes — reduce internal padding slightly */
+.card, .box, .usage, .value-box {
+  padding: 20px !important;
+  margin: 16px 0 !important;
+}
+
+/* Grid gaps */
+.grid, .cards, .color-grid, .font-grid {
+  gap: 20px !important;
+}
