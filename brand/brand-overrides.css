@@ -105,9 +105,11 @@ body { font-size: 15px; line-height: 1.6; }
 p, li { font-size: 15px !important; line-height: 1.6 !important; }
 th, td { font-size: 14px !important; padding: 8px 12px !important; }
 small, .label, .tag, .badge,
-.font-type, .weight-badge,
-nav a, .nav-link {
+.font-type, .weight-badge {
   font-size: 12px !important;
+}
+nav a, .nav-link {
+  font-size: 15px !important;
 }
 .color-code, .token-value {
   font-size: 13px !important;
