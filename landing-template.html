@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAGE_TITLE - Community Carpool</title>
+  <meta name="description" content="PAGE_DESCRIPTION" />
+  <link rel="canonical" href="https://communitycarpool.org/PAGE_SLUG" />
+
+  <!-- Schema.org -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "PAGE_TITLE",
+    "description": "PAGE_DESCRIPTION",
+    "url": "https://communitycarpool.org/PAGE_SLUG",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Community Carpool",
+      "url": "https://communitycarpool.org"
+    }
+  }
+  </script>
+
+  <!-- Favicons -->
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #16a34a;
+      --primary-dark: #15803d;
+      --text: #111827;
+      --text-secondary: #6b7280;
+      --bg: #f8fafc;
+      --white: #ffffff;
+      --border: #e5e7eb;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 32px 20px 0;
+    }
+
+    .logo-img {
+      width: 200px;
+      height: auto;
+      display: block;
+      margin: 0 auto 32px;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 0 20px 40px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 14px 32px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: background 0.2s;
+    }
+
+    .cta-btn:hover { background: var(--primary-dark); }
+
+    /* Content */
+    .content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    .section {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    }
+
+    .section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .section p {
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .section ul {
+      padding-left: 20px;
+      color: var(--text-secondary);
+    }
+
+    .section ul li { margin-bottom: 8px; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 24px 20px;
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <a href="/">
+      <picture>
+        <source srcset="logo.webp" type="image/webp">
+        <img src="logo.png" alt="Community Carpool" class="logo-img">
+      </picture>
+    </a>
+  </div>
+
+  <div class="hero">
+    <h1>PAGE_H1</h1>
+    <p>PAGE_SUBTITLE</p>
+    <a href="/" class="cta-btn">Find Your Carpool Match →</a>
+  </div>
+
+  <div class="content">
+
+    <div class="section">
+      <h2>SECTION_TITLE</h2>
+      <p>SECTION_CONTENT</p>
+    </div>
+
+    <!-- Add more .section blocks as needed -->
+
+  </div>
+
+  <div class="footer">
+    <p><a href="/">← Back to Community Carpool</a> &nbsp;·&nbsp; <a href="/terms.html">Terms</a> &nbsp;·&nbsp; <a href="/support.html">Support</a></p>
+    <p style="margin-top:8px;">© 2026 Community Carpool. All rights reserved.</p>
+  </div>
+
+</body>
+</html>

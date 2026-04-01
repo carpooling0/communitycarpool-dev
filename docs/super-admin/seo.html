@@ -106,7 +106,7 @@
     <div class="sa-badge">🔒 Super-Admin Only</div>
     <div class="article-eyebrow">🔍 Processes</div>
     <h1 class="article-title">SEO &amp; Search Management</h1>
-    <p class="article-lead">This document covers all SEO assets on the platform — Open Graph tags, Google Search Console, robots.txt, sitemap.xml, and GA4 — including what each does, how to update it, and how often.</p>
+    <p class="article-lead">This document covers all SEO assets on the platform — Open Graph tags, Google Search Console, robots.txt, sitemap.xml, and Schema.org — including what each does, how to update it, and how often.</p>
 
     <div class="article-toc">
       <div class="article-toc-title">On this page</div>
@@ -257,23 +257,8 @@ Sitemap: https://communitycarpool.org/sitemap.xml</code></pre>
 
     <!-- GA4 -->
     <h2 id="ga4">Google Analytics 4</h2>
-    <p>GA4 tracks user behaviour on the site — page views, form interactions, events. Measurement ID: <code>G-F7RGV13VFY</code>.</p>
-
-    <h3>Access</h3>
-    <p>Go to <a href="https://analytics.google.com" target="_blank">analytics.google.com</a> → Community Carpool property.</p>
-
-    <h3>Key reports</h3>
-    <table>
-      <tr><th>Report</th><th>Where</th><th>Purpose</th></tr>
-      <tr><td>Realtime</td><td>Reports → Realtime</td><td>Live users on site right now</td></tr>
-      <tr><td>Pages &amp; screens</td><td>Reports → Engagement → Pages</td><td>Most visited pages</td></tr>
-      <tr><td>Acquisition</td><td>Reports → Acquisition → Traffic acquisition</td><td>Where users come from</td></tr>
-      <tr><td>Events</td><td>Reports → Engagement → Events</td><td>Custom events (form_started, page_visited)</td></tr>
-    </table>
-
-    <h3>The GA4 snippet</h3>
-    <p>The GA4 snippet is included on every page via a <code>&lt;script&gt;</code> tag pointing to Google's gtag.js. Any new page created from the landing page template will automatically include it — no manual action needed.</p>
-    <p>GA4 does <strong>not</strong> need to be updated when adding new pages — it tracks all pages automatically.</p>
+    <p>GA4 has been removed from the platform. Campaign attribution is handled natively via <code>ref_code</code> on the <code>users</code> table, populated from <code>?ref=</code> URL parameters. Referral links and QR codes are managed in the admin dashboard.</p>
+    <p>If GA4 is reinstated in future, cookie consent gating must be implemented before the GA4 script fires (GDPR requirement).</p>
 
     <!-- SCHEMA -->
     <h2 id="schema">Schema.org structured data</h2>
@@ -304,7 +289,7 @@ Sitemap: https://communitycarpool.org/sitemap.xml</code></pre>
     <p>Every time a new <strong>public</strong> page is added to the site:</p>
     <table>
       <tr><th>Task</th><th>Required</th><th>Notes</th></tr>
-      <tr><td>Use landing page template</td><td><span class="tag tag-green">Yes</span></td><td>GA4 and meta structure already included</td></tr>
+      <tr><td>Use landing page template</td><td><span class="tag tag-green">Yes</span></td><td>Meta structure already included</td></tr>
       <tr><td>Write unique <code>&lt;meta name="description"&gt;</code></td><td><span class="tag tag-green">Yes</span></td><td>110–160 characters</td></tr>
       <tr><td>Add <code>og:title</code>, <code>og:description</code>, <code>og:url</code></td><td><span class="tag tag-amber">Landing pages only</span></td><td>Not needed for docs articles</td></tr>
       <tr><td>Add Schema.org JSON-LD</td><td><span class="tag tag-green">Yes</span></td><td>Use <code>WebPage</code> for landing pages, <code>Article</code> for docs</td></tr>
