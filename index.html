@@ -1027,7 +1027,7 @@
             <div class="terms-wrapper">
                 <input type="checkbox" id="termsCheckbox" class="terms-checkbox" />
                 <label for="termsCheckbox" class="terms-label">
-                    I agree to the <button type="button" onclick="openTermsPopOut()" class="terms-link">Terms &amp; Conditions</button> and <a href="privacy.html" target="_blank" class="terms-link">Privacy Policy</a>.
+                    I agree to the <a href="terms.html" target="_blank" class="terms-link">Terms &amp; Conditions</a> and <a href="privacy.html" target="_blank" class="terms-link">Privacy Policy</a>.
                 </label>
             </div>
 
@@ -1142,21 +1142,6 @@
         }
 
 
-        // ============================================
-        // TERMS POP-OUT
-        // ============================================
-        function openTermsPopOut() {
-            const width = 600;
-            const height = 800;
-            const left = (window.screen.width / 2) - (width / 2);
-            const top = (window.screen.height / 2) - (height / 2);
-
-            window.open(
-                'terms.html',
-                'TermsAndConditions',
-                `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
-            );
-        }
 
         let fromLocationText = '', toLocationText = '';
         let fromLatLng = '', toLatLng = '';
