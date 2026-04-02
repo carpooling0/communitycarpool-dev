@@ -2308,23 +2308,42 @@ function renderAnalytics(data) {
   const s = data.stats || {}
   const pv = data.pageviews || {}
 
-  // Summary KPIs
-  const bounceRate = s.bounces && s.visits ? ((s.bounces.value / s.visits.value) * 100).toFixed(1) : 0
-  const avgDuration = s.totaltime && s.visits ? (s.totaltime.value / s.visits.value).toFixed(0) : 0
+  // Safely extract a numeric value from either { value: N } or a plain number
+  const gv = (field) => {
+    const f = s[field]
+    if (f === undefined || f === null) return 0
+    if (typeof f === 'object') return Number(f.value) || 0
+    return Number(f) || 0
+  }
+  // Extract change/prev trend value
+  const gc = (field) => {
+    const f = s[field]
+    if (!f || typeof f !== 'object') return null
+    return f.change ?? f.prev ?? null
+  }
+
+  const visitors   = gv('visitors')
+  const visits     = gv('visits')
+  const pageviews  = gv('pageviews')
+  const bounces    = gv('bounces')
+  const totaltime  = gv('totaltime')
+
+  const bounceRate = visits > 0 ? ((bounces / visits) * 100).toFixed(1) : '0.0'
+  const avgDuration = visits > 0 ? Math.round(totaltime / visits) : 0
   const fmtDur = d => d >= 60 ? `${Math.floor(d/60)}m ${d%60}s` : `${d}s`
   const fmtChg = (v) => {
-    if (!v && v !== 0) return ''
+    if (v === null || v === undefined) return ''
     const cls = v > 0 ? 'up' : v < 0 ? 'dn' : ''
     return `<span class="kpi-trend ${cls}">${v > 0 ? '↑' : v < 0 ? '↓' : ''}${Math.abs(v)}%</span>`
   }
 
   let html = `
   <div class="kpi-grid kpi-5" style="margin-bottom:16px">
-    <div class="kpi-card"><div class="kpi-label">Visitors</div><div class="kpi-value">${(s.visitors?.value||0).toLocaleString()}</div><div class="kpi-sub">${fmtChg(s.visitors?.change)}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Visits</div><div class="kpi-value">${(s.visits?.value||0).toLocaleString()}</div><div class="kpi-sub">${fmtChg(s.visits?.change)}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Views</div><div class="kpi-value">${(s.pageviews?.value||0).toLocaleString()}</div><div class="kpi-sub">${fmtChg(s.pageviews?.change)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Visitors</div><div class="kpi-value">${visitors.toLocaleString()}</div><div class="kpi-sub">${fmtChg(gc('visitors'))}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Visits</div><div class="kpi-value">${visits.toLocaleString()}</div><div class="kpi-sub">${fmtChg(gc('visits'))}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Views</div><div class="kpi-value">${pageviews.toLocaleString()}</div><div class="kpi-sub">${fmtChg(gc('pageviews'))}</div></div>
     <div class="kpi-card"><div class="kpi-label">Bounce Rate</div><div class="kpi-value">${bounceRate}%</div></div>
-    <div class="kpi-card"><div class="kpi-label">Visit Duration</div><div class="kpi-value">${fmtDur(Number(avgDuration))}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Visit Duration</div><div class="kpi-value">${fmtDur(avgDuration)}</div></div>
   </div>`
 
   // Chart
