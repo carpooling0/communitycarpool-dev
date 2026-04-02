@@ -2340,7 +2340,8 @@ function renderAnalytics(data) {
   ], data)
   html += anBreakdownPanel('Sources', 'anSources', [
     { label:'Referrers', key:'referrers' },
-    { label:'Channels', key:'channels' }
+    { label:'Channels', key:'channels' },
+    { label:'Queries', key:'queries' }
   ], data)
   html += `</div>`
 
@@ -2349,7 +2350,9 @@ function renderAnalytics(data) {
   html += anBreakdownPanel('Environment', 'anEnv', [
     { label:'Browsers', key:'browsers' },
     { label:'OS', key:'os' },
-    { label:'Devices', key:'devices' }
+    { label:'Devices', key:'devices' },
+    { label:'Screens', key:'screens' },
+    { label:'Languages', key:'languages' }
   ], data)
   html += anBreakdownPanel('Location', 'anLoc', [
     { label:'Countries', key:'countries' },

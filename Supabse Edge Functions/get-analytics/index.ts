@@ -14,10 +14,9 @@ serve(async (req) => {
   }
 
   try {
-    // Parse request body
     const { token, startAt, endAt, unit } = await req.json()
 
-    // Validate admin session via admin-auth edge function
+    // Validate admin session
     const supabaseUrl = Deno.env.get('DB_URL')!
     const authRes = await fetch(`${supabaseUrl}/functions/v1/admin-auth`, {
       method: 'POST',
@@ -32,7 +31,6 @@ serve(async (req) => {
       })
     }
 
-    // Check UMAMI_API_KEY
     const umamiKey = Deno.env.get('UMAMI_API_KEY')
     if (!umamiKey) {
       return new Response(
@@ -50,7 +48,6 @@ serve(async (req) => {
       return fetch(`${UMAMI_BASE}${path}`, { headers }).then(r => r.json())
     }
 
-    // Parallel calls to Umami API
     const [
       stats,
       pageviews,
@@ -65,6 +62,9 @@ serve(async (req) => {
       countries,
       regions,
       cities,
+      languages,
+      screens,
+      queries,
     ] = await Promise.all([
       umamiGet(`/websites/${id}/stats?${qs}`),
       umamiGet(`/websites/${id}/pageviews?${qsUnit}`),
@@ -79,24 +79,20 @@ serve(async (req) => {
       umamiGet(`/websites/${id}/metrics?${qs}&type=country`),
       umamiGet(`/websites/${id}/metrics?${qs}&type=region`),
       umamiGet(`/websites/${id}/metrics?${qs}&type=city`),
+      umamiGet(`/websites/${id}/metrics?${qs}&type=language`),
+      umamiGet(`/websites/${id}/metrics?${qs}&type=screen`),
+      umamiGet(`/websites/${id}/metrics?${qs}&type=query`),
     ])
 
     return new Response(
       JSON.stringify({
         success: true,
-        stats,
-        pageviews,
-        pages,
-        entryPages,
-        exitPages,
-        referrers,
-        channels,
-        browsers,
-        os,
-        devices,
-        countries,
-        regions,
-        cities,
+        stats, pageviews,
+        pages, entryPages, exitPages,
+        referrers, channels,
+        browsers, os, devices,
+        countries, regions, cities,
+        languages, screens, queries,
       }),
       { headers: { ...CORS, 'Content-Type': 'application/json' } }
     )
