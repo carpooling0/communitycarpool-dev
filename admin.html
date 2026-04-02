@@ -2282,7 +2282,13 @@ async function loadAnalytics() {
   el.innerHTML = '<div class="loading"><span class="spinner"></span>Loading analytics…</div>'
   try {
     const { startAt, endAt, unit } = getAnalyticsRange()
-    const data = await apiPost('get-analytics', { startAt, endAt, unit })
+    const tok = localStorage.getItem(TOKEN_KEY)
+    const _anRes = await fetch(`${SUPABASE_URL}/functions/v1/get-analytics`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: tok, startAt, endAt, unit })
+    })
+    const data = await _anRes.json()
     if (!data.success) {
       if (data.error?.includes('UMAMI_API_KEY')) {
         el.innerHTML = '<div class="an-empty">⚙️ Analytics not configured.<br><span style="font-size:12px">Add <code>UMAMI_API_KEY</code> to Supabase Edge Function secrets to enable.</span></div>'
