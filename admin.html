@@ -679,8 +679,8 @@
     <!-- ANALYTICS -->
     <div id="panel-analytics" class="panel hidden">
       <div class="an-range-bar">
-        <button class="an-nav-btn" onclick="analyticsShift(-1)">‹</button>
-        <select class="an-range-select" id="anRange" onchange="loadAnalytics()">
+        <button class="an-nav-btn" id="anPrev" onclick="analyticsShift(-1)">‹</button>
+        <select class="an-range-select" id="anRange" onchange="onRangeChange()">
           <option value="24h">Last 24 hours</option>
           <option value="7d">Last 7 days</option>
           <option value="30d" selected>Last 30 days</option>
@@ -688,8 +688,15 @@
           <option value="6m">Last 6 months</option>
           <option value="12m">Last 12 months</option>
           <option value="all">All time</option>
+          <option value="custom">Custom range…</option>
         </select>
-        <button class="an-nav-btn" onclick="analyticsShift(1)">›</button>
+        <button class="an-nav-btn" id="anNext" onclick="analyticsShift(1)">›</button>
+        <span id="anCustomWrap" class="hidden" style="display:flex;align-items:center;gap:6px">
+          <input type="date" id="anDateFrom" class="an-range-select" style="padding:5px 8px;cursor:pointer">
+          <span style="font-size:13px;color:var(--text-muted)">→</span>
+          <input type="date" id="anDateTo" class="an-range-select" style="padding:5px 8px;cursor:pointer">
+          <button class="btn btn-sm btn-primary" onclick="loadAnalytics()" style="padding:5px 14px;font-size:13px">Apply</button>
+        </span>
       </div>
       <div id="analyticsContent"><div class="loading"><span class="spinner"></span>Loading analytics…</div></div>
     </div>
@@ -2249,24 +2256,51 @@ function lgClearHistory() {
 // ═══════════════════════════════════════════════════════════════
 let anOffset = 0 // period offset for prev/next navigation
 
+function onRangeChange() {
+  const range = document.getElementById('anRange').value
+  const isCustom = range === 'custom'
+  document.getElementById('anCustomWrap').classList.toggle('hidden', !isCustom)
+  document.getElementById('anPrev').classList.toggle('hidden', isCustom)
+  document.getElementById('anNext').classList.toggle('hidden', isCustom)
+  if (isCustom) {
+    // Pre-fill with last 30 days as a sensible default
+    const to = new Date(); const from = new Date(to - 30*86400000)
+    document.getElementById('anDateFrom').value = from.toISOString().slice(0,10)
+    document.getElementById('anDateTo').value   = to.toISOString().slice(0,10)
+    return // wait for Apply
+  }
+  anOffset = 0
+  loadAnalytics()
+}
+
 function getAnalyticsRange() {
   const range = document.getElementById('anRange')?.value || '30d'
   const now = Date.now()
-  let startAt, endAt = now
+  let startAt, endAt = now, unit
 
-  if (range === '24h')  { startAt = now - 24*60*60*1000 }
-  else if (range === '7d')  { startAt = now - 7*24*60*60*1000 }
-  else if (range === '30d') { startAt = now - 30*24*60*60*1000 }
-  else if (range === '90d') { startAt = now - 90*24*60*60*1000 }
-  else if (range === '6m')  { startAt = now - 180*24*60*60*1000 }
-  else if (range === '12m') { startAt = now - 365*24*60*60*1000 }
-  else { startAt = new Date('2025-01-01').getTime() } // all time
+  if (range === 'custom') {
+    const from = document.getElementById('anDateFrom').value
+    const to   = document.getElementById('anDateTo').value
+    if (!from || !to) return null
+    startAt = new Date(from).getTime()
+    endAt   = new Date(to).getTime() + 86399999 // end of day
+    const days = (endAt - startAt) / 86400000
+    unit = days <= 2 ? 'hour' : days <= 90 ? 'day' : 'month'
+    return { startAt, endAt, unit }
+  }
+
+  if (range === '24h')  { startAt = now - 24*60*60*1000; unit = 'hour' }
+  else if (range === '7d')  { startAt = now - 7*86400000;   unit = 'day' }
+  else if (range === '30d') { startAt = now - 30*86400000;  unit = 'day' }
+  else if (range === '90d') { startAt = now - 90*86400000;  unit = 'day' }
+  else if (range === '6m')  { startAt = now - 180*86400000; unit = 'month' }
+  else if (range === '12m') { startAt = now - 365*86400000; unit = 'month' }
+  else { startAt = new Date('2025-01-01').getTime();        unit = 'month' }
 
   const duration = endAt - startAt
   startAt += anOffset * duration
   endAt   += anOffset * duration
 
-  const unit = range === '24h' ? 'hour' : (range === '7d' || range === '30d') ? 'day' : 'month'
   return { startAt: Math.floor(startAt), endAt: Math.floor(endAt), unit }
 }
 
@@ -2281,7 +2315,9 @@ async function loadAnalytics() {
   if (!el) return
   el.innerHTML = '<div class="loading"><span class="spinner"></span>Loading analytics…</div>'
   try {
-    const { startAt, endAt, unit } = getAnalyticsRange()
+    const range = getAnalyticsRange()
+    if (!range) { el.innerHTML = ''; return }
+    const { startAt, endAt, unit } = range
     const tok = localStorage.getItem(TOKEN_KEY)
     const _anRes = await fetch(`${SUPABASE_URL}/functions/v1/get-analytics`, {
       method: 'POST',
