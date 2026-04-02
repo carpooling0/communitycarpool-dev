@@ -2394,24 +2394,51 @@ function renderAnalytics(data, unit) {
   // Draw chart
   requestAnimationFrame(() => {
     const canvas = document.getElementById(chartId)
-    if (!canvas || !pv.pageviews) return
-    const labels = (pv.pageviews||[]).map(d => {
-      const dt = new Date(d.x)
-      if (unit === 'hour') return dt.toLocaleTimeString('en-GB', { hour:'numeric', minute:'2-digit', hour12:true })
+    if (!canvas) return
+
+    // Build a complete dense time-series covering the full selected range,
+    // filling zeros for any buckets Umami omits (sparse data = fat bars otherwise)
+    const { startAt, endAt } = getAnalyticsRange()
+    const stepMs = unit === 'hour' ? 3600000 : unit === 'month' ? 30*24*3600000 : 86400000
+    const allKeys = []
+    for (let t = startAt; t <= endAt + stepMs; t += stepMs) allKeys.push(Math.floor(t / stepMs) * stepMs)
+
+    const fmtLabel = ts => {
+      const dt = new Date(ts)
+      if (unit === 'hour')  return dt.toLocaleTimeString('en-GB', { hour:'numeric', minute:'2-digit', hour12:true })
       if (unit === 'month') return dt.toLocaleDateString('en-GB', { month:'short', year:'numeric' })
-      return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short' }) // day (default)
-    })
-    const maxTicks = unit === 'hour' ? 12 : unit === 'month' ? 12 : 10
+      return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short' })
+    }
+    const toKey = ts => Math.floor(new Date(ts).getTime() / stepMs) * stepMs
+
+    const pvMap = {}, sesMap = {}
+    ;(pv.pageviews||[]).forEach(d => { pvMap[toKey(d.x)]  = d.y })
+    ;(pv.sessions||[]).forEach(d  => { sesMap[toKey(d.x)] = d.y })
+
+    const labels   = allKeys.map(fmtLabel)
+    const pvData   = allKeys.map(k => pvMap[k]  || 0)
+    const sesData  = allKeys.map(k => sesMap[k] || 0)
+    const maxTicks = unit === 'hour' ? 12 : 10
+
     new Chart(canvas, {
       type: 'bar',
       data: {
         labels,
         datasets: [
-          { label:'Visitors', data:(pv.sessions||[]).map(d=>d.y), backgroundColor:'#3b82f6cc', borderRadius:3 },
-          { label:'Views', data:(pv.pageviews||[]).map(d=>d.y), backgroundColor:'#93c5fd88', borderRadius:3 }
+          // Views behind, Visitors in front — overlapping like Umami
+          { label:'Views',    data:pvData,  backgroundColor:'#93c5fd99', borderRadius:3, order:2 },
+          { label:'Visitors', data:sesData, backgroundColor:'#3b82f6cc', borderRadius:3, order:1 }
         ]
       },
-      options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false }, ticks:{ maxTicksLimit:maxTicks, font:{size:11} } }, y:{ beginAtZero:true, ticks:{stepSize:1, font:{size:11}} } } }
+      options: {
+        grouped: false,   // overlapping bars, same category width
+        responsive: true,
+        plugins: { legend: { display:false } },
+        scales: {
+          x: { grid:{ display:false }, ticks:{ maxTicksLimit:maxTicks, font:{size:11} } },
+          y: { beginAtZero:true, ticks:{ stepSize:1, font:{size:11} } }
+        }
+      }
     })
 
     // Set up tab switching for breakdown panels
