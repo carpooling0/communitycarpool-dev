@@ -1645,6 +1645,7 @@
         // SHARE
         // ============================================
         function shareWhatsApp() {
+            window.umami?.track('whatsapp_share', { page: 'confirmation' });
             const ref = sessionStorage.getItem('cc_ref') || '007';
             const url = `https://communitycarpool.org?ref=${ref}`;
             const text = encodeURIComponent(

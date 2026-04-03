@@ -1092,6 +1092,7 @@
     const PAGE_SIZE = 25
 
     function shareWhatsApp() {
+      window.umami?.track('whatsapp_share', { page: 'matches' });
       const ref = (typeof userData !== 'undefined' && userData?.refCode) ? userData.refCode : '007'
       const url = `https://communitycarpool.org?ref=${ref}`
       const text = encodeURIComponent(
