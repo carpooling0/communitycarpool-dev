@@ -2375,7 +2375,7 @@ async function loadArchiveDateList() {
   picker.innerHTML = '<option value="">Loading…</option>'
   try {
     const tok = localStorage.getItem(TOKEN_KEY)
-    const res = await apiPost({ action: 'analytics.archive' })
+    const res = await apiPost('analytics.archive')
     if (!res.success || !res.rows?.length) {
       picker.innerHTML = '<option value="">No synced dates yet — use ↓ Sync on the Live tab</option>'
       return
