@@ -71,8 +71,7 @@
 
         .logo {
             max-width: 100%;
-            width: 560px;
-            /* Increased size */
+            width: 400px;
             margin-bottom: 16px;
         }
 
@@ -605,17 +604,18 @@
 
         .share-yellow-box {
             background: #fef9c3;
-            border-radius: 12px;
-            padding: 24px;
+            border-radius: 10px;
+            padding: 12px 16px;
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
 
         .share-yellow-title {
             color: #92400e;
             font-weight: 700;
-            margin-bottom: 16px;
-            font-size: 16px;
+            margin-top: 8px;
+            margin-bottom: 0;
+            font-size: 14px;
         }
 
         .share-green-btn {
@@ -660,8 +660,7 @@
             }
 
             .logo {
-                width: 420px;
-                /* Increased by 40% from 300px */
+                width: 280px;
             }
 
             .tagline {
@@ -953,6 +952,9 @@
                                 placeholder="Search Area / Community or Point of Interest" autocomplete="off" />
                             <div class="location-status" id="fromStatus"></div>
                         </div>
+                        <div id="fromHint" style="display:none;margin-top:6px;font-size:12.5px;color:#b45309;background:#fff7ed;border:1px solid #fdba74;border-radius:6px;padding:7px 10px;line-height:1.45;">
+                            Please pick a location from the dropdown list. A green ✔ will appear when selected.
+                        </div>
                         <div class="privacy-note">
                             Enter only your area / community (e.g., JVC District 11) or Point of Interest (e.g.,
                             Raffles
@@ -978,6 +980,9 @@
                             <input type="text" id="toInput" class="place-input"
                                 placeholder="Search Area / Community or Point of Interest" autocomplete="off" />
                             <div class="location-status" id="toStatus"></div>
+                        </div>
+                        <div id="toHint" style="display:none;margin-top:6px;font-size:12.5px;color:#b45309;background:#fff7ed;border:1px solid #fdba74;border-radius:6px;padding:7px 10px;line-height:1.45;">
+                            Please pick a location from the dropdown list. A green ✔ will appear when selected.
                         </div>
                     </div>
 
@@ -1240,16 +1245,34 @@
         function setLocationStatus(type, status) {
             const el = document.getElementById(type + 'Status');
             const input = document.getElementById(type + 'Input');
+            const hint = document.getElementById(type + 'Hint');
             if (status === 'loading') {
                 el.innerHTML = '<svg class="loc-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
                 input.classList.remove('filled');
+                if (hint) hint.style.display = 'none';
             } else if (status === 'success') {
                 el.innerHTML = '<svg class="loc-check" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
                 input.classList.add('filled');
+                if (hint) hint.style.display = 'none';
             } else {
                 el.innerHTML = '';
                 input.classList.remove('filled');
             }
+        }
+
+        // Show hint if user leaves the field without selecting from dropdown
+        function attachLocationBlurHint(type) {
+            const input = document.getElementById(type + 'Input');
+            const hint = document.getElementById(type + 'Hint');
+            input.addEventListener('blur', () => {
+                const selected = type === 'from' ? fromSelected : toSelected;
+                if (!selected && input.value.trim().length > 0 && hint) {
+                    hint.style.display = 'block';
+                }
+            });
+            input.addEventListener('focus', () => {
+                if (hint) hint.style.display = 'none';
+            });
         }
 
         // ============================================
@@ -1383,6 +1406,10 @@
                     setLocationStatus('to', '');
                 }
             });
+
+            // Show inline hint when user leaves field without picking from dropdown
+            attachLocationBlurHint('from');
+            attachLocationBlurHint('to');
         }
 
         // ============================================
@@ -1575,8 +1602,6 @@
             screen.style.boxShadow = 'none';
             screen.innerHTML = `
                 <div style="padding: 16px 24px 0; background: white; border-radius: 24px 24px 0 0; border: 2px solid #ecfdf5; border-bottom: none;">
-                    <picture><source srcset="logo_with_slogan.webp" type="image/webp"><img src="logo-slogan.png" alt="Community Carpool — Share rides. Cut emissions." style="max-width:200px;height:auto;margin-bottom:4px;"></picture>
-                    <p style="font-size:13px;color:#475569;margin:0 0 12px;line-height:1.4;">Match with people on similar routes.<br>Contact shared only after a match.</p>
                     <div class="conf-header" style="margin-bottom:10px;">
                         <div class="conf-title">
                             <div class="conf-icon">
