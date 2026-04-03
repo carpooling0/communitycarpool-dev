@@ -152,6 +152,12 @@
           <td>~$10–12/year</td>
           <td><a href="https://porkbun.com/account/domains" target="_blank">porkbun.com/account/domains</a></td>
         </tr>
+        <tr>
+          <td>Umami (analytics)</td>
+          <td>Cloud Free</td>
+          <td>$0</td>
+          <td><a href="https://umami.is" target="_blank">umami.is</a></td>
+        </tr>
       </tbody>
     </table>
 
@@ -279,6 +285,13 @@
           <td>N/A</td>
           <td>Site falls back to system fonts (Inter → system-ui). No functional impact.</td>
         </tr>
+        <tr>
+          <td><strong>Umami</strong></td>
+          <td>Free (Cloud Free tier)</td>
+          <td>No renewal required</td>
+          <td>N/A</td>
+          <td>Analytics stop collecting. Admin dashboard Live tab and nightly sync fail. Re-authenticate or upgrade plan at umami.is.</td>
+        </tr>
       </tbody>
     </table>
 
@@ -365,6 +378,25 @@
       <li>$200/month free credit resets on the 1st of each month — at typical usage levels, cost should be $0</li>
       <li>Set a GCP billing alert at $10 to catch any unexpected usage spikes: Billing → Budgets &amp; Alerts</li>
       <li>Login: [REDACTED] — see password manager</li>
+    </ul>
+
+    <h3>Umami (web analytics)</h3>
+    <p>Dashboard: <a href="https://umami.is" target="_blank">umami.is</a> · Analytics: <a href="https://umami.is/websites" target="_blank">umami.is/websites</a></p>
+    <table>
+      <thead><tr><th>Tier</th><th>Websites</th><th>Monthly events</th><th>Data retention</th><th>Price</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cloud Free</strong></td><td>3</td><td>100,000</td><td>12 months</td><td>$0</td></tr>
+        <tr><td>Pro</td><td>Unlimited</td><td>1,000,000</td><td>Unlimited</td><td>$9/mo</td></tr>
+        <tr><td>Business</td><td>Unlimited</td><td>10,000,000</td><td>Unlimited</td><td>$19/mo</td></tr>
+      </tbody>
+    </table>
+    <ul>
+      <li>Community Carpool uses the <strong>Cloud Free</strong> tier — no credit card required</li>
+      <li>100,000 events/month is ample for current traffic levels. An "event" is a pageview or custom event.</li>
+      <li>12-month data retention on the free tier — historical data beyond 12 months is deleted by Umami. The <code>analytics_daily</code> Supabase table is the permanent archive (data is synced nightly and retained indefinitely)</li>
+      <li>No cookies, no GDPR consent banner required — Umami is privacy-first by design</li>
+      <li>API key (<code>UMAMI_API_KEY</code>) is stored in Supabase Vault and used only in the <code>sync-analytics</code> and <code>get-analytics</code> edge functions</li>
+      <li>Website ID: <code>95b6c0b0-6a71-42ea-8f2d-56ec5eb5e55a</code></li>
     </ul>
 
     <h3>Mapbox (road distance calculation)</h3>

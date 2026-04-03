@@ -173,6 +173,13 @@
           <td>N/A — no credentials required</td>
           <td><a href="https://fonts.google.com" target="_blank">fonts.google.com</a></td>
         </tr>
+        <tr>
+          <td><strong>Umami</strong></td>
+          <td>Privacy-first web analytics — pageviews, visitors, sessions, referrers, devices, geography</td>
+          <td>API key (<code>x-umami-api-key</code> header)</td>
+          <td>Supabase Vault (secret: <code>UMAMI_API_KEY</code>)</td>
+          <td><a href="https://umami.is" target="_blank">umami.is</a></td>
+        </tr>
       </tbody>
     </table>
 
@@ -209,11 +216,57 @@
     </ul>
     <p>Additional secrets (like <code>RESEND_API_KEY</code>) must be set manually via the Supabase CLI or dashboard and are accessed the same way: <code>Deno.env.get('RESEND_API_KEY')</code>.</p>
 
+    <h2>Umami analytics</h2>
+    <p>Umami is a privacy-first, cookieless analytics platform. The tracking script is embedded in all site pages and sends anonymous event data to Umami's servers. A nightly edge function (<code>sync-analytics</code>) pulls aggregated stats via the Umami API and stores them in the <code>analytics_daily</code> Supabase table for historical review in the Admin dashboard.</p>
+
+    <h3>Website details</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Website ID</td><td><code>95b6c0b0-6a71-42ea-8f2d-56ec5eb5e55a</code></td></tr>
+        <tr><td>API base URL</td><td><code>https://api.umami.is/v1</code></td></tr>
+        <tr><td>Auth header</td><td><code>x-umami-api-key: &lt;UMAMI_API_KEY&gt;</code></td></tr>
+        <tr><td>Secret location</td><td>Supabase Vault → <code>UMAMI_API_KEY</code> (set on both prod and dev)</td></tr>
+        <tr><td>Dashboard</td><td><a href="https://umami.is" target="_blank">umami.is</a> → login with team account</td></tr>
+      </tbody>
+    </table>
+
+    <h3>API endpoints used by sync-analytics</h3>
+    <p>The <code>sync-analytics</code> edge function calls 16 endpoints in parallel for each target date (<code>?startAt=&amp;endAt=</code> as Unix ms timestamps):</p>
+    <table>
+      <thead><tr><th>Endpoint</th><th>Metric type</th><th>Stored in column</th></tr></thead>
+      <tbody>
+        <tr><td><code>/websites/{id}/stats</code></td><td>Aggregate: pageviews, visitors, visits, bounces, totaltime</td><td><code>pageviews</code>, <code>visitors</code>, <code>visits</code>, <code>bounces</code>, <code>totaltime</code>, <code>bounce_rate</code>, <code>avg_duration</code></td></tr>
+        <tr><td><code>/websites/{id}/pageviews?unit=hour</code></td><td>Hourly pageview + session breakdown</td><td><code>pageviews_hourly</code> (JSONB array, 24 slots)</td></tr>
+        <tr><td><code>/metrics?type=url</code></td><td>Top pages by pageview count</td><td><code>pages</code></td></tr>
+        <tr><td><code>/metrics?type=entry</code></td><td>Entry pages</td><td><code>entry_pages</code></td></tr>
+        <tr><td><code>/metrics?type=exit</code></td><td>Exit pages</td><td><code>exit_pages</code></td></tr>
+        <tr><td><code>/metrics?type=referrer</code></td><td>Referrer domains</td><td><code>referrers</code></td></tr>
+        <tr><td><code>/metrics?type=channel</code></td><td>UTM channels</td><td><code>channels</code></td></tr>
+        <tr><td><code>/metrics?type=browser</code></td><td>Browser breakdown</td><td><code>browsers</code></td></tr>
+        <tr><td><code>/metrics?type=os</code></td><td>OS breakdown</td><td><code>os</code></td></tr>
+        <tr><td><code>/metrics?type=device</code></td><td>Device type (desktop/mobile/tablet)</td><td><code>devices</code></td></tr>
+        <tr><td><code>/metrics?type=country</code></td><td>Country breakdown</td><td><code>countries</code></td></tr>
+        <tr><td><code>/metrics?type=region</code></td><td>Region/state breakdown</td><td><code>regions</code></td></tr>
+        <tr><td><code>/metrics?type=city</code></td><td>City breakdown</td><td><code>cities</code></td></tr>
+        <tr><td><code>/metrics?type=language</code></td><td>Browser language</td><td><code>languages</code></td></tr>
+        <tr><td><code>/metrics?type=screen</code></td><td>Screen resolution</td><td><code>screens</code></td></tr>
+        <tr><td><code>/metrics?type=query</code></td><td>Query string parameters (e.g. <code>?ref=</code>)</td><td><code>queries</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Edge functions that use Umami</h3>
+    <ul>
+      <li><strong><code>sync-analytics</code></strong> — pulls one full UTC day of stats from the Umami API and upserts into <code>analytics_daily</code>. Triggered nightly at 00:05 UTC by the <code>sync-analytics-nightly</code> scheduled task, or manually via the Admin dashboard Sync button.</li>
+      <li><strong><code>get-analytics</code></strong> — proxies live Umami API calls for the Admin dashboard "Live" tab (current day / recent ranges). Forwards the request with the <code>UMAMI_API_KEY</code> header so the key never reaches the browser.</li>
+    </ul>
+
     <h2>Security checklist</h2>
     <ul>
       <li>Google Maps API key restricted to <code>*.communitycarpool.org/*</code></li>
       <li>Resend domain shows "Verified" in the Resend dashboard</li>
       <li>Service role key is NOT present in any committed file</li>
+      <li><code>UMAMI_API_KEY</code> stored in Supabase Vault only — never in frontend code or git</li>
       <li>GitHub SSH key or PAT is not shared between team members — each person uses their own credentials</li>
       <li>All team member logins to external services use unique credentials (not a shared password)</li>
     </ul>
