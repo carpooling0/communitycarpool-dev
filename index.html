@@ -1653,31 +1653,22 @@
             window.umami?.track('social_share', { platform: platform, page: page });
             const ref = sessionStorage.getItem('cc_ref') || '007';
             const url = `https://communitycarpool.org?ref=${ref}`;
-            const text = encodeURIComponent(
-`Hi,
+            const msgFull = encodeURIComponent(
+`Hey! I just signed up on CommunityCarpool.org to find carpooling partners for my commute.
 
-Carpooling can cut your transportation emissions by half. We built CommunityCarpool.org to make finding carpool partners as frictionless as it should be.
+It matches neighbors going the same route — completely FREE, No Cookies, No App, and you only connect when both sides are interested. Everything over email.
 
-How it works:
-\u2022\u2060 \u2060Enter your home and destination
-\u2022\u2060 \u2060Get matched with neighbors going the same way
-\u2022\u2060 \u2060See your current commute's carbon footprint
-\u2022\u2060 \u2060Connect only when both people are interested
-\u2022\u2060 \u2060All communication happens over email
-
-No App. No Cookies. Completely FREE.
-
-The more people register in your neighborhood, the better matches get. If you are looking to reduce your environmental footprint while connecting with your community, it takes 30 seconds to signup.
-
-We would really appreciate any feedback as we grow this.
-
+The more people sign up in our area, the better the matches get. Takes 30 seconds!
+${url}`);
+            const msgTwitter = encodeURIComponent(
+`Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, email-only. The more locals sign up, the better the matches! Check it out 👇
 ${url}`);
             const links = {
-                whatsapp: 'https://wa.me/?text=' + text,
+                whatsapp: 'https://wa.me/?text=' + msgFull,
                 facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url),
-                twitter:  'https://x.com/intent/tweet?text=' + text,
-                linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url),
-                sms:      'sms:?body=' + text,
+                twitter:  'https://x.com/intent/tweet?text=' + msgTwitter,
+                linkedin: 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent('Find Your Carpool Match') + '&summary=' + encodeURIComponent('Just registered on CommunityCarpool.org — matches neighbors who share the same commute. Completely free, no app, privacy-first (email only). Takes 30 seconds to join.') + '&source=communitycarpool.org',
+                sms:      'sms:?body=' + msgFull,
             };
             window.open(links[platform], '_blank');
         }
