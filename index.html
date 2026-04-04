@@ -187,7 +187,7 @@
         }
 
         .helper {
-            font-size: 13px;
+            font-size: 15px;
             color: var(--text-muted);
             margin-bottom: 8px;
         }
@@ -648,7 +648,7 @@
         .footer {
             text-align: center;
             padding: 20px;
-            font-size: 13px;
+            font-size: 15px;
             color: var(--text-muted);
         }
 
@@ -1667,10 +1667,10 @@ ${url}`);
                 whatsapp: 'https://wa.me/?text=' + msgFull,
                 facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url),
                 twitter:  'https://x.com/intent/tweet?text=' + msgTwitter,
-                linkedin: 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent('Find Your Carpool Match') + '&summary=' + encodeURIComponent('Just registered on CommunityCarpool.org — matches neighbors who share the same commute. Completely free, no app, privacy-first (email only). Takes 30 seconds to join.') + '&source=communitycarpool.org',
+                linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url),
                 sms:      'sms:?body=' + msgFull,
             };
-            window.open(links[platform], '_blank');
+            const a = document.createElement('a'); a.href = links[platform]; a.target = '_blank'; a.rel = 'noopener noreferrer'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
         function copyLink() {
