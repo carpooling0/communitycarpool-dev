@@ -388,7 +388,6 @@
     <div class="nav-body">
       <div class="nav-section-label">Overview</div>
       <button class="nav-item active" data-panel="dashboard" onclick="switchPanel('dashboard')">Dashboard</button>
-      <button class="nav-item" data-panel="analytics" onclick="switchPanel('analytics')">📊 Analytics</button>
 
       <div class="nav-section-label">Support</div>
       <button class="nav-item" data-panel="tickets" onclick="switchPanel('tickets')">Tickets</button>
@@ -454,9 +453,32 @@
 
     <!-- DASHBOARD -->
     <div id="panel-dashboard" class="panel">
-      <div class="section-hd">
-        <div><div class="section-title">Platform Overview</div><div class="section-sub">Manual refresh only — click to reload</div></div>
-        <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">↻ Refresh</button>
+      <div class="section-hd" style="margin-bottom:16px">
+        <div>
+          <div class="section-title">Dashboard</div>
+          <div class="section-sub">
+            <span style="display:inline-flex;align-items:center;gap:5px;margin-right:12px"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>Green = Supabase data</span>
+            <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:var(--blue);display:inline-block"></span>Blue = Analytics data</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <select class="an-range-select" id="dashRange" onchange="onDashRangeChange()">
+            <option value="7d">Last 7 days</option>
+            <option value="30d" selected>Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+            <option value="6m">Last 6 months</option>
+            <option value="12m">Last 12 months</option>
+            <option value="all">All time</option>
+            <option value="custom">Custom…</option>
+          </select>
+          <span id="dashCustomWrap" class="hidden" style="display:flex;align-items:center;gap:6px">
+            <input type="date" id="dashDateFrom" class="an-range-select" style="padding:5px 8px">
+            <span style="font-size:13px;color:var(--text-muted)">→</span>
+            <input type="date" id="dashDateTo" class="an-range-select" style="padding:5px 8px">
+            <button class="btn btn-sm btn-primary" onclick="loadDashboard()" style="padding:5px 14px;font-size:13px">Apply</button>
+          </span>
+          <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">↻ Refresh</button>
+        </div>
       </div>
       <div id="dashboardContent"><div class="loading"><span class="spinner"></span>Loading metrics…</div></div>
     </div>
@@ -880,6 +902,7 @@ let deletePendingUserId = null
 let editingAdminId = null
 let teamAdminsCache = []
 let growthPeriod = 'weeks'
+let dashAnalyticsData = null
 let addAdminFormOpen = false
 let charts = {}
 
@@ -1243,12 +1266,85 @@ function toggleSidebar() { document.getElementById('sidebar').classList.toggle('
 // ═══════════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════
+function getDashRange() {
+  const range = document.getElementById('dashRange')?.value || '30d'
+  if (range === 'custom') {
+    const from = document.getElementById('dashDateFrom')?.value
+    const to   = document.getElementById('dashDateTo')?.value
+    if (!from || !to) return null
+    return { fromDate: from, toDate: to }
+  }
+  const now = new Date()
+  const todayMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  let startMs
+  if      (range === '7d')  startMs = todayMs - 6*86400000
+  else if (range === '30d') startMs = todayMs - 29*86400000
+  else if (range === '90d') startMs = todayMs - 89*86400000
+  else if (range === '6m')  startMs = todayMs - 179*86400000
+  else if (range === '12m') startMs = todayMs - 364*86400000
+  else                      startMs = new Date('2025-01-01').getTime()
+  return { fromDate: new Date(startMs).toISOString().slice(0,10), toDate: new Date(todayMs).toISOString().slice(0,10) }
+}
+
+function onDashRangeChange() {
+  const range = document.getElementById('dashRange').value
+  document.getElementById('dashCustomWrap').classList.toggle('hidden', range !== 'custom')
+  if (range !== 'custom') loadDashboard()
+}
+
+async function loadDashAnalytics() {
+  try {
+    const range = getDashRange()
+    if (!range) return null
+    const res = await apiPost('analytics.archive', { fromDate: range.fromDate, toDate: range.toDate })
+    if (!res.success) return null
+    const rows = res.rows || []
+    if (!rows.length) return null
+    const totals = rows.reduce((acc, r) => ({
+      visitors:  acc.visitors  + (r.visitors  || 0),
+      visits:    acc.visits    + (r.visits    || 0),
+      pageviews: acc.pageviews + (r.pageviews || 0),
+      bounces:   acc.bounces   + (r.bounces   || 0),
+      totaltime: acc.totaltime + (r.totaltime || 0),
+    }), { visitors:0, visits:0, pageviews:0, bounces:0, totaltime:0 })
+    const eventsData = mergeBreakdown(rows.map(r => r.events))
+    const waShares = (eventsData || []).filter(e => e.x === 'social_share').reduce((sum, e) => sum + (e.y || 0), 0)
+    // Build visitor series by date for growth chart overlay
+    const visitorsByDate = {}
+    rows.forEach(r => { if (r.date) visitorsByDate[r.date] = r.visitors || 0 })
+    // Build day-of-week heatmap from archive rows
+    const dow = [0,0,0,0,0,0,0]
+    rows.forEach(r => { if (r.date) { const d = new Date(r.date+'T12:00:00Z'); dow[d.getUTCDay()] += r.visitors || 0 } })
+    return {
+      ...totals, waShares, rows, visitorsByDate, dowVisitors: dow,
+      pages:      mergeBreakdown(rows.map(r => r.pages)),
+      entryPages: mergeBreakdown(rows.map(r => r.entry_pages)),
+      exitPages:  mergeBreakdown(rows.map(r => r.exit_pages)),
+      referrers:  mergeBreakdown(rows.map(r => r.referrers)),
+      channels:   mergeBreakdown(rows.map(r => r.channels)),
+      queries:    mergeBreakdown(rows.map(r => r.queries)),
+      browsers:   mergeBreakdown(rows.map(r => r.browsers)),
+      os:         mergeBreakdown(rows.map(r => r.os)),
+      devices:    mergeBreakdown(rows.map(r => r.devices)),
+      screens:    mergeBreakdown(rows.map(r => r.screens)),
+      languages:  mergeBreakdown(rows.map(r => r.languages)),
+      countries:  mergeBreakdown(rows.map(r => r.countries)),
+      regions:    mergeBreakdown(rows.map(r => r.regions)),
+      cities:     mergeBreakdown(rows.map(r => r.cities)),
+    }
+  } catch(e) { return null }
+}
+
 async function loadDashboard() {
   document.getElementById('dashboardContent').innerHTML = '<div class="loading"><span class="spinner"></span>Loading metrics…</div>'
   try {
-    const data = await apiPost('metrics', { period: growthPeriod })
+    const [data, an] = await Promise.all([
+      apiPost('metrics', { period: growthPeriod }),
+      loadDashAnalytics()
+    ])
     if (!data.success) throw new Error(data.error || 'Failed')
-    renderDashboard(data)
+    dashAnalyticsData = an
+    renderDashboard(data, an)
   } catch (e) {
     document.getElementById('dashboardContent').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${esc(e.message)}</p></div>`
   }
@@ -1262,6 +1358,35 @@ function kpiCard(label, value, sub, tip, trend) {
     <div class="kpi-value">${esc(String(value ?? '—'))}</div>
     <div class="kpi-sub">${sub || ''} ${trendHtml}</div>
   </div>`
+}
+
+function normalizeCountry(raw) {
+  if (!raw) return '—'
+  // Normalize to uppercase for lookup
+  const upper = String(raw).toUpperCase().trim()
+  return COUNTRY_NAMES[upper] || COUNTRY_NAMES[raw] || raw
+}
+
+function cleanCityName(raw) {
+  if (!raw) return '—'
+  // Remove long community strings like "The Sustainable City - Wadi Al Safa 7 - ..."
+  // Extract first meaningful part before " - " or ", "
+  let name = String(raw).trim()
+  // If it contains " - ", take the first segment only
+  if (name.includes(' - ')) name = name.split(' - ')[0].trim()
+  if (name.includes(', ')) name = name.split(', ')[0].trim()
+  // Known UAE communities → map to city
+  const communityMap = {
+    'The Sustainable City': 'Dubai',
+    'Jumeirah': 'Dubai', 'Downtown Dubai': 'Dubai', 'Business Bay': 'Dubai',
+    'Dubai Marina': 'Dubai', 'JLT': 'Dubai', 'Palm Jumeirah': 'Dubai',
+    'Silicon Oasis': 'Dubai', 'Al Quoz': 'Dubai', 'Deira': 'Dubai',
+    'Bur Dubai': 'Dubai', 'DIFC': 'Dubai', 'JVC': 'Dubai',
+    'Arabian Ranches': 'Dubai', 'Motor City': 'Dubai', 'Sports City': 'Dubai',
+    'Al Barsha': 'Dubai', 'Mirdif': 'Dubai', 'Rashidiya': 'Dubai',
+    'Abu Dhabi': 'Abu Dhabi', 'Sharjah': 'Sharjah', 'Ajman': 'Ajman',
+  }
+  return communityMap[name] || name
 }
 
 // ISO 3166-1 alpha-2 → display name (UAE context: most common nationalities)
@@ -1297,14 +1422,15 @@ function renderAcquisitionList(items, key) {
   }).join('')}</ul>`
 }
 
-function renderDashboard(data) {
+function renderDashboard(data, an) {
   const { kpi, charts, emailMetrics } = data
   const u = kpi.users, s = kpi.submissions, m = kpi.matches, mt = kpi.matching, op = kpi.operational
   const em = emailMetrics || {}
   let html = ''
 
-  // Row 1 – Main KPIs
-  html += `<div class="kpi-grid kpi-5">
+  // Row 1 – Platform Overview (green Supabase data)
+  html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Platform Overview</div><span style="font-size:11px;font-weight:600;color:var(--green-dark);background:var(--green-light);padding:2px 8px;border-radius:20px">🗄 Supabase</span></div></div>
+  <div class="kpi-grid kpi-5">
     ${kpiCard('Total Users', u.total, `${u.newThisWeek} new this week`, 'Total registered users including inactive', u.weeklyTrend)}
     ${kpiCard('Active Journeys', s.active, `${s.total} total all-time`, 'Submissions with journey_status = active', null)}
     ${kpiCard('Total Matches', m.total, `${m.mutual} mutual confirmed`, 'All-time matches found by the algorithm', m.weeklyTrend)}
@@ -1312,7 +1438,25 @@ function renderDashboard(data) {
     ${kpiCard('Pending Actions', (op.pendingDeletions||0)+(op.openTickets||0), `${op.pendingDeletions||0} deletions · ${op.openTickets||0} tickets`, 'Pending deletion requests plus open support tickets', null)}
   </div>`
 
-  // Row 2 – Growth chart
+  // Row 2 – Analytics Stats (blue, date-range sensitive)
+  if (an) {
+    const bounceRate = an.visits > 0 ? ((an.bounces / an.visits) * 100).toFixed(1) : '—'
+    const avgDuration = an.visits > 0 ? Math.round(an.totaltime / an.visits) : 0
+    const fmtDur = d => d >= 60 ? `${Math.floor(d/60)}m ${d%60}s` : `${d}s`
+    html += `<div style="margin:18px 0 8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Web Traffic</div><span style="font-size:11px;font-weight:600;color:var(--blue);background:#dbeafe;padding:2px 8px;border-radius:20px">📊 Analytics</span></div></div>
+    <div class="kpi-grid kpi-5" style="margin-bottom:22px">
+      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Visitors</div><div class="kpi-value" style="color:var(--blue)">${an.visitors.toLocaleString()}</div><div class="kpi-sub">unique</div></div>
+      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Views</div><div class="kpi-value" style="color:var(--blue)">${an.pageviews.toLocaleString()}</div><div class="kpi-sub">page loads</div></div>
+      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Bounce Rate</div><div class="kpi-value" style="color:var(--blue)">${bounceRate}${bounceRate!=='—'?'%':''}</div><div class="kpi-sub">single-page sessions</div></div>
+      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Visit Duration</div><div class="kpi-value" style="color:var(--blue)">${fmtDur(avgDuration)}</div><div class="kpi-sub">avg per session</div></div>
+      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Social Shares</div><div class="kpi-value" style="color:var(--blue)">${an.waShares.toLocaleString()}</div><div class="kpi-sub">share taps</div></div>
+    </div>`
+  } else {
+    html += `<div style="margin:18px 0 8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Web Traffic</div><span style="font-size:11px;font-weight:600;color:var(--blue);background:#dbeafe;padding:2px 8px;border-radius:20px">📊 Analytics</span></div></div>
+    <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:22px;font-size:13px;color:var(--text-muted)">No analytics data for selected range — sync dates first via the Analytics tab.</div>`
+  }
+
+  // Row 3 – Growth chart (Users green + Visitors blue)
   html += `<div class="chart-card" style="margin-bottom:22px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <h3 style="margin:0">Growth</h3>
@@ -1323,38 +1467,42 @@ function renderDashboard(data) {
       </div>
     </div>
     <div style="position:relative;height:240px"><canvas id="growthChart"></canvas></div>
+    <div style="display:flex;gap:16px;justify-content:center;margin-top:10px;font-size:12px">
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#16a34a;display:inline-block"></span>New Users (Supabase)</span>
+      ${an?`<span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#3b82f6;display:inline-block"></span>Visitors (Analytics)</span>`:''}
+    </div>
   </div>`
 
-  // Row 3 – Journey Quality
-  html += `<div style="margin-bottom:10px"><div class="section-title">Journey & Matching Quality</div></div>
+  // Row 4 – Journey Quality
+  html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Journey & Matching Quality</div><span style="font-size:11px;font-weight:600;color:var(--green-dark);background:var(--green-light);padding:2px 8px;border-radius:20px">🗄 Supabase</span></div></div>
   <div class="kpi-grid kpi-4">
     ${kpiCard('Zero-Match Subs', s.withZeroMatches, 'Active with no match yet', 'Active submissions that have not been matched with anyone', null)}
-    ${kpiCard('Notification Backlog', s.notificationBacklog||0, 'Matched, email not sent', 'Matches found but notification email not yet sent. If unexpectedly high, check the batch-send-emails cron job and email delivery config.', null)}
+    ${kpiCard('Notification Backlog', s.notificationBacklog||0, 'Matched, email not sent', 'Matches found but notification email not yet sent.', null)}
     ${kpiCard('Avg per Submission', m.avgPerSubmission||'—', 'Matches per active journey', 'Pool quality — higher means more matching opportunities', null)}
     ${kpiCard('Expiry Rate', s.expiryRate||'—', 'Journeys expired vs total', '% of all submissions that expired without a mutual match', null)}
   </div>`
 
-  // Row 4 – User Engagement
-  html += `<div style="margin-bottom:10px"><div class="section-title">User Engagement</div></div>
+  // Row 5 – User Engagement
+  html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">User Engagement</div><span style="font-size:11px;font-weight:600;color:var(--green-dark);background:var(--green-light);padding:2px 8px;border-radius:20px">🗄 Supabase</span></div></div>
   <div class="kpi-grid kpi-4">
     ${kpiCard('Active Users', u.activeWithJourney, `of ${u.total} registered`, 'Users with at least one active submission', null)}
     ${kpiCard('Inactive 30+ Days', u.inactiveLast30Days, 'Churn signal', 'Users with no activity in the last 30 days', null)}
-    ${kpiCard('Return Users', u.returnUsers, 'Submitted more than once', 'Users who have submitted more than one journey — retention signal', null)}
+    ${kpiCard('Return Users', u.returnUsers, 'Submitted more than once', 'Users who submitted more than one journey', null)}
     ${kpiCard('One-Way Interest', m.oneWayInterestRate||'—', 'A says Yes, B never responds', 'Rate of matches where one side expressed interest but the other never responded', null)}
   </div>`
 
-  // Row 5 – Matching Performance
-  html += `<div style="margin-bottom:10px"><div class="section-title">Matching Performance</div></div>
+  // Row 6 – Matching Performance
+  html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Matching Performance</div><span style="font-size:11px;font-weight:600;color:var(--green-dark);background:var(--green-light);padding:2px 8px;border-radius:20px">🗄 Supabase</span></div></div>
   <div class="kpi-grid kpi-4">
-    ${kpiCard('Time to 1st Match', mt.medianTimeToFirstMatchDays!=null?mt.medianTimeToFirstMatchDays+'d':'—', 'Median days from submission', 'Median days from submission to first match. Median is used (not mean) because a small number of early users who waited long before a match partner joined skew the mean significantly.', null)}
+    ${kpiCard('Time to 1st Match', mt.medianTimeToFirstMatchDays!=null?mt.medianTimeToFirstMatchDays+'d':'—', 'Median days from submission', 'Median days from submission to first match.', null)}
     ${kpiCard('Time to 2nd Match', mt.medianTimeToSecondMatchDays!=null?mt.medianTimeToSecondMatchDays+'d':'—', 'Median days to second match', 'Median days from submission to second match found', null)}
     ${kpiCard('Conversion Rate', mt.conversionRate||'—', 'Mutual matches ÷ total', '% of all matches that resulted in mutual interest', null)}
     ${kpiCard('Avg Response Time', mt.avgResponseTimeDays!=null?mt.avgResponseTimeDays+'d':'—', 'Between A & B interest', 'Average days between user A and user B both expressing interest', null)}
   </div>`
 
-  // Row 6 – Strength + Locations
-  html += `<div style="margin-bottom:10px"><div class="section-title">Match Strength & Geography</div></div>
-  <div class="chart-grid-3" style="align-items:start">
+  // Row 7 – Strength + Locations
+  html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Match Strength & Geography</div><span style="font-size:11px;font-weight:600;color:var(--green-dark);background:var(--green-light);padding:2px 8px;border-radius:20px">🗄 Supabase</span></div></div>
+  <div class="chart-grid-3" style="align-items:start;margin-bottom:22px">
     <div class="chart-card">
       <h3>Match Strength</h3>
       <div style="position:relative;height:160px"><canvas id="strengthChart"></canvas></div>
@@ -1366,24 +1514,73 @@ function renderDashboard(data) {
     </div>
     <div class="chart-card">
       <h3>Top Countries</h3>
-      ${renderLocationList(charts.topCountries||[], 'country', c => COUNTRY_NAMES[c] || c)}
+      ${renderLocationList(charts.topCountries||[], 'country', c => normalizeCountry(c))}
     </div>
     <div class="chart-card">
       <h3>Top Cities</h3>
-      ${renderLocationList(charts.topCities||[], 'city')}
+      ${renderLocationList(charts.topCities||[], 'city', c => cleanCityName(c))}
     </div>
   </div>`
 
-  // Row 7 – Behavioural Patterns
-  html += `<div style="margin-bottom:10px"><div class="section-title">Behavioural Patterns</div></div>
-  <div class="chart-grid-3">
-    <div class="chart-card"><h3>By Day of Week</h3><div style="position:relative;height:160px"><canvas id="dayChart"></canvas></div></div>
-    <div class="chart-card"><h3>By Hour of Day</h3><div style="position:relative;height:160px"><canvas id="hourChart"></canvas></div></div>
-    <div class="chart-card"><h3>Distance Preference</h3><div style="position:relative;height:160px"><canvas id="distChart"></canvas></div></div>
+  // Row 8 – Behavioral Patterns (combined Supabase + Analytics heatmap)
+  html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0">
+    <div style="display:flex;align-items:center;gap:8px"><div class="section-title">Behavioral Patterns</div></div>
+    <div style="display:flex;gap:3px;background:var(--bg);border-radius:6px;padding:2px">
+      <button id="bpToggleDB" class="chart-toggle-btn active" onclick="setBehaviorToggle('db')" style="border:none;background:white;padding:5px 12px;border-radius:5px;font-size:12px;font-weight:600;color:var(--green-dark);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.1)">🗄 Supabase</button>
+      <button id="bpToggleAn" class="chart-toggle-btn" onclick="setBehaviorToggle('analytics')" style="border:none;background:transparent;padding:5px 12px;border-radius:5px;font-size:12px;font-weight:500;color:var(--text-secondary);cursor:pointer">📊 Analytics</button>
+    </div>
   </div>`
 
-  // Row 8 – Operational Health
-  html += `<div style="margin-bottom:10px"><div class="section-title">Operational Health</div></div>
+  // Supabase behavioral (day/hour/distance)
+  html += `<div id="bpSectionDB" style="margin-top:14px">
+    <div class="chart-grid-3" style="margin-bottom:22px">
+      <div class="chart-card"><h3>By Day of Week</h3><div style="position:relative;height:160px"><canvas id="dayChart"></canvas></div></div>
+      <div class="chart-card"><h3>By Hour of Day</h3><div style="position:relative;height:160px"><canvas id="hourChart"></canvas></div></div>
+      <div class="chart-card"><h3>Distance Preference</h3><div style="position:relative;height:160px"><canvas id="distChart"></canvas></div></div>
+    </div>
+  </div>`
+
+  // Analytics traffic heatmap
+  html += `<div id="bpSectionAn" class="hidden" style="margin-top:14px">`
+  if (an) {
+    html += renderDashHeatmap(an)
+  } else {
+    html += `<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:24px;text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:22px">No analytics data for selected range.</div>`
+  }
+  html += `</div>`
+
+  // Row 9 – Analytics Breakdown Panels (Pages, Sources, Environment, Location)
+  if (an) {
+    html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Traffic Breakdown</div><span style="font-size:11px;font-weight:600;color:var(--blue);background:#dbeafe;padding:2px 8px;border-radius:20px">📊 Analytics</span></div></div>
+    <div class="an-grid-2" style="margin-bottom:14px">`
+    html += anBreakdownPanel('Pages', 'dashPages', [
+      { label:'Path', key:'pages' },
+      { label:'Entry', key:'entryPages' },
+      { label:'Exit', key:'exitPages' }
+    ], an)
+    html += anBreakdownPanel('Sources', 'dashSources', [
+      { label:'Referrers', key:'referrers' },
+      { label:'Channels', key:'channels' },
+      { label:'Queries', key:'queries' }
+    ], an)
+    html += `</div><div class="an-grid-2" style="margin-bottom:22px">`
+    html += anBreakdownPanel('Environment', 'dashEnv', [
+      { label:'Browsers', key:'browsers' },
+      { label:'OS', key:'os' },
+      { label:'Devices', key:'devices' },
+      { label:'Screens', key:'screens' },
+      { label:'Languages', key:'languages' }
+    ], an)
+    html += anBreakdownPanel('Location', 'dashLoc', [
+      { label:'Countries', key:'countries' },
+      { label:'Regions', key:'regions' },
+      { label:'Cities', key:'cities' }
+    ], an)
+    html += `</div>`
+  }
+
+  // Row 10 – Operational Health
+  html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Operational Health</div><span style="font-size:11px;font-weight:600;color:var(--green-dark);background:var(--green-light);padding:2px 8px;border-radius:20px">🗄 Supabase</span></div></div>
   <div class="kpi-grid kpi-4">
     ${kpiCard('Avg Ticket Resolution', op.avgTicketResolutionHours!=null?op.avgTicketResolutionHours+'h':'—', 'Hours to close a ticket', 'Average hours from ticket submission to closure', null)}
     ${kpiCard('Blacklist Count', op.blacklistCount||0, 'Blocked emails', 'Total emails currently on the blacklist', null)}
@@ -1391,7 +1588,7 @@ function renderDashboard(data) {
     ${em.hasData
       ? kpiCard('Email Delivery', em.deliveryRate!=null?em.deliveryRate+'%':'—',
           `Open ${em.openRate??'—'}% · Bounce ${em.bounceRate??'—'}%`,
-          `${em.totalSent||0} sent · ${em.totalDelivered||0} delivered · ${em.totalBounced||0} bounced · ${em.totalOpened||0} unique opens · ${em.totalClicked||0} unique clicks`,
+          `${em.totalSent||0} sent · ${em.totalDelivered||0} delivered · ${em.totalBounced||0} bounced · ${em.totalOpened||0} unique opens`,
           null)
       : kpiCard('Email Delivery', '—', 'Deploy resend-webhook to enable',
           'Set up the resend-webhook edge function and register its URL as a Resend webhook endpoint to track delivery, opens, bounces and clicks',
@@ -1399,10 +1596,10 @@ function renderDashboard(data) {
     }
   </div>`
 
-  // Row 9 – Acquisition Sources (only if any referral data exists)
+  // Row 11 – Acquisition Sources
   const hasRefData = (charts.refBreakdown||[]).length > 0 || (charts.utmSourceBreakdown||[]).length > 0
   if (hasRefData) {
-    html += `<div style="margin-bottom:10px"><div class="section-title">Acquisition Sources</div></div>
+    html += `<div style="margin-bottom:8px"><div class="section-title">Acquisition Sources</div></div>
     <div class="chart-grid-2" style="margin-bottom:24px">
       <div class="chart-card">
         <h3>Individual Referral Links <span style="font-size:11px;color:var(--text-muted);font-weight:400">(ref codes)</span></h3>
@@ -1417,29 +1614,91 @@ function renderDashboard(data) {
 
   document.getElementById('dashboardContent').innerHTML = html
 
-  // Render charts after injection
-  renderGrowthChart(charts.growthSeries || [])
+  // Render Supabase charts
+  renderGrowthChart(charts.growthSeries || [], an?.visitorsByDate)
   renderStrengthChart(m)
   renderBarChart('dayChart',  (charts.submissionsByDayOfWeek||[]).map(d=>d.day),   (charts.submissionsByDayOfWeek||[]).map(d=>d.count),   '#16a34a')
   renderBarChart('hourChart', (charts.submissionsByHour||[]).map(h=>String(h.hour)), (charts.submissionsByHour||[]).map(h=>h.count),         '#2563eb')
   renderBarChart('distChart', (charts.distancePrefBreakdown||[]).map(d=>d.label),   (charts.distancePrefBreakdown||[]).map(d=>d.count),      '#d97706')
+
+  // Wire up breakdown tab switching
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.an-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const key = tab.dataset.key
+        tab.closest('.an-panel').querySelectorAll('.an-tab').forEach(t => t.classList.toggle('active', t === tab))
+        tab.closest('.an-panel').querySelectorAll('.an-tab-content').forEach(c => c.classList.toggle('hidden', c.dataset.key !== key))
+      })
+    })
+  })
+}
+
+function setBehaviorToggle(mode) {
+  const isDB = mode === 'db'
+  document.getElementById('bpSectionDB')?.classList.toggle('hidden', !isDB)
+  document.getElementById('bpSectionAn')?.classList.toggle('hidden', isDB)
+  const btnDB = document.getElementById('bpToggleDB')
+  const btnAn = document.getElementById('bpToggleAn')
+  if (btnDB) { btnDB.style.background = isDB ? 'white' : 'transparent'; btnDB.style.color = isDB ? 'var(--green-dark)' : 'var(--text-secondary)'; btnDB.style.boxShadow = isDB ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'; btnDB.style.fontWeight = isDB ? '600' : '500' }
+  if (btnAn) { btnAn.style.background = !isDB ? 'white' : 'transparent'; btnAn.style.color = !isDB ? 'var(--blue)' : 'var(--text-secondary)'; btnAn.style.boxShadow = !isDB ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'; btnAn.style.fontWeight = !isDB ? '600' : '500' }
+}
+
+function renderDashHeatmap(an) {
+  const dowLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+  const dow = an.dowVisitors || [0,0,0,0,0,0,0]
+  const maxDow = Math.max(1, ...dow)
+  let html = `<div class="an-heatmap-wrap" style="margin-bottom:22px"><div class="an-heatmap-title" style="color:var(--blue)">Traffic by Day of Week <span style="font-size:11px;font-weight:400;color:var(--text-muted)">(visitors from analytics)</span></div>`
+  html += `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:8px">`
+  dowLabels.forEach((day, i) => {
+    const v = dow[i] || 0
+    const pct = Math.round((v / maxDow) * 100)
+    const bg = pct === 0 ? '#f3f4f6' : pct < 25 ? '#bfdbfe' : pct < 50 ? '#93c5fd' : pct < 75 ? '#60a5fa' : '#3b82f6'
+    html += `<div style="text-align:center">
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:4px">${day}</div>
+      <div style="height:60px;background:${bg};border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:${pct>50?'white':'var(--text)'}">${v}</div>
+    </div>`
+  })
+  html += `</div></div>`
+  return html
 }
 
 function destroyChart(key) { if (charts[key]) { charts[key].destroy(); charts[key] = null } }
 
-function renderGrowthChart(series) {
+function renderGrowthChart(series, visitorsByDate) {
   destroyChart('growth')
   const canvas = document.getElementById('growthChart'); if (!canvas) return
+  // Build visitors dataset aligned to growth periods using period_start from DB
+  const visData = series.map((p, i) => {
+    if (!visitorsByDate || !p.period_start) return null
+    const startDate = p.period_start.slice(0, 10)
+    let endDate
+    const nextPs = series[i + 1]?.period_start
+    if (nextPs) {
+      const d = new Date(nextPs.slice(0, 10) + 'T00:00:00Z')
+      d.setUTCDate(d.getUTCDate() - 1)
+      endDate = d.toISOString().slice(0, 10)
+    } else {
+      const d = new Date(startDate + 'T00:00:00Z')
+      d.setUTCDate(d.getUTCDate() + 6)
+      endDate = d.toISOString().slice(0, 10)
+    }
+    let total = 0
+    Object.entries(visitorsByDate).forEach(([date, v]) => {
+      if (date >= startDate && date <= endDate) total += v
+    })
+    return total || null
+  })
+  const hasVisitors = visData.some(v => v !== null && v > 0)
+  const datasets = [
+    { label:'New Users', data: series.map(p=>p.users), backgroundColor:'#16a34a', borderRadius:3 }
+  ]
+  if (hasVisitors) {
+    datasets.push({ label:'Visitors', data: visData, backgroundColor:'#3b82f6bb', borderRadius:3 })
+  }
   charts.growth = new Chart(canvas, {
     type: 'bar',
-    data: {
-      labels: series.map(p => p.label),
-      datasets: [
-        { label:'New Users',       data: series.map(p=>p.users),       backgroundColor:'#16a34a', borderRadius:3 },
-        { label:'New Submissions', data: series.map(p=>p.submissions), backgroundColor:'#86efac', borderRadius:3 }
-      ]
-    },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top',labels:{font:{size:12}}}}, scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#f3f4f6'}}} }
+    data: { labels: series.map(p => p.label), datasets },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#f3f4f6'}}} }
   })
 }
 
@@ -1468,7 +1727,7 @@ async function setGrowthPeriod(period) {
   document.querySelectorAll('#growthToggle button').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase() === period))
   try {
     const data = await apiPost('metrics', { period })
-    if (data.success) renderGrowthChart(data.charts?.growthSeries || [])
+    if (data.success) renderGrowthChart(data.charts?.growthSeries || [], dashAnalyticsData?.visitorsByDate)
   } catch(e) {}
 }
 
