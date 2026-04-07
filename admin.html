@@ -173,6 +173,9 @@
     /* CHART CARDS */
     .chart-card { background: white; border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 0; }
     .chart-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+    .chart-card-green { border-top: 3px solid var(--green) !important; }
+    .chart-card-blue  { border-top: 3px solid var(--blue) !important; }
+    .loc-scroll { max-height: 220px; overflow-y: auto; }
     .chart-toggle { display: flex; gap: 3px; background: var(--bg); border-radius: 6px; padding: 2px; }
     .chart-toggle button { border: none; background: transparent; padding: 5px 12px; border-radius: 5px; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; font-family: inherit; transition: background 0.15s; }
     .chart-toggle button.active { background: white; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -903,6 +906,7 @@ let editingAdminId = null
 let teamAdminsCache = []
 let growthPeriod = 'weeks'
 let dashAnalyticsData = null
+let dashChartsData = null
 let addAdminFormOpen = false
 let charts = {}
 
@@ -1400,7 +1404,7 @@ const COUNTRY_NAMES = {
 function renderLocationList(items, key, labelFn) {
   if (!items?.length) return '<p style="color:var(--text-muted);font-size:13px;padding:12px 0;text-align:center">No data</p>'
   const max = items[0]?.count || 1
-  return `<ul class="loc-list">${items.slice(0,8).map(it => {
+  return `<ul class="loc-list loc-scroll">${items.map(it => {
     const raw = it[key] || '—'
     const label = labelFn ? labelFn(raw) : raw
     return `<li><span style="min-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(label)}</span>
@@ -1412,10 +1416,11 @@ function renderLocationList(items, key, labelFn) {
 function renderAcquisitionList(items, key) {
   if (!items?.length) return '<p style="color:var(--text-muted);font-size:13px;padding:12px 0;text-align:center">No data yet — referral links not used</p>'
   const max = items[0]?.count || 1
-  return `<ul class="loc-list">${items.map(it => {
+  return `<ul class="loc-list loc-scroll">${items.map(it => {
     const label = it[key] || '—'
+    const nameAttr = it.name ? ` title="${esc(it.name)}"` : ''
     return `<li>
-      <span style="min-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:13px">${esc(label)}</span>
+      <span style="min-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:13px;cursor:${it.name?'help':'default'}"${nameAttr}>${esc(label)}</span>
       <div class="loc-bar-wrap"><div class="loc-bar"><div class="loc-bar-inner" style="width:${Math.round(it.count/max*100)}%"></div></div></div>
       <span class="loc-count">${it.count} (${it.pct??0}%)</span>
     </li>`
@@ -1424,6 +1429,7 @@ function renderAcquisitionList(items, key) {
 
 function renderDashboard(data, an) {
   const { kpi, charts, emailMetrics } = data
+  dashChartsData = charts
   const u = kpi.users, s = kpi.submissions, m = kpi.matches, mt = kpi.matching, op = kpi.operational
   const em = emailMetrics || {}
   let html = ''
@@ -1457,7 +1463,7 @@ function renderDashboard(data, an) {
   }
 
   // Row 3 – Growth chart (Users green + Visitors blue)
-  html += `<div class="chart-card" style="margin-bottom:22px">
+  html += `<div class="chart-card" style="margin-bottom:22px;border-top:3px solid var(--green)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <h3 style="margin:0">Growth</h3>
       <div class="chart-toggle" id="growthToggle">
@@ -1503,7 +1509,7 @@ function renderDashboard(data, an) {
   // Row 7 – Strength + Locations
   html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Match Strength & Geography</div><span style="font-size:11px;font-weight:600;color:var(--green-dark);background:var(--green-light);padding:2px 8px;border-radius:20px">🗄 Supabase</span></div></div>
   <div class="chart-grid-3" style="align-items:start;margin-bottom:22px">
-    <div class="chart-card">
+    <div class="chart-card" style="border-top:3px solid var(--green)">
       <h3>Match Strength</h3>
       <div style="position:relative;height:160px"><canvas id="strengthChart"></canvas></div>
       <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:12px">
@@ -1512,41 +1518,35 @@ function renderDashboard(data, an) {
         <span>🔴 Low &lt;60: <strong>${m.strengthLow}</strong></span>
       </div>
     </div>
-    <div class="chart-card">
+    <div class="chart-card" style="border-top:3px solid var(--green)">
       <h3>Top Countries</h3>
       ${renderLocationList(charts.topCountries||[], 'country', c => normalizeCountry(c))}
     </div>
-    <div class="chart-card">
+    <div class="chart-card" style="border-top:3px solid var(--green)">
       <h3>Top Cities</h3>
       ${renderLocationList(charts.topCities||[], 'city', c => cleanCityName(c))}
     </div>
   </div>`
 
-  // Row 8 – Behavioral Patterns (combined Supabase + Analytics heatmap)
-  html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0">
-    <div style="display:flex;align-items:center;gap:8px"><div class="section-title">Behavioral Patterns</div></div>
-    <div style="display:flex;gap:3px;background:var(--bg);border-radius:6px;padding:2px">
-      <button id="bpToggleDB" class="chart-toggle-btn active" onclick="setBehaviorToggle('db')" style="border:none;background:white;padding:5px 12px;border-radius:5px;font-size:12px;font-weight:600;color:var(--green-dark);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.1)">🗄 Supabase</button>
-      <button id="bpToggleAn" class="chart-toggle-btn" onclick="setBehaviorToggle('analytics')" style="border:none;background:transparent;padding:5px 12px;border-radius:5px;font-size:12px;font-weight:500;color:var(--text-secondary);cursor:pointer">📊 Analytics</button>
+  // Row 8 – Behavioral Patterns (heatmap + distance)
+  html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Behavioral Patterns</div></div></div>`
+  html += `<div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:22px;align-items:start">`
+  // Heatmap card (toggleable)
+  html += `<div id="hmCard" class="chart-card" style="border-top:3px solid var(--green)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <h3 style="margin:0;font-size:14px">Traffic Patterns</h3>
+      <div style="display:flex;gap:2px;background:var(--bg);border-radius:6px;padding:2px">
+        <button id="hmToggleDB" onclick="setHeatmapMode('db')" style="border:none;background:white;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;color:var(--green-dark);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.1)">🗄 Supabase</button>
+        <button id="hmToggleAn" onclick="setHeatmapMode('analytics')" style="border:none;background:transparent;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:500;color:var(--text-secondary);cursor:pointer">📊 Analytics</button>
+      </div>
     </div>
+    <div id="hmGrid">${buildHeatmapGrid('db', charts, an)}</div>
   </div>`
-
-  // Supabase behavioral (day/hour/distance)
-  html += `<div id="bpSectionDB" style="margin-top:14px">
-    <div class="chart-grid-3" style="margin-bottom:22px">
-      <div class="chart-card"><h3>By Day of Week</h3><div style="position:relative;height:160px"><canvas id="dayChart"></canvas></div></div>
-      <div class="chart-card"><h3>By Hour of Day</h3><div style="position:relative;height:160px"><canvas id="hourChart"></canvas></div></div>
-      <div class="chart-card"><h3>Distance Preference</h3><div style="position:relative;height:160px"><canvas id="distChart"></canvas></div></div>
-    </div>
+  // Distance Preference card (Supabase always)
+  html += `<div class="chart-card" style="border-top:3px solid var(--green)">
+    <h3>Distance Preference</h3>
+    <div style="position:relative;height:160px"><canvas id="distChart"></canvas></div>
   </div>`
-
-  // Analytics traffic heatmap
-  html += `<div id="bpSectionAn" class="hidden" style="margin-top:14px">`
-  if (an) {
-    html += renderDashHeatmap(an)
-  } else {
-    html += `<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:24px;text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:22px">No analytics data for selected range.</div>`
-  }
   html += `</div>`
 
   // Row 9 – Analytics Breakdown Panels (Pages, Sources, Environment, Location)
@@ -1601,11 +1601,11 @@ function renderDashboard(data, an) {
   if (hasRefData) {
     html += `<div style="margin-bottom:8px"><div class="section-title">Acquisition Sources</div></div>
     <div class="chart-grid-2" style="margin-bottom:24px">
-      <div class="chart-card">
+      <div class="chart-card" style="border-top:3px solid var(--green)">
         <h3>Individual Referral Links <span style="font-size:11px;color:var(--text-muted);font-weight:400">(ref codes)</span></h3>
         ${renderAcquisitionList(charts.refBreakdown||[], 'ref')}
       </div>
-      <div class="chart-card">
+      <div class="chart-card" style="border-top:3px solid var(--green)">
         <h3>Campaign Sources <span style="font-size:11px;color:var(--text-muted);font-weight:400">(utm_source)</span></h3>
         ${renderAcquisitionList(charts.utmSourceBreakdown||[], 'source')}
       </div>
@@ -1617,9 +1617,7 @@ function renderDashboard(data, an) {
   // Render Supabase charts
   renderGrowthChart(charts.growthSeries || [], an?.visitorsByDate)
   renderStrengthChart(m)
-  renderBarChart('dayChart',  (charts.submissionsByDayOfWeek||[]).map(d=>d.day),   (charts.submissionsByDayOfWeek||[]).map(d=>d.count),   '#16a34a')
-  renderBarChart('hourChart', (charts.submissionsByHour||[]).map(h=>String(h.hour)), (charts.submissionsByHour||[]).map(h=>h.count),         '#2563eb')
-  renderBarChart('distChart', (charts.distancePrefBreakdown||[]).map(d=>d.label),   (charts.distancePrefBreakdown||[]).map(d=>d.count),      '#d97706')
+  renderBarChart('distChart', (charts.distancePrefBreakdown||[]).map(d=>d.label),   (charts.distancePrefBreakdown||[]).map(d=>d.count),      '#16a34a')
 
   // Wire up breakdown tab switching
   requestAnimationFrame(() => {
@@ -1633,33 +1631,90 @@ function renderDashboard(data, an) {
   })
 }
 
-function setBehaviorToggle(mode) {
+
+function buildHeatmapGrid(mode, sbCharts, an) {
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+  const hourLabels = ['12am','1am','2am','3am','4am','5am','6am','7am','8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm','7pm','8pm','9pm','10pm','11pm']
   const isDB = mode === 'db'
-  document.getElementById('bpSectionDB')?.classList.toggle('hidden', !isDB)
-  document.getElementById('bpSectionAn')?.classList.toggle('hidden', isDB)
-  const btnDB = document.getElementById('bpToggleDB')
-  const btnAn = document.getElementById('bpToggleAn')
-  if (btnDB) { btnDB.style.background = isDB ? 'white' : 'transparent'; btnDB.style.color = isDB ? 'var(--green-dark)' : 'var(--text-secondary)'; btnDB.style.boxShadow = isDB ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'; btnDB.style.fontWeight = isDB ? '600' : '500' }
-  if (btnAn) { btnAn.style.background = !isDB ? 'white' : 'transparent'; btnAn.style.color = !isDB ? 'var(--blue)' : 'var(--text-secondary)'; btnAn.style.boxShadow = !isDB ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'; btnAn.style.fontWeight = !isDB ? '600' : '500' }
+  let dowArr, hourArr
+  if (isDB) {
+    const dowData = sbCharts?.submissionsByDayOfWeek || []
+    const hourData = sbCharts?.submissionsByHour || []
+    dowArr = [0,0,0,0,0,0,0]
+    hourArr = new Array(24).fill(0)
+    dowData.forEach(d => { if (d.dow_num >= 0 && d.dow_num < 7) dowArr[d.dow_num] = d.count })
+    hourData.forEach(h => { if (h.hour_num >= 0 && h.hour_num < 24) hourArr[h.hour_num] = h.count })
+  } else {
+    dowArr = an?.dowVisitors || [0,0,0,0,0,0,0]
+    hourArr = new Array(24).fill(1)
+  }
+  const maxDow = Math.max(1, ...dowArr)
+  const maxHour = Math.max(1, ...hourArr)
+  const normDow = dowArr.map(v => v / maxDow)
+  const normHour = hourArr.map(v => v / maxHour)
+  function cellColor(intensity) {
+    if (intensity < 0.01) return '#f3f4f6'
+    if (isDB) {
+      if (intensity < 0.15) return '#dcfce7'
+      if (intensity < 0.30) return '#86efac'
+      if (intensity < 0.50) return '#4ade80'
+      if (intensity < 0.70) return '#16a34a'
+      if (intensity < 0.85) return '#15803d'
+      return '#14532d'
+    } else {
+      if (intensity < 0.15) return '#dbeafe'
+      if (intensity < 0.30) return '#93c5fd'
+      if (intensity < 0.50) return '#3b82f6'
+      if (intensity < 0.70) return '#2563eb'
+      if (intensity < 0.85) return '#1d4ed8'
+      return '#1e3a8a'
+    }
+  }
+  let html = `<div>`
+  // Day headers row
+  html += `<div style="display:grid;grid-template-columns:34px repeat(7,1fr);gap:1px;margin-bottom:3px">`
+  html += `<div></div>`
+  days.forEach(d => html += `<div style="text-align:center;font-size:10px;font-weight:600;color:var(--text-muted)">${d}</div>`)
+  html += `</div>`
+  // Hour rows
+  for (let h = 0; h < 24; h++) {
+    const showLabel = h % 3 === 0
+    html += `<div style="display:grid;grid-template-columns:34px repeat(7,1fr);gap:1px;margin-bottom:1px">`
+    html += `<div style="font-size:9px;color:var(--text-muted);text-align:right;padding-right:5px;line-height:8px">${showLabel ? hourLabels[h] : ''}</div>`
+    for (let d = 0; d < 7; d++) {
+      const intensity = isDB ? normDow[d] * normHour[h] : normDow[d]
+      const bg = cellColor(intensity)
+      const tipText = isDB
+        ? `${days[d]} ${hourLabels[h]}: ${Math.round(intensity * 100)}% relative activity (${dowArr[d]} submissions on ${days[d]}, ${hourArr[h]} at ${hourLabels[h]})`
+        : `${days[d]} ${hourLabels[h]}: ${dowArr[d]} visitors on ${days[d]}`
+      html += `<div style="height:8px;background:${bg};border-radius:1px;cursor:default" title="${tipText}"></div>`
+    }
+    html += `</div>`
+  }
+  html += `</div>`
+  return html
 }
 
-function renderDashHeatmap(an) {
-  const dowLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
-  const dow = an.dowVisitors || [0,0,0,0,0,0,0]
-  const maxDow = Math.max(1, ...dow)
-  let html = `<div class="an-heatmap-wrap" style="margin-bottom:22px"><div class="an-heatmap-title" style="color:var(--blue)">Traffic by Day of Week <span style="font-size:11px;font-weight:400;color:var(--text-muted)">(visitors from analytics)</span></div>`
-  html += `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:8px">`
-  dowLabels.forEach((day, i) => {
-    const v = dow[i] || 0
-    const pct = Math.round((v / maxDow) * 100)
-    const bg = pct === 0 ? '#f3f4f6' : pct < 25 ? '#bfdbfe' : pct < 50 ? '#93c5fd' : pct < 75 ? '#60a5fa' : '#3b82f6'
-    html += `<div style="text-align:center">
-      <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:4px">${day}</div>
-      <div style="height:60px;background:${bg};border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:${pct>50?'white':'var(--text)'}">${v}</div>
-    </div>`
-  })
-  html += `</div></div>`
-  return html
+function setHeatmapMode(mode) {
+  const isDB = mode === 'db'
+  const btnDB = document.getElementById('hmToggleDB')
+  const btnAn = document.getElementById('hmToggleAn')
+  if (btnDB) {
+    btnDB.style.background = isDB ? 'white' : 'transparent'
+    btnDB.style.color = isDB ? 'var(--green-dark)' : 'var(--text-secondary)'
+    btnDB.style.boxShadow = isDB ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+    btnDB.style.fontWeight = isDB ? '600' : '500'
+  }
+  if (btnAn) {
+    btnAn.style.background = !isDB ? 'white' : 'transparent'
+    btnAn.style.color = !isDB ? 'var(--blue)' : 'var(--text-secondary)'
+    btnAn.style.boxShadow = !isDB ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+    btnAn.style.fontWeight = !isDB ? '600' : '500'
+  }
+  const grid = document.getElementById('hmGrid')
+  if (grid) grid.innerHTML = buildHeatmapGrid(mode, dashChartsData, dashAnalyticsData)
+  const card = document.getElementById('hmCard')
+  if (card) card.style.borderTop = `3px solid var(--${isDB ? 'green' : 'blue'})`
 }
 
 function destroyChart(key) { if (charts[key]) { charts[key].destroy(); charts[key] = null } }
@@ -3041,7 +3096,7 @@ function renderAnalytics(data, unit) {
 }
 
 function anBreakdownPanel(title, id, tabs, data) {
-  let html = `<div class="an-panel"><div class="an-panel-title">${title}</div><div class="an-tabs">`
+  let html = `<div class="an-panel" style="border-top:3px solid var(--blue)"><div class="an-panel-title">${title}</div><div class="an-tabs">`
   tabs.forEach((t, i) => {
     html += `<button class="an-tab${i===0?' active':''}" data-panel="${id}" data-key="${t.key}">${t.label}</button>`
   })
