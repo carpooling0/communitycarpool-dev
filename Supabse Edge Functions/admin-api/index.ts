@@ -439,23 +439,26 @@ Deno.serve(async (req) => {
       return json({ error: 'Insufficient permissions' }, 403)
 
     if (action === 'links.save') {
-      const { mode, display, url, refCode } = body
-      if (!mode || !display || !url) return json({ error: 'mode, display, url required' }, 400)
+      const { mode, url, refCode, source, medium, personCampaignName } = body
+      if (!mode || !url) return json({ error: 'mode and url required' }, 400)
       const { error } = await supabase.from('referral_links').insert({
-        mode, display, url,
+        mode, url,
         ref_code: refCode || null,
+        source: source || null,
+        medium: medium || null,
+        person_campaign_name: personCampaignName || null,
         created_by_id: admin.admin_id,
         created_by_name: admin.name
       })
       if (error && error.code === '23505') return json({ success: true, duplicate: true })
       if (error) throw error
-      await logAction(admin, 'links.save', null, { mode, display, url }, clientIP)
+      await logAction(admin, 'links.save', null, { mode, url, source, personCampaignName }, clientIP)
       return json({ success: true })
     }
 
     if (action === 'links.list') {
       const { data, error } = await supabase.from('referral_links')
-        .select('id, mode, display, url, ref_code, created_by_name, created_at')
+        .select('id, mode, url, ref_code, source, medium, person_campaign_name, created_by_name, created_at')
         .order('created_at', { ascending: false })
       if (error) throw error
       return json({ success: true, links: data })
@@ -482,6 +485,16 @@ Deno.serve(async (req) => {
         .select('date, pageviews, visitors, synced_at')
         .order('date', { ascending: false })
       return json({ success: true, rows: rows || [] })
+    }
+
+    // ── ORGANISATIONS: list active orgs (admin+) ─────────────────────────────
+    if (action === 'orgs.list_active') {
+      if (!requireRole(admin, 'admin')) return json({ error: 'Insufficient permissions' }, 403)
+      const { data, error } = await supabase.from('organisations')
+        .select('org_id, org_code, org_name')
+        .eq('is_active', true).order('org_name')
+      if (error) throw error
+      return json({ success: true, orgs: data || [] })
     }
 
     // ── ORGANISATIONS (super_admin only) ──────────────────────────────────────

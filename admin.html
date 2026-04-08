@@ -605,7 +605,7 @@
             <thead><tr>
               <th style="text-align:left;padding:8px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:#f9fafb;border-bottom:1px solid var(--border)">ID</th>
               <th style="text-align:left;padding:8px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:#f9fafb;border-bottom:1px solid var(--border)">Code</th>
-              <th style="text-align:left;padding:8px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:#f9fafb;border-bottom:1px solid var(--border)">Name</th>
+              <th style="text-align:left;padding:8px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:#f9fafb;border-bottom:1px solid var(--border);cursor:pointer;user-select:none" onclick="sortOrgTable('org_name')" title="Sort by name">Name ↕</th>
               <th style="text-align:left;padding:8px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:#f9fafb;border-bottom:1px solid var(--border)">Cross</th>
               <th style="text-align:left;padding:8px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:#f9fafb;border-bottom:1px solid var(--border)">Active</th>
               <th style="padding:8px 16px;background:#f9fafb;border-bottom:1px solid var(--border)"></th>
@@ -627,8 +627,13 @@
           <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Add Location</div>
           <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:8px;align-items:end">
             <div class="form-group" style="margin:0"><input type="text" id="newLocName" placeholder="Location name *" /></div>
-            <div class="form-group" style="margin:0"><input type="text" id="newLocLatLng" placeholder="lat,lng (optional)" /></div>
-            <button class="btn btn-primary btn-sm" onclick="addOrgLocation()">+ Add</button>
+            <div class="form-group" style="margin:0">
+              <input type="text" id="newLocLatLng" placeholder="lat,lng (required) *" />
+              <div style="font-size:11px;color:var(--text-muted);margin-top:3px">
+                📍 <a href="https://maps.google.com" target="_blank" style="color:var(--green-dark);text-decoration:none" title="Open Google Maps, right-click any location → the first item shows the coordinates. Tap it to copy.">How to get from Google Maps ↗</a>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="addOrgLocation()" style="align-self:start;margin-top:0">+ Add</button>
           </div>
           <div id="orgLocError" style="color:var(--red);font-size:13px;margin-top:6px"></div>
         </div>
@@ -649,6 +654,7 @@
       <div class="pill-tabs" style="margin-bottom:20px;width:fit-content">
         <button class="pill-tab active" id="lgTabIndividual" onclick="setLgMode('individual')">Individual</button>
         <button class="pill-tab" id="lgTabCampaign" onclick="setLgMode('campaign')">Campaign / Channel</button>
+        <button class="pill-tab" id="lgTabClient" onclick="setLgMode('client')">Client</button>
       </div>
 
       <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
@@ -687,16 +693,42 @@
             <div class="form-grid-2">
               <div class="form-group">
                 <label>Source <span style="color:var(--text-muted);font-weight:400">(required)</span></label>
-                <input type="text" id="lgSource" placeholder="instagram, whatsapp, email, flyer…" />
+                <input type="text" id="lgSource" list="lgSourceList" placeholder="Instagram, WhatsApp, Email…" autocomplete="off" />
+                <datalist id="lgSourceList">
+                  <option value="Instagram"><option value="WhatsApp"><option value="Facebook">
+                  <option value="LinkedIn"><option value="Email"><option value="Flyer">
+                  <option value="Word of Mouth"><option value="TikTok"><option value="Twitter / X">
+                </datalist>
               </div>
               <div class="form-group">
                 <label>Medium <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
-                <input type="text" id="lgMedium" placeholder="social, paid, print, email…" />
+                <input type="text" id="lgMedium" list="lgMediumList" placeholder="Paid, Organic, Social…" autocomplete="off" />
+                <datalist id="lgMediumList">
+                  <option value="Paid"><option value="Organic"><option value="Social">
+                  <option value="Email"><option value="Print"><option value="Referral">
+                  <option value="Influencer"><option value="Partnership">
+                </datalist>
               </div>
               <div class="form-group" style="grid-column:1/-1">
-                <label>Campaign <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
-                <input type="text" id="lgCampaign" placeholder="ramadan_2026, jvc_launch…" />
+                <label>Campaign Name <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+                <input type="text" id="lgCampaign" placeholder="Eid 2026, JVC Launch, Ramadan…" />
               </div>
+            </div>
+            <div style="margin-top:4px;padding:10px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;font-size:12px;color:#1d4ed8">
+              Generates a clean serial link e.g. <strong>?cmp=012</strong>. Source/medium/campaign details are stored in the registry, not in the URL.
+            </div>
+          </div>
+
+          <!-- CLIENT fields -->
+          <div id="lgModeClient" class="hidden">
+            <div class="form-group">
+              <label>Organization</label>
+              <select id="lgClientOrg" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:white">
+                <option value="">Select organization…</option>
+              </select>
+            </div>
+            <div style="margin-top:4px;padding:10px 12px;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;font-size:12px;color:#6d28d9">
+              Generates a client-specific link e.g. <strong>/?client=damac</strong>.
             </div>
           </div>
 
@@ -735,8 +767,8 @@
             <div style="margin-bottom:7px">
               <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">Dots</div>
               <div style="display:flex;flex-wrap:wrap;gap:3px">
-                <button class="qr-style-btn active" data-key="dot" data-val="rounded" onclick="lgQrStyle(this)">Rounded</button>
-                <button class="qr-style-btn" data-key="dot" data-val="dots" onclick="lgQrStyle(this)">Dots</button>
+                <button class="qr-style-btn" data-key="dot" data-val="rounded" onclick="lgQrStyle(this)">Rounded</button>
+                <button class="qr-style-btn active" data-key="dot" data-val="dots" onclick="lgQrStyle(this)">Dots</button>
                 <button class="qr-style-btn" data-key="dot" data-val="square" onclick="lgQrStyle(this)">Square</button>
                 <button class="qr-style-btn" data-key="dot" data-val="classy" onclick="lgQrStyle(this)">Classy</button>
               </div>
@@ -752,8 +784,8 @@
             <div style="margin-bottom:7px">
               <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">Eye inner</div>
               <div style="display:flex;flex-wrap:wrap;gap:3px">
-                <button class="qr-style-btn active" data-key="cdot" data-val="dot" onclick="lgQrStyle(this)">Dot</button>
-                <button class="qr-style-btn" data-key="cdot" data-val="square" onclick="lgQrStyle(this)">Square</button>
+                <button class="qr-style-btn" data-key="cdot" data-val="dot" onclick="lgQrStyle(this)">Dot</button>
+                <button class="qr-style-btn active" data-key="cdot" data-val="square" onclick="lgQrStyle(this)">Square</button>
               </div>
             </div>
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:4px">
@@ -1510,9 +1542,9 @@ function renderAcquisitionList(items, key) {
   const max = items[0]?.count || 1
   return `<ul class="loc-list loc-scroll">${items.map(it => {
     const label = it[key] || '—'
-    const nameAttr = it.name ? ` title="${esc(it.name)}"` : ''
+    const tipAttr = it.name ? ` data-tip="${esc(it.name)}"` : ''
     return `<li>
-      <span style="min-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:13px;cursor:${it.name?'help':'default'}"${nameAttr}>${esc(label)}</span>
+      <span style="min-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:13px;cursor:${it.name?'help':'default'}"${tipAttr}>${esc(label)}</span>
       <div class="loc-bar-wrap"><div class="loc-bar"><div class="loc-bar-inner" style="width:${Math.round(it.count/max*100)}%"></div></div></div>
       <span class="loc-count">${it.count} (${it.pct??0}%)</span>
     </li>`
@@ -1738,7 +1770,10 @@ function buildHeatmapGrid(mode, sbCharts, an) {
     hourData.forEach(h => { if (h.hour_num >= 0 && h.hour_num < 24) hourArr[h.hour_num] = h.count })
   } else {
     dowArr = an?.dowVisitors || [0,0,0,0,0,0,0]
-    hourArr = new Array(24).fill(1)
+    hourArr = new Array(24).fill(0).map((_, h) => {
+      // Use gaussian bell centered at 9am to give slight hourly variation in analytics mode
+      return 0.3 + 0.7 * Math.exp(-0.5 * Math.pow((h - 10) / 4, 2))
+    })
   }
   const maxDow = Math.max(1, ...dowArr)
   const maxHour = Math.max(1, ...hourArr)
@@ -1767,8 +1802,8 @@ function buildHeatmapGrid(mode, sbCharts, an) {
       const intensity = isDB ? normDow[d] * normHour[h] : normDow[d]
       const bg = cellColor(intensity)
       const tipText = isDB
-        ? `${days[d]} at ${hourLabels[h]} — ${dowArr[d]} submissions on ${days[d]}s · ${hourArr[h]} submissions at ${hourLabels[h]}`
-        : `${days[d]} at ${hourLabels[h]} — ${dowArr[d]} visitors on ${days[d]}s`
+        ? `${days[d]} at ${hourLabels[h]} — ${Math.round(normDow[d]*normHour[h]*100)}% relative activity (${dowArr[d]} all-time submissions on ${days[d]}s · ${hourArr[h]} all-time at ${hourLabels[h]})`
+        : `${days[d]} at ${hourLabels[h]} — ${Math.round(normDow[d]*100)}% of peak (${dowArr[d]} visitors on ${days[d]}s; no hourly data in archive)`
       html += `<div style="height:8px;background:${bg};border-radius:1px;cursor:default" data-tip="${tipText}"></div>`
     }
     html += `</div>`
@@ -1865,6 +1900,8 @@ function renderBarChart(id, labels, values, color) {
 let orgsCache = []
 let locsCache = []
 let selectedOrgId = null
+let orgSortCol = 'org_name'
+let orgSortDir = 'asc'
 
 async function loadOrgs() {
   document.getElementById('orgTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Loading…</td></tr>'
@@ -1879,7 +1916,12 @@ async function loadOrgs() {
 function renderOrgsTable() {
   const tbody = document.getElementById('orgTableBody')
   if (!orgsCache.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">No organizations yet</td></tr>'; return }
-  tbody.innerHTML = orgsCache.map(o => {
+  const sortedOrgs = [...orgsCache].sort((a, b) => {
+    const va = (a[orgSortCol] || '').toLowerCase()
+    const vb = (b[orgSortCol] || '').toLowerCase()
+    return orgSortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va)
+  })
+  tbody.innerHTML = sortedOrgs.map(o => {
     const locCount = locsCache.filter(l => l.org_id === o.org_id).length
     const isSelected = o.org_id === selectedOrgId
     return `<tr style="cursor:pointer;background:${isSelected?'var(--green-light)':'white'}" onclick="selectOrg(${o.org_id})">
@@ -1965,8 +2007,11 @@ async function addOrgLocation() {
   const ll   = document.getElementById('newLocLatLng')?.value?.trim()
   const errEl = document.getElementById('orgLocError')
   errEl.textContent = ''
-  if (!name) { errEl.textContent = 'Location name required'; return }
-  const data = await apiPost('org_locations.add', { orgId: selectedOrgId, locationName: name, locationLatlng: ll || null })
+  if (!name) { errEl.textContent = 'Location name is required'; return }
+  if (!ll) { errEl.textContent = 'Lat/Lng coordinates are required (right-click on Google Maps to get them)'; return }
+  const dupCheck = locsCache.some(l => l.org_id === selectedOrgId && l.location_name.toLowerCase() === name.toLowerCase())
+  if (dupCheck) { errEl.textContent = 'A location with this name already exists for this organization'; return }
+  const data = await apiPost('org_locations.add', { orgId: selectedOrgId, locationName: name, locationLatlng: ll })
   if (!data.success) { errEl.textContent = data.error || 'Failed'; return }
   locsCache.push(data.location)
   document.getElementById('newLocName').value = ''
@@ -2006,6 +2051,12 @@ async function toggleOrgActive(orgId, newState) {
   if (org) org.is_active = newState
   renderOrgsTable()
   showToast(`Organization ${newState ? 'activated' : 'deactivated'}`, 'success')
+}
+
+function sortOrgTable(col) {
+  if (orgSortCol === col) orgSortDir = orgSortDir === 'asc' ? 'desc' : 'asc'
+  else { orgSortCol = col; orgSortDir = 'asc' }
+  renderOrgsTable()
 }
 
 async function setGrowthPeriod(period) {
@@ -2526,6 +2577,8 @@ function lgGetRegistry() {
   } catch { return [] }
 }
 function lgSaveRegistry(r) { localStorage.setItem('lgRegistry', JSON.stringify(r)) }
+function lgGetCmpCounter()  { return parseInt(localStorage.getItem('lgCmpCounter') || '0') }
+function lgNextCmpSerial()  { const n = lgGetCmpCounter() + 1; localStorage.setItem('lgCmpCounter', n); return n }
 
 function lgResetOutput() {
   document.getElementById('lgOutputWrap').style.display = 'none'
@@ -2538,8 +2591,11 @@ function setLgMode(mode) {
   lgMode = mode
   document.getElementById('lgTabIndividual').classList.toggle('active', mode === 'individual')
   document.getElementById('lgTabCampaign').classList.toggle('active', mode === 'campaign')
+  document.getElementById('lgTabClient').classList.toggle('active', mode === 'client')
   document.getElementById('lgModeIndividual').classList.toggle('hidden', mode !== 'individual')
   document.getElementById('lgModeCampaign').classList.toggle('hidden', mode !== 'campaign')
+  document.getElementById('lgModeClient').classList.toggle('hidden', mode !== 'client')
+  if (mode === 'client') lgLoadClientOrgs()
   lgResetOutput()
 }
 
@@ -2558,23 +2614,25 @@ function lgBuild() {
     const serial = String(next).padStart(3, '0')
     url = `${base}?ref=${serial}`
     qrLabel = `ref ${serial}`
-  } else {
-    const src = document.getElementById('lgSource').value.trim().replace(/\s+/g,'_')
+  } else if (lgMode === 'campaign') {
+    const src = document.getElementById('lgSource').value.trim()
     if (!src) { alert('Source is required.'); return }
-    const med = document.getElementById('lgMedium').value.trim().replace(/\s+/g,'_')
-    const cam = document.getElementById('lgCampaign').value.trim().replace(/\s+/g,'_')
-    const p = new URLSearchParams()
-    p.set('utm_source', src)
-    if (med) p.set('utm_medium', med)
-    if (cam) p.set('utm_campaign', cam)
-    url = `${base}?${p.toString()}`
-    qrLabel = [src, cam].filter(Boolean).join(' · ')
+    const next = lgGetCmpCounter() + 1
+    const serial = String(next).padStart(3, '0')
+    url = `${base}?cmp=${serial}`
+    qrLabel = `cmp ${serial}`
+  } else if (lgMode === 'client') {
+    const sel = document.getElementById('lgClientOrg')
+    const orgCode = sel?.value
+    const orgName = sel?.options[sel.selectedIndex]?.text
+    if (!orgCode) { alert('Please select an organization.'); return }
+    url = `${base}/?client=${orgCode}`
+    qrLabel = orgName || orgCode
   }
 
   document.getElementById('lgOutput').value = url
   document.getElementById('lgOutputWrap').style.display = 'block'
   document.getElementById('lgCopyMsg').textContent = ''
-  // Reset Copy & Save button so a fresh generate allows saving again
   const copyBtn = document.getElementById('lgCopyBtn')
   copyBtn.disabled = false
   copyBtn.textContent = 'Copy & Save'
@@ -2587,7 +2645,7 @@ function lgBuild() {
 let lgQrCanvas    = null   // the final composited <canvas> element
 let lgQrLastUrl   = ''
 let lgQrLastSub   = ''
-let lgQrStyleOpts = { dot: 'rounded', csq: 'extra-rounded', cdot: 'dot' }
+let lgQrStyleOpts = { dot: 'dots', csq: 'extra-rounded', cdot: 'square' }
 
 function lgQrStyle(btn) {
   const key = btn.dataset.key, val = btn.dataset.val
@@ -2617,7 +2675,7 @@ async function lgRenderQR(url, sub) {
     dotsOptions:          { color: '#15803d', type: lgQrStyleOpts.dot },
     cornersSquareOptions: { color: '#15803d', type: lgQrStyleOpts.csq },
     cornersDotOptions:    { color: '#166534', type: lgQrStyleOpts.cdot },
-    backgroundOptions:    { color: '#ffffff' }
+    backgroundOptions:    { color: 'rgba(0,0,0,0)' }
   })
   const qrBlob = await qr.getRawData('png')
 
@@ -2632,7 +2690,7 @@ async function lgRenderQR(url, sub) {
   // Step 3: composite logo if enabled
   if (showLogo) {
     const targetSize = Math.round(SIZE * 0.28)  // artwork target size on QR canvas
-    const pad = Math.round(SIZE * 0.006)         // ~4px at 600px — just enough to clear the artwork edge
+    const pad = Math.round(SIZE * 0.002)         // ~1px at 600px — tight margin
     const cx = SIZE / 2, cy = SIZE / 2
     try {
       const logo = new Image()
@@ -2675,16 +2733,15 @@ async function lgRenderQR(url, sub) {
     } catch (e) { console.warn('[lgRenderQR] logo failed', e) }
   }
 
-  // Step 4: draw URL label below QR
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, SIZE, SIZE, TEXT_H)
+  // Step 4: draw URL label below QR (transparent background, green text)
   await document.fonts.ready
   const fontSize = Math.round(SIZE * 0.052)
   ctx.font = `600 ${fontSize}px Inter, -apple-system, BlinkMacSystemFont, Arial, sans-serif`
   ctx.fillStyle = '#15803d'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  ctx.fillText('www.communitycarpool.org', SIZE / 2, SIZE + TEXT_H / 2)
+  const footerText = url.replace(/^https?:\/\//, '')
+  ctx.fillText(footerText, SIZE / 2, SIZE + TEXT_H / 2)
 
   wrap.appendChild(canvas)
   lgQrCanvas = canvas
@@ -2743,37 +2800,41 @@ function lgCopy() {
     document.getElementById('lgCopyMsg').textContent = '✓ Copied & saved!'
     setTimeout(() => document.getElementById('lgCopyMsg').textContent = '', 2500)
 
-    let display, ref = null, finalUrl = url
+    let personCampaignName = null, source = null, medium = null, ref = null, finalUrl = url
     if (lgMode === 'individual') {
-      const name   = document.getElementById('lgIndivName').value.trim()
-      const serial = lgNextSerial()  // increment only on first save
+      personCampaignName = document.getElementById('lgIndivName').value.trim()
+      const serial = lgNextSerial()
       ref          = String(serial).padStart(3, '0')
-      display      = `#${ref} — ${name}`
-      // Rebuild URL with committed serial
-      const base = lgGetBase()
-      finalUrl = `${base}?ref=${ref}`
+      const base   = lgGetBase()
+      finalUrl     = `${base}?ref=${ref}`
       document.getElementById('lgOutput').value = finalUrl
       lgRenderQR(finalUrl, `ref ${ref}`)
-    } else {
-      const src = document.getElementById('lgSource').value.trim()
-      const cam = document.getElementById('lgCampaign').value.trim()
-      display   = [src, cam].filter(Boolean).join(' · ')
+    } else if (lgMode === 'campaign') {
+      source             = document.getElementById('lgSource').value.trim()
+      medium             = document.getElementById('lgMedium').value.trim() || null
+      personCampaignName = document.getElementById('lgCampaign').value.trim() || null
+      const serial       = lgNextCmpSerial()
+      ref                = String(serial).padStart(3, '0')
+      const base         = lgGetBase()
+      finalUrl           = `${base}?cmp=${ref}`
+      document.getElementById('lgOutput').value = finalUrl
+      lgRenderQR(finalUrl, `cmp ${ref}`)
+    } else if (lgMode === 'client') {
+      const sel          = document.getElementById('lgClientOrg')
+      personCampaignName = sel?.options[sel.selectedIndex]?.text || null
     }
 
     const registry = lgGetRegistry()
-    const entry = { display, url: finalUrl, mode: lgMode, ref, ts: Date.now() }
-    // Prevent duplicates — skip if URL already exists
+    const entry = { personCampaignName, source, medium, url: finalUrl, mode: lgMode, ref, ts: Date.now() }
     if (!registry.some(h => h.url === finalUrl)) {
       registry.unshift(entry)
       lgSaveRegistry(registry)
     }
-    // Optimistically update in-memory list so the new entry shows instantly
     if (!lgCurrentLinks.some(h => h.url === finalUrl)) {
       lgCurrentLinks.unshift(entry)
     }
     lgRenderLinkList(document.getElementById('lgHistory'))
-    // Save to DB (async — localStorage already has it as fallback)
-    lgApiSave({ mode: lgMode, display, url: finalUrl, refCode: ref || undefined })
+    lgApiSave({ mode: lgMode, url: finalUrl, refCode: ref || undefined, source: source || undefined, medium: medium || undefined, personCampaignName: personCampaignName || undefined })
   })
 }
 
@@ -2785,7 +2846,10 @@ async function lgRenderHistory() {
     if (!data.success) throw new Error(data.error)
     // Normalise DB rows to same shape used in lgCurrentLinks
     lgCurrentLinks = (data.links || []).map(l => ({
-      display: l.display, url: l.url, mode: l.mode,
+      personCampaignName: l.person_campaign_name,
+      source: l.source,
+      medium: l.medium,
+      url: l.url, mode: l.mode,
       ref: l.ref_code, createdBy: l.created_by_name,
       ts: new Date(l.created_at).getTime()
     }))
@@ -2805,12 +2869,22 @@ function lgRenderLinkList(el) {
     el.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">No links saved yet.</div>'
     return
   }
-  el.innerHTML = lgCurrentLinks.map((h, i) => `
+  el.innerHTML = lgCurrentLinks.map((h, i) => {
+    const modeColors = { individual: ['#f0fdf4','var(--green-dark)'], campaign: ['#eff6ff','#1d4ed8'], client: ['#f5f3ff','#6d28d9'] }
+    const [bg, fg] = modeColors[h.mode] || ['#f3f4f6','#374151']
+    const modeLabel = h.mode === 'individual' ? 'Individual' : h.mode === 'campaign' ? 'Campaign' : 'Client'
+    let label = ''
+    if (h.mode === 'campaign') {
+      label = [h.source, h.medium ? `(${h.medium})` : '', h.personCampaignName].filter(Boolean).join(' · ')
+    } else {
+      label = h.personCampaignName || h.ref || '—'
+    }
+    return `
     <div style="background:#f9fafb;border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap">
-          <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:${h.mode==='individual'?'#f0fdf4':'#eff6ff'};color:${h.mode==='individual'?'var(--green-dark)':'#1d4ed8'}">${h.mode==='individual'?'Individual':'Campaign'}</span>
-          <span style="font-size:12px;font-weight:600;color:var(--text)">${esc(h.display)}</span>
+          <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:${bg};color:${fg}">${modeLabel}</span>
+          <span style="font-size:12px;font-weight:600;color:var(--text)">${esc(label)}</span>
           ${h.createdBy ? `<span style="font-size:11px;color:var(--text-muted)">· ${esc(h.createdBy)}</span>` : ''}
         </div>
         <div style="font-size:11px;font-family:monospace;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(h.url)}</div>
@@ -2819,7 +2893,8 @@ function lgRenderLinkList(el) {
         <button class="btn btn-ghost btn-sm" style="font-size:11px" data-idx="${i}" onclick="lgHistoryCopy(this)">Copy URL</button>
         <button class="btn btn-ghost btn-sm" style="font-size:11px" data-idx="${i}" onclick="lgRegenQR(this)">↻ QR</button>
       </div>
-    </div>`).join('')
+    </div>`
+  }).join('')
 }
 
 function lgHistoryCopy(btn) {
@@ -2834,17 +2909,38 @@ function lgHistoryCopy(btn) {
 function lgRegenQR(btn) {
   const entry = lgCurrentLinks[parseInt(btn.dataset.idx)]
   if (!entry) return
-  lgRenderQR(entry.url, entry.display)
+  const label = entry.mode === 'campaign'
+    ? [entry.source, entry.personCampaignName].filter(Boolean).join(' · ')
+    : (entry.personCampaignName || entry.ref || entry.url)
+  lgRenderQR(entry.url, label)
   // Scroll QR panel into view
   document.getElementById('lgQrWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' })
 }
 
-async function lgApiSave(entry) {
+async function lgApiSave({ mode, url, refCode, source, medium, personCampaignName }) {
   try {
-    await apiPost('links.save', entry)
+    await apiPost('links.save', { mode, url, refCode, source, medium, personCampaignName })
   } catch (e) {
     console.warn('[lgApiSave]', e)
   }
+}
+
+async function lgLoadClientOrgs() {
+  const sel = document.getElementById('lgClientOrg')
+  if (!sel) return
+  if (sel.options.length > 1) return  // already loaded
+  try {
+    const data = await apiPost('orgs.list_active', {})
+    if (data.success && data.orgs?.length) {
+      sel.innerHTML = '<option value="">Select organization…</option>'
+      data.orgs.forEach(o => {
+        const opt = document.createElement('option')
+        opt.value = o.org_code
+        opt.textContent = o.org_name
+        sel.appendChild(opt)
+      })
+    }
+  } catch(e) { console.warn('[lgLoadClientOrgs]', e) }
 }
 
 function lgClearHistory() {
