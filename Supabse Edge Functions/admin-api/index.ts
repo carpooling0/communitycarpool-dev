@@ -123,8 +123,11 @@ Deno.serve(async (req) => {
     // ── METRICS (all roles) ────────────────────────────────────────────────────
     if (action === 'metrics') {
       const period = body.period || 'weeks'
+      const rpcParams: Record<string, any> = {}
+      if (body.startDate) rpcParams.p_start = body.startDate
+      if (body.endDate)   rpcParams.p_end   = body.endDate
       const [metricsRes, chartRes] = await Promise.all([
-        supabase.rpc('get_admin_metrics'),
+        supabase.rpc('get_admin_metrics', rpcParams),
         supabase.rpc('get_admin_growth_chart', { p_period: period, p_start: body.startDate || null, p_end: body.endDate || null })
       ])
       if (metricsRes.error) throw metricsRes.error

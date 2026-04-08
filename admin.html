@@ -469,12 +469,14 @@
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <select class="an-range-select" id="dashRange" onchange="onDashRangeChange()">
+            <option value="all" selected>All time</option>
+            <option value="today">Today</option>
+            <option value="24h">Last 24 hours</option>
             <option value="7d">Last 7 days</option>
-            <option value="30d" selected>Last 30 days</option>
+            <option value="30d">Last 30 days</option>
             <option value="90d">Last 90 days</option>
             <option value="6m">Last 6 months</option>
             <option value="12m">Last 12 months</option>
-            <option value="all">All time</option>
             <option value="custom">Custom…</option>
           </select>
           <span id="dashCustomWrap" class="hidden" style="display:flex;align-items:center;gap:6px">
@@ -1390,23 +1392,45 @@ function toggleSidebar() { document.getElementById('sidebar').classList.toggle('
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════
 function getDashRange() {
-  const range = document.getElementById('dashRange')?.value || '30d'
+  const range = document.getElementById('dashRange')?.value || 'all'
+  const now = new Date()
+  const todayMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  const todayStr = new Date(todayMs).toISOString().slice(0, 10)
+
   if (range === 'custom') {
     const from = document.getElementById('dashDateFrom')?.value
     const to   = document.getElementById('dashDateTo')?.value
     if (!from || !to) return null
-    return { fromDate: from, toDate: to }
+    return { fromDate: from, toDate: to, startIso: from + 'T00:00:00.000Z', endIso: to + 'T23:59:59.999Z' }
   }
-  const now = new Date()
-  const todayMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  if (range === 'all') {
+    return { fromDate: '2025-01-01', toDate: todayStr, startIso: null, endIso: null }
+  }
+  if (range === 'today') {
+    return { fromDate: todayStr, toDate: todayStr,
+      startIso: new Date(todayMs).toISOString(), endIso: new Date(todayMs + 86399999).toISOString() }
+  }
+  if (range === '24h') {
+    const start = new Date(now.getTime() - 86400000)
+    return { fromDate: start.toISOString().slice(0, 10), toDate: todayStr,
+      startIso: start.toISOString(), endIso: now.toISOString() }
+  }
+
   let startMs
   if      (range === '7d')  startMs = todayMs - 6*86400000
   else if (range === '30d') startMs = todayMs - 29*86400000
   else if (range === '90d') startMs = todayMs - 89*86400000
   else if (range === '6m')  startMs = todayMs - 179*86400000
   else if (range === '12m') startMs = todayMs - 364*86400000
-  else                      startMs = new Date('2025-01-01').getTime()
-  return { fromDate: new Date(startMs).toISOString().slice(0,10), toDate: new Date(todayMs).toISOString().slice(0,10) }
+  else startMs = new Date('2025-01-01').getTime()
+
+  return {
+    fromDate: new Date(startMs).toISOString().slice(0, 10),
+    toDate:   todayStr,
+    startIso: new Date(startMs).toISOString(),
+    endIso:   new Date(todayMs + 86399999).toISOString()
+  }
+
 }
 
 function onDashRangeChange() {
@@ -1471,8 +1495,9 @@ async function loadDashAnalytics() {
 async function loadDashboard() {
   document.getElementById('dashboardContent').innerHTML = '<div class="loading"><span class="spinner"></span>Loading metrics…</div>'
   try {
+    const range = getDashRange()
     const [data, an] = await Promise.all([
-      apiPost('metrics', { period: growthPeriod }),
+      apiPost('metrics', { period: growthPeriod, startDate: range?.startIso || null, endDate: range?.endIso || null }),
       loadDashAnalytics()
     ])
     if (!data.success) throw new Error(data.error || 'Failed')
