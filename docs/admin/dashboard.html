@@ -195,12 +195,31 @@
       </tbody>
     </table>
 
+    <h2 id="date-filter">Date filter</h2>
+    <p>A date range selector at the top of the dashboard controls which period is shown in the chart panels. It defaults to <strong>All Time</strong>. Available options:</p>
+    <table>
+      <thead><tr><th>Option</th><th>What it covers</th></tr></thead>
+      <tbody>
+        <tr><td><strong>All Time</strong> (default)</td><td>Every submission from platform launch to today. KPI cards always show all-time figures regardless of this setting.</td></tr>
+        <tr><td><strong>Today</strong></td><td>Since 00:00 midnight UTC today. Useful for seeing same-day sign-up spikes after a campaign launch.</td></tr>
+        <tr><td><strong>Last 24 hours</strong></td><td>Rolling 24-hour window ending right now. Different from "Today" — it includes yesterday's late submissions.</td></tr>
+        <tr><td><strong>Last 7 / 30 / 90 days</strong></td><td>Standard rolling windows for short and medium trend analysis.</td></tr>
+        <tr><td><strong>Last 6 / 12 months</strong></td><td>Longer trend views for quarterly and annual reporting.</td></tr>
+        <tr><td><strong>Custom…</strong></td><td>Pick any start and end date.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body"><strong>What the date filter affects:</strong> All chart panels in Rows 6–8 (Top Countries, Top Cities, Behavioural Patterns, Match Strength, Distance Breakdown, Organisation Breakdown, Referral Sources) are filtered by this date range. The five KPI cards (Row 1) and the journey &amp; matching quality cards (Rows 3–5) always show all-time figures — they are not affected by the date filter.</div>
+    </div>
+
     <h2>Rows 6–8 — Charts and operational health</h2>
-    <p>The lower portion of the dashboard contains a set of charts and summary panels for deeper analysis. These are read-only reference panels.</p>
+    <p>The lower portion of the dashboard contains a set of charts and summary panels for deeper analysis. All charts in this section respond to the date filter. These are read-only reference panels.</p>
     <ul>
       <li><strong>Match strength distribution</strong> — bar chart breaking down all matches into High / Medium / Low strength bands. A distribution skewed heavily toward Low suggests the matching radius may be capturing poor-fit pairs.</li>
-      <li><strong>Top countries / cities</strong> — where users are located. Useful for understanding geographic coverage and informing where to focus outreach.</li>
-      <li><strong>Submissions by day / hour</strong> — heatmap or bar chart showing when users typically submit journeys. Useful for timing campaigns and communications.</li>
+      <li><strong>Top countries / cities</strong> — where users are located. Useful for understanding geographic coverage and informing where to focus outreach. Country codes are normalised (e.g. <code>ae</code> and <code>AE</code> are merged into UAE).</li>
+      <li><strong>Behavioural Patterns (heatmap)</strong> — shows when users are active. In <strong>Supabase mode</strong> (submission patterns), data is always all-time regardless of the date filter. In <strong>Analytics mode</strong> (website visitor patterns), data follows the date filter and is sourced from the <code>analytics_daily</code> table.</li>
       <li><strong>Distance preference breakdown</strong> — how users have set their maximum acceptable distance. Helps identify whether tightening or relaxing the default distance would improve match rates.</li>
       <li><strong>Ticket resolution time</strong> — average days between ticket creation and closure. Use this to monitor whether tickets are being handled in a timely manner.</li>
       <li><strong>Organisation breakdown</strong> — how many users are attributed to each partner organisation. Useful for reporting to org partners.</li>

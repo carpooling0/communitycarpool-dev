@@ -110,7 +110,7 @@
     <div class="sa-badge">🔒 Super-Admin Only</div>
     <div class="article-eyebrow">⚡ Edge Functions &amp; Automation</div>
     <h1 class="article-title">Cron jobs &amp; scheduled tasks</h1>
-    <p class="article-lead">Two edge functions run on a schedule via Supabase's built-in cron scheduler (powered by pg_cron): one sends match notification emails, the other processes pending account deletions. All scheduled times are in UTC.</p>
+    <p class="article-lead">Three edge functions run on a schedule via Supabase's built-in cron scheduler (powered by pg_cron): one sends match notification emails, one processes pending account deletions, and one syncs daily analytics from Umami into the <code>analytics_daily</code> table. All scheduled times are in UTC.</p>
 
     <h2>Scheduled functions</h2>
     <table>
@@ -135,6 +135,12 @@
           <td>—</td>
           <td>Sends match notification emails to users with status <code>new</code> or <code>notified</code> that haven't been emailed yet. Respects testing_mode.</td>
         </tr>
+        <tr>
+          <td><code>sync-analytics</code></td>
+          <td><code>5 0 * * *</code><br/>(daily at 00:05 UTC)</td>
+          <td>04:05 GMT+4 daily</td>
+          <td>Fetches the previous day's analytics data from Umami (pageviews, sessions, hourly breakdown, country/referrer/device splits) and writes it to the <code>analytics_daily</code> table. This decouples the admin dashboard from the live Umami API and provides a permanent archive of traffic data beyond Umami's 6-month retention window.</td>
+        </tr>
       </tbody>
     </table>
 
@@ -153,8 +159,9 @@
 0 6 * * 1</code></pre>
 
     <h2>How cron jobs authenticate</h2>
-    <p>Both scheduled functions have <code>verify_jwt: true</code>. When Supabase's scheduler invokes an edge function internally, it automatically provides a valid service-level JWT — no manual configuration is needed. This means the cron trigger is privileged and the functions can access the database with the service role.</p>
-    <p>If you were to call these functions manually from the browser with only the anon key, you would get a 401 — which is the intended security behaviour. Only the scheduler (or a client with the service role key) can invoke them successfully.</p>
+    <p><code>process-deletions</code> and <code>batch-send-emails</code> have <code>verify_jwt: true</code> and are invoked directly by Supabase's scheduler with a service-level JWT — no manual configuration needed.</p>
+    <p><code>sync-analytics</code> works differently: the pg_cron job calls the edge function via <code>net.http_post</code> with a shared secret in the request body. The function reads the <code>SYNC_SECRET</code> environment variable and rejects any request where the secret doesn't match. This allows the cron job to authenticate without needing JWT infrastructure. See <a href="secrets.html">Secrets &amp; API keys</a> for the <code>SYNC_SECRET</code> setup.</p>
+    <p>If you were to call <code>process-deletions</code> or <code>batch-send-emails</code> manually from the browser with only the anon key, you would get a 401. <code>sync-analytics</code> can be called manually with the correct <code>secret</code> in the JSON body.</p>
 
     <h2>Viewing and managing cron jobs</h2>
     <h3>Via Supabase dashboard</h3>

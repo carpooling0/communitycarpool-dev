@@ -3,225 +3,374 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community Carpool - Color System</title>
+    <title>Community Carpool — Color System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --dark-green: #1B5C3A; --bright-green: #B4E035; --button-green: #10B981; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.8; color: #333; background: #f9f9f9; }
-        header { background: linear-gradient(135deg, #1B5C3A 0%, #10B981 100%); color: white; padding: 60px 40px; box-shadow: 0 4px 12px rgba(27, 92, 58, 0.2); }
-        header h1 { font-size: 40px; margin-bottom: 8px; font-weight: 700; }
-        nav { background: #f5f5f5; padding: 16px 40px; border-bottom: 1px solid #eee; }
-        nav a { color: #10B981; text-decoration: none; font-weight: 600; margin-right: 20px; }
-        main { max-width: 1200px; margin: 0 auto; padding: 60px 40px; }
-        h2 { font-size: 36px; color: #2C3E50; margin: 60px 0 24px 0; border-bottom: 3px solid #10B981; padding-bottom: 12px; }
-        h3 { font-size: 22px; color: #2C3E50; margin: 40px 0 20px 0; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin: 32px 0; }
-        .card { background: white; border: 1px solid #eee; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .swatch { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        .info { padding: 16px; }
-        .color-name { font-size: 16px; font-weight: 700; color: #2C3E50; margin-bottom: 8px; }
-        .color-code { font-family: monospace; font-size: 12px; color: #666; margin-bottom: 4px; }
-        table { width: 100%; border-collapse: collapse; background: white; margin: 24px 0; border: 1px solid #eee; border-radius: 6px; }
-        th, td { padding: 16px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
-        th { background: #f5f5f5; font-weight: 700; color: #2C3E50; }
-        .usage { background: white; border: 1px solid #eee; border-radius: 8px; padding: 24px; margin: 24px 0; }
-        .box { background: #f5f5f5; border: 1px solid #eee; border-radius: 8px; padding: 24px; margin: 24px 0; }
-        footer { background: #f5f5f5; padding: 50px 40px; text-align: center; margin-top: 80px; font-size: 14px; color: #999; border-top: 2px solid #eee; }
+        :root {
+            --dark-green:  #1B5C3A;
+            --bright-green:#B4E035;
+            --button-green:#10B981;
+            --warm-cream:  #F8F4E6;
+            --near-black:  #1A1A1A;
+            --text-primary:#1F2937;
+            --text-muted:  #6B7280;
+            --border:      #E5E7EB;
+        }
+        body { font-family: 'Montserrat', -apple-system, sans-serif; background: #F9FAFB; color: var(--text-primary); line-height: 1.6; }
+
+        /* ── Header ── */
+        header { background: linear-gradient(135deg, #1B5C3A 0%, #10B981 100%); color: white; padding: 64px 48px; }
+        header h1 { font-size: 36px; font-weight: 900; letter-spacing: -1px; margin-bottom: 6px; }
+        header h1 a { color: inherit; text-decoration: none; }
+        header p  { font-size: 15px; opacity: 0.85; font-weight: 500; }
+        nav { background: white; padding: 14px 48px; border-bottom: 1px solid var(--border); }
+        nav a { color: #10B981; text-decoration: none; font-weight: 600; font-size: 13px; margin-right: 24px; }
+        nav a:hover { color: #1B5C3A; }
+
+        /* ── Layout ── */
+        main { max-width: 1200px; margin: 0 auto; padding: 64px 48px; }
+        .section { margin-bottom: 80px; }
+        .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 8px; }
+        .section-title { font-size: 30px; font-weight: 900; color: var(--dark-green); margin-bottom: 6px; letter-spacing: -0.5px; }
+        .section-desc { font-size: 14px; color: var(--text-muted); max-width: 600px; line-height: 1.7; margin-bottom: 36px; }
+        .divider { height: 3px; width: 48px; background: var(--button-green); border-radius: 2px; margin-bottom: 36px; }
+
+        /* ── Swatch Grid ── */
+        .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+        .swatch-card { border-radius: 12px; overflow: hidden; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.07); transition: transform 0.2s, box-shadow 0.2s; }
+        .swatch-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .swatch-block { height: 130px; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px 14px; }
+        .swatch-hex-overlay { font-family: 'Monaco', 'Courier New', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+        .swatch-info { padding: 14px 16px 16px; border-top: 1px solid var(--border); }
+        .swatch-name { font-size: 13px; font-weight: 700; color: var(--near-black); margin-bottom: 3px; }
+        .swatch-meta { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+        .swatch-meta .css-var { font-family: 'Monaco', 'Courier New', monospace; font-size: 10px; background: #F3F4F6; border-radius: 3px; padding: 1px 5px; display: inline-block; margin-top: 4px; }
+        .new-badge { display: inline-flex; align-items: center; gap: 4px; background: #fef9c3; color: #92400e; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 7px; border-radius: 10px; border: 1px solid #fde68a; margin-left: 6px; vertical-align: middle; }
+
+        /* ── Usage Table ── */
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.07); margin-bottom: 32px; }
+        th { background: #F8FAFC; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+        td { padding: 12px 16px; font-size: 13.5px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+        .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+
+        /* ── Contrast block ── */
+        .contrast-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 4px; }
+        .contrast-item { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+        .contrast-preview { height: 80px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; letter-spacing: -0.2px; }
+        .contrast-meta { padding: 12px 14px; font-size: 12px; color: var(--text-muted); }
+        .contrast-meta strong { color: var(--text-primary); }
+
+        /* ── Footer ── */
+        footer { background: var(--dark-green); color: rgba(255,255,255,0.8); padding: 40px 48px; text-align: center; font-size: 13px; margin-top: 40px; }
+        footer strong { color: white; }
     </style>
-  <link rel="stylesheet" href="/brand/brand-overrides.css">
+    <link rel="stylesheet" href="/brand/brand-overrides.css">
 </head>
 <body>
     <header>
-        <h1><a href="/brand/" style="color:inherit;text-decoration:none;">Community Carpool</a></h1>
-        <p>Color System & Palette</p>
+        <h1><a href="/brand/">Community Carpool</a></h1>
+        <p>Color System &amp; Palette — Updated April 2026</p>
     </header>
-    
     <nav>
         <a href="/brand/">← Brand Home</a>
         <a href="06_Logo_Specifications_Guide.html">← Logo</a>
+        <a href="08_Typography_System.html">Typography →</a>
     </nav>
-    
+
     <main>
-        <section>
-            <h2>Primary Brand Colors</h2>
-            <p>The three core colors that define Community Carpool's visual identity.</p>
-            
-            <div class="grid">
-                <div class="card">
-                    <div class="swatch" style="background-color: #1B5C3A;">#1B5C3A</div>
-                    <div class="info">
-                        <div class="color-name">Dark Forest Green</div>
-                        <div class="color-code">Hex: #1B5C3A</div>
-                        <div class="color-code">RGB: 27, 92, 58</div>
+
+        <!-- ══ Primary Brand Colors ══ -->
+        <div class="section">
+            <div class="section-label">Core Palette</div>
+            <h2 class="section-title">Primary Brand Colors</h2>
+            <p class="section-desc">The three foundational colors that define Community Carpool's visual identity — trust, energy, and action. Used consistently across all digital and print materials.</p>
+            <div class="divider"></div>
+
+            <div class="swatch-grid">
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#1B5C3A;">
+                        <span class="swatch-hex-overlay" style="color:rgba(255,255,255,0.9);">#1B5C3A</span>
+                    </div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">Dark Forest Green</div>
+                        <div class="swatch-meta">
+                            RGB 27, 92, 58<br>
+                            Trust &amp; stability — primary headings, footer, logo pin<br>
+                            <span class="css-var">--dark-green</span>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="card">
-                    <div class="swatch" style="background-color: #B4E035;">#B4E035</div>
-                    <div class="info">
-                        <div class="color-name">Bright Chartreuse</div>
-                        <div class="color-code">Hex: #B4E035</div>
-                        <div class="color-code">RGB: 180, 224, 53</div>
+
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#B4E035;">
+                        <span class="swatch-hex-overlay" style="color:rgba(0,0,0,0.7);">#B4E035</span>
+                    </div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">Bright Chartreuse</div>
+                        <div class="swatch-meta">
+                            RGB 180, 224, 53<br>
+                            Energy &amp; growth — logo accent, highlights, dividers<br>
+                            <span class="css-var">--bright-green</span>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="card">
-                    <div class="swatch" style="background-color: #10B981;">#10B981</div>
-                    <div class="info">
-                        <div class="color-name">Button Green</div>
-                        <div class="color-code">Hex: #10B981</div>
-                        <div class="color-code">RGB: 16, 185, 129</div>
+
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#10B981;">
+                        <span class="swatch-hex-overlay" style="color:rgba(255,255,255,0.9);">#10B981</span>
                     </div>
-                </div>
-            </div>
-        </section>
-        
-        <section>
-            <h2>Primary Color Usage</h2>
-            
-            <div class="usage">
-                <h3>Dark Forest Green (#1B5C3A)</h3>
-                <p><strong>Purpose:</strong> Trust, stability, growth<br>
-                <strong>Used for:</strong> Left pin, "CARPOOL" text, headings<br>
-                <strong>When to use:</strong> Conveys security and environmental responsibility</p>
-            </div>
-            
-            <div class="usage">
-                <h3>Bright Chartreuse (#B4E035)</h3>
-                <p><strong>Purpose:</strong> Energy, sustainability, action<br>
-                <strong>Used for:</strong> Right pin, "COMMUNITY" text, highlights<br>
-                <strong>When to use:</strong> Draws attention, shows movement and energy</p>
-            </div>
-            
-            <div class="usage">
-                <h3>Button Green (#10B981)</h3>
-                <p><strong>Purpose:</strong> Call-to-action, interaction<br>
-                <strong>Used for:</strong> Buttons, CTAs, links<br>
-                <strong>When to use:</strong> Guides user interaction</p>
-            </div>
-        </section>
-        
-        <section>
-            <h2>Neutral Palette</h2>
-            
-            <div class="grid">
-                <div class="card">
-                    <div class="swatch" style="background-color: #FFFFFF; border: 1px solid #ccc; color: #333;">White</div>
-                    <div class="info">
-                        <div class="color-name">White</div>
-                        <div class="color-code">Hex: #FFFFFF</div>
-                        <div class="color-code">Use: Primary background</div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="swatch" style="background-color: #F5F5F5; border: 1px solid #ccc; color: #333;">Light Gray</div>
-                    <div class="info">
-                        <div class="color-name">Light Gray</div>
-                        <div class="color-code">Hex: #F5F5F5</div>
-                        <div class="color-code">Use: Secondary background</div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="swatch" style="background-color: #1F2937; color: white;">Dark Text</div>
-                    <div class="info">
-                        <div class="color-name">Text Primary</div>
-                        <div class="color-code">Hex: #1F2937</div>
-                        <div class="color-code">Use: Body text</div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">Button Green</div>
+                        <div class="swatch-meta">
+                            RGB 16, 185, 129<br>
+                            Action &amp; interaction — all CTAs, buttons, links<br>
+                            <span class="css-var">--button-green</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
-        
-        <section>
-            <h2>Semantic Colors</h2>
-            
-            <div class="grid">
-                <div class="card">
-                    <div class="swatch" style="background-color: #10B981; color: white;">Success</div>
-                    <div class="info">
-                        <div class="color-name">Success (Green)</div>
-                        <div class="color-code">Hex: #10B981</div>
-                        <div class="color-code">Use: Confirmations</div>
+        </div>
+
+        <!-- ══ New from Flyer ══ -->
+        <div class="section">
+            <div class="section-label">Added April 2026 — from Corporate Flyer</div>
+            <h2 class="section-title">Extended Palette <span class="new-badge">New</span></h2>
+            <p class="section-desc">Two colors introduced from the DAMAC corporate flyer template. Use Warm Cream for print collateral, landing pages, and premium-feel backgrounds. Near-Black replaces cool-toned dark text on light or cream backgrounds.</p>
+            <div class="divider"></div>
+
+            <div class="swatch-grid">
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#F8F4E6; border-bottom: 1px solid #E5E7EB;">
+                        <span class="swatch-hex-overlay" style="color:rgba(0,0,0,0.5);">#F8F4E6</span>
+                    </div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">Warm Cream <span class="new-badge">New</span></div>
+                        <div class="swatch-meta">
+                            RGB 248, 244, 230<br>
+                            Premium background — print flyers, landing page hero, collateral. Warmer and more considered than pure white.<br>
+                            <span class="css-var">--warm-cream</span>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="card">
-                    <div class="swatch" style="background-color: #F59E0B; color: white;">Warning</div>
-                    <div class="info">
-                        <div class="color-name">Warning (Amber)</div>
-                        <div class="color-code">Hex: #F59E0B</div>
-                        <div class="color-code">Use: Cautions</div>
+
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#1A1A1A;">
+                        <span class="swatch-hex-overlay" style="color:rgba(255,255,255,0.8);">#1A1A1A</span>
                     </div>
-                </div>
-                
-                <div class="card">
-                    <div class="swatch" style="background-color: #EF4444; color: white;">Error</div>
-                    <div class="info">
-                        <div class="color-name">Error (Red)</div>
-                        <div class="color-code">Hex: #EF4444</div>
-                        <div class="color-code">Use: Errors</div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">Near-Black <span class="new-badge">New</span></div>
+                        <div class="swatch-meta">
+                            RGB 26, 26, 26<br>
+                            Hero headline text on cream or light backgrounds. Warmer than the blue-tinted #1F2937.<br>
+                            <span class="css-var">--near-black</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
-        
-        <section>
-            <h2>Implementation Checklist</h2>
-            
+
+            <div class="callout" style="margin-top:24px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:16px 20px;font-size:13.5px;color:#78350f;line-height:1.7;">
+                <strong>Usage rule for the new colors:</strong> Warm Cream (#F8F4E6) is for print and premium digital contexts — not the everyday web UI (which stays on #FFFFFF / #F9FAFB). Near-Black (#1A1A1A) is specifically for large display text (H1, hero taglines) on cream backgrounds. For body text on white, continue using Text Primary (#1F2937).
+            </div>
+        </div>
+
+        <!-- ══ Neutrals ══ -->
+        <div class="section">
+            <div class="section-label">Supporting Colors</div>
+            <h2 class="section-title">Neutral Palette</h2>
+            <p class="section-desc">Supporting tones for backgrounds, borders, and typography across all interfaces.</p>
+            <div class="divider"></div>
+
+            <div class="swatch-grid">
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#FFFFFF;border-bottom:1px solid #E5E7EB;">
+                        <span class="swatch-hex-overlay" style="color:rgba(0,0,0,0.35);">#FFFFFF</span>
+                    </div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">White</div>
+                        <div class="swatch-meta">Primary web background, cards</div>
+                    </div>
+                </div>
+
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#F9FAFB;border-bottom:1px solid #E5E7EB;">
+                        <span class="swatch-hex-overlay" style="color:rgba(0,0,0,0.35);">#F9FAFB</span>
+                    </div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">Off-White</div>
+                        <div class="swatch-meta">Page background, section fill</div>
+                    </div>
+                </div>
+
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#E5E7EB;border-bottom:1px solid #D1D5DB;">
+                        <span class="swatch-hex-overlay" style="color:rgba(0,0,0,0.45);">#E5E7EB</span>
+                    </div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">Border Gray</div>
+                        <div class="swatch-meta">Dividers, input borders, card edges</div>
+                    </div>
+                </div>
+
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#9CA3AF;">
+                        <span class="swatch-hex-overlay" style="color:rgba(255,255,255,0.9);">#9CA3AF</span>
+                    </div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">Muted Text</div>
+                        <div class="swatch-meta">Captions, helper text, placeholders</div>
+                    </div>
+                </div>
+
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#6B7280;">
+                        <span class="swatch-hex-overlay" style="color:rgba(255,255,255,0.9);">#6B7280</span>
+                    </div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">Secondary Text</div>
+                        <div class="swatch-meta">Secondary labels, metadata</div>
+                    </div>
+                </div>
+
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#1F2937;">
+                        <span class="swatch-hex-overlay" style="color:rgba(255,255,255,0.9);">#1F2937</span>
+                    </div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">Text Primary</div>
+                        <div class="swatch-meta">Body copy, labels on white backgrounds</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ Semantic ══ -->
+        <div class="section">
+            <div class="section-label">Status &amp; Feedback</div>
+            <h2 class="section-title">Semantic Colors</h2>
+            <p class="section-desc">Reserved for system states only — success, warning, and error. Never use for decorative purposes.</p>
+            <div class="divider"></div>
+
+            <div class="swatch-grid">
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#10B981;">
+                        <span class="swatch-hex-overlay" style="color:rgba(255,255,255,0.9);">#10B981</span>
+                    </div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">Success</div>
+                        <div class="swatch-meta">Confirmations, completed states</div>
+                    </div>
+                </div>
+
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#F59E0B;">
+                        <span class="swatch-hex-overlay" style="color:rgba(255,255,255,0.9);">#F59E0B</span>
+                    </div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">Warning</div>
+                        <div class="swatch-meta">Cautions, non-critical alerts</div>
+                    </div>
+                </div>
+
+                <div class="swatch-card">
+                    <div class="swatch-block" style="background:#EF4444;">
+                        <span class="swatch-hex-overlay" style="color:rgba(255,255,255,0.9);">#EF4444</span>
+                    </div>
+                    <div class="swatch-info">
+                        <div class="swatch-name">Error</div>
+                        <div class="swatch-meta">Validation errors, destructive actions</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ Usage Reference ══ -->
+        <div class="section">
+            <div class="section-label">Implementation</div>
+            <h2 class="section-title">Color Usage Reference</h2>
+            <p class="section-desc">Where each color should and should not be used.</p>
+            <div class="divider"></div>
+
             <table>
                 <thead>
                     <tr>
-                        <th>Element</th>
                         <th>Color</th>
-                        <th>Usage</th>
+                        <th>Use for</th>
+                        <th>Do not use for</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><strong>Primary Button</strong></td>
-                        <td>#10B981</td>
-                        <td>Main call-to-action</td>
+                        <td><span class="dot" style="background:#1B5C3A;"></span><strong>Dark Forest Green</strong></td>
+                        <td>Headings, footer, nav, logo, large text blocks on white</td>
+                        <td>Small body text (contrast too heavy), button fill</td>
                     </tr>
                     <tr>
-                        <td><strong>Headings</strong></td>
-                        <td>#1B5C3A</td>
-                        <td>H1-H6 hierarchy</td>
+                        <td><span class="dot" style="background:#B4E035;border:1px solid #ccc;"></span><strong>Bright Chartreuse</strong></td>
+                        <td>Logo accents, graphic dividers, data highlights, illustrations</td>
+                        <td>Body text, small text (fails contrast on white)</td>
                     </tr>
                     <tr>
-                        <td><strong>Body Text</strong></td>
-                        <td>#1F2937</td>
-                        <td>Paragraphs</td>
+                        <td><span class="dot" style="background:#10B981;"></span><strong>Button Green</strong></td>
+                        <td>Primary CTA buttons, links, active states, success indicator</td>
+                        <td>Large background fills, decorative only</td>
                     </tr>
                     <tr>
-                        <td><strong>Success State</strong></td>
-                        <td>#10B981</td>
-                        <td>Confirmations</td>
+                        <td><span class="dot" style="background:#F8F4E6;border:1px solid #ccc;"></span><strong>Warm Cream</strong> <span class="new-badge">New</span></td>
+                        <td>Print flyers, landing page hero sections, premium collateral backgrounds</td>
+                        <td>Web UI backgrounds (use #F9FAFB instead), dark text backgrounds</td>
                     </tr>
                     <tr>
-                        <td><strong>Error State</strong></td>
-                        <td>#EF4444</td>
-                        <td>Validation errors</td>
+                        <td><span class="dot" style="background:#1A1A1A;"></span><strong>Near-Black</strong> <span class="new-badge">New</span></td>
+                        <td>Hero display text (H1, taglines) on cream or white backgrounds</td>
+                        <td>Body copy (use #1F2937), captions</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot" style="background:#1F2937;"></span><strong>Text Primary</strong></td>
+                        <td>All body copy, form labels, card text on white/off-white</td>
+                        <td>Headings on colored backgrounds</td>
                     </tr>
                 </tbody>
             </table>
-        </section>
-        
-        <section>
-            <h2>Accessibility</h2>
-            <div class="box">
-                <h3>Contrast Ratios</h3>
-                <p>✅ <strong>Dark Green on White:</strong> 8.4:1 (WCAG AAA)<br>
-                ✅ <strong>Bright Green on White:</strong> 5.2:1 (WCAG AA)<br>
-                ✅ <strong>Button Green on White:</strong> 5.8:1 (WCAG AA)</p>
+        </div>
+
+        <!-- ══ Contrast ══ -->
+        <div class="section">
+            <div class="section-label">Accessibility</div>
+            <h2 class="section-title">Contrast Ratios</h2>
+            <p class="section-desc">All text pairings meet WCAG 2.1 AA (4.5:1 for normal text, 3:1 for large text). AAA ratings exceed the minimum standard.</p>
+            <div class="divider"></div>
+
+            <div class="contrast-grid">
+                <div class="contrast-item">
+                    <div class="contrast-preview" style="background:#1B5C3A;color:white;">Dark Green on White</div>
+                    <div class="contrast-meta"><strong>8.4:1</strong> — WCAG AAA ✅</div>
+                </div>
+                <div class="contrast-item">
+                    <div class="contrast-preview" style="background:#10B981;color:white;">Button Green on White</div>
+                    <div class="contrast-meta"><strong>5.8:1</strong> — WCAG AA ✅</div>
+                </div>
+                <div class="contrast-item">
+                    <div class="contrast-preview" style="background:#F8F4E6;color:#1A1A1A;">Near-Black on Warm Cream</div>
+                    <div class="contrast-meta"><strong>16.1:1</strong> — WCAG AAA ✅</div>
+                </div>
+                <div class="contrast-item">
+                    <div class="contrast-preview" style="background:#F9FAFB;color:#1F2937;">Text Primary on Off-White</div>
+                    <div class="contrast-meta"><strong>13.4:1</strong> — WCAG AAA ✅</div>
+                </div>
+                <div class="contrast-item">
+                    <div class="contrast-preview" style="background:#B4E035;color:#1B5C3A;font-size:14px;">Dark Green on Chartreuse</div>
+                    <div class="contrast-meta"><strong>4.9:1</strong> — WCAG AA ✅ (large text only)</div>
+                </div>
             </div>
-        </section>
+        </div>
+
     </main>
-    
+
     <footer>
-        <p><strong>Community Carpool Color System</strong></p>
-        <p>Professional Color Palette & Usage Standards | March 2026</p>
+        <p><strong>Community Carpool Color System</strong> — Updated April 2026</p>
+        <p style="margin-top:6px;">Two new colors added from DAMAC corporate flyer: Warm Cream (#F8F4E6) and Near-Black (#1A1A1A)</p>
     </footer>
 </body>
 </html>

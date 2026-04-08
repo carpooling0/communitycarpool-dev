@@ -389,6 +389,34 @@
       </tbody>
     </table>
 
+    <!-- analytics_daily -->
+    <div class="table-name">analytics_daily</div>
+    <div class="table-desc">Daily snapshot of website analytics data synced from Umami by the <code>sync-analytics</code> edge function (runs nightly at 00:05 UTC via pg_cron). Each row covers one calendar day. This table is the <strong>sole source of truth</strong> for all analytics charts in the admin dashboard — the dashboard never reads from the live Umami API. This means analytics data survives beyond Umami's 6-month data retention window and is always available regardless of Umami's uptime.</div>
+    <table>
+      <thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>id</code></td><td>SERIAL PK</td><td>Auto-incrementing primary key</td></tr>
+        <tr><td><code>date</code></td><td>DATE UNIQUE NOT NULL</td><td>The calendar date this row covers (UTC). UNIQUE — one row per day.</td></tr>
+        <tr><td><code>pageviews</code></td><td>INT</td><td>Total pageviews for the day</td></tr>
+        <tr><td><code>sessions</code></td><td>INT</td><td>Unique visitor sessions for the day</td></tr>
+        <tr><td><code>bounces</code></td><td>INT</td><td>Sessions where the user viewed only one page</td></tr>
+        <tr><td><code>total_time</code></td><td>INT</td><td>Cumulative time on site across all sessions (seconds)</td></tr>
+        <tr><td><code>pageviews_hourly</code></td><td>JSONB</td><td>Array of 24 hourly buckets: <code>[{"hour":0,"pageviews":N,"sessions":N}, ...]</code>. Used for the Behavioural Patterns heatmap (analytics mode) in the admin dashboard.</td></tr>
+        <tr><td><code>countries</code></td><td>JSONB</td><td>Visitor counts by country ISO code: <code>[{"x":"AE","y":N}, ...]</code></td></tr>
+        <tr><td><code>referrers</code></td><td>JSONB</td><td>Traffic sources: <code>[{"x":"google.com","y":N}, ...]</code></td></tr>
+        <tr><td><code>devices</code></td><td>JSONB</td><td>Device type breakdown: <code>[{"x":"mobile","y":N}, ...]</code></td></tr>
+        <tr><td><code>os</code></td><td>JSONB</td><td>Operating system breakdown</td></tr>
+        <tr><td><code>browsers</code></td><td>JSONB</td><td>Browser breakdown</td></tr>
+        <tr><td><code>wa_shares</code></td><td>INT DEFAULT 0</td><td>WhatsApp share button clicks tracked for this day via the <code>track-event</code> function</td></tr>
+        <tr><td><code>synced_at</code></td><td>TIMESTAMPTZ DEFAULT now()</td><td>When this row was last written or updated by the sync function</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout info" style="margin-bottom:20px;">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body"><strong>Backfilling missing days:</strong> If the nightly sync missed a day (e.g. because the pg_cron job wasn't set up yet), use the <strong>Archive tab</strong> in the admin dashboard Analytics panel → "↓ Sync Range" button. Select the date range and click to backfill. Each day is fetched from Umami individually and upserted into <code>analytics_daily</code>. This only works for dates within Umami's retention window (approximately last 6 months).</div>
+    </div>
+
     <!-- ============================================================ -->
     <div class="group-heading">Configuration</div>
 
