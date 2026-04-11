@@ -106,8 +106,15 @@ Deno.serve(async (req) => {
   // Extract fields from the Resend event payload
   const messageId  = data.email_id as string | undefined   // e.g. "re_xxxx"
   const recipient  = Array.isArray(data.to) ? data.to[0] : data.to as string | undefined
-  const tags       = (data.tags as Array<{ name: string; value: string }> | undefined) || []
-  const batchId    = tags.find(t => t.name === 'batch_id')?.value || null
+  // Resend returns tags as an object {key: value} in webhook payloads,
+  // even though we send them as [{name, value}] arrays via the API
+  const tags = data.tags
+  let batchId: string | null = null
+  if (Array.isArray(tags)) {
+    batchId = tags.find((t: any) => t.name === 'batch_id')?.value || null
+  } else if (tags && typeof tags === 'object') {
+    batchId = (tags as Record<string, string>)['batch_id'] || null
+  }
   const occurredAt = event.created_at as string | undefined
 
   // Store the event — provider-agnostic schema so SES/SendGrid webhooks can write here too

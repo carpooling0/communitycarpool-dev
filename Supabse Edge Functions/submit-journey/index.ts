@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json()
     const { firstName, email, fromLocation, fromLatLng, toLocation, toLatLng, distance, distanceValue, country: countryHint, orgCode,
-            refCode, utmSource, utmMedium, utmCampaign, termsVersion } = body
+            refCode, utmSource, utmMedium, utmCampaign, termsVersion, termsAgreed } = body
 
     // Detect real IP from request headers (server-side, no CORS restrictions)
     const ip = req.headers.get('cf-connecting-ip')
@@ -80,7 +80,24 @@ Deno.serve(async (req) => {
       }
     } catch { /* silent fail — use hint/default */ }
 
-    // 1. Check blacklist
+    // 1. Validate required fields
+    if (!firstName || !email || !fromLocation || !fromLatLng || !toLocation || !toLatLng) {
+      return new Response(JSON.stringify({ success: false, error: 'Missing required fields.' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 })
+    }
+
+    // 2. Enforce terms acceptance server-side
+    // Accept either termsAgreed:true (new) or a valid termsVersion string (legacy)
+    const requiredTermsVersion = await getConfig('required_terms_version')
+    const acceptedVersion = termsAgreed ? requiredTermsVersion : termsVersion
+    if (!acceptedVersion || parseFloat(acceptedVersion) < parseFloat(requiredTermsVersion)) {
+      return new Response(JSON.stringify({ success: false, error: 'You must accept the current Terms & Conditions to continue.' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 })
+    }
+    // Use the server-resolved version for storage
+    const resolvedTermsVersion = requiredTermsVersion
+
+    // 3. Check blacklist
     const { data: blacklisted } = await supabase
       .from('blacklist').select('blacklist_id').eq('email', email.toLowerCase()).single()
     if (blacklisted) {
@@ -106,7 +123,7 @@ Deno.serve(async (req) => {
       }
       userId = existingUser.user_id
       userJourneyLimit = existingUser.journey_limit
-      const updates: Record<string, any> = { last_seen_at: new Date().toISOString(), name: firstName, ...(termsVersion ? { terms_accepted_version: termsVersion } : {}) }
+      const updates: Record<string, any> = { last_seen_at: new Date().toISOString(), name: firstName, terms_accepted_version: resolvedTermsVersion, terms_accepted_at: new Date().toISOString() }
       // Only set ref_code on first touch — never overwrite existing attribution
       if (!existingUser.ref_code && refCode) {
         updates.ref_code = refCode
@@ -126,7 +143,8 @@ Deno.serve(async (req) => {
         .insert({
           email: email.toLowerCase(), name: firstName, last_seen_at: new Date().toISOString(),
           ref_code: refCode || null,
-          terms_accepted_version: termsVersion || null,
+          terms_accepted_version: resolvedTermsVersion,
+          terms_accepted_at: new Date().toISOString(),
         })
         .select('user_id').single()
       if (insertError) {
@@ -197,7 +215,7 @@ Deno.serve(async (req) => {
         journey_status: 'active', journey_num: journeyNum,
         distance_km: Math.round(distanceKm * 10) / 10,
         expires_at: expiresAt.toISOString(),
-        terms_version: termsVersion || null
+        terms_version: resolvedTermsVersion
       }).select('submission_id').single()
     if (subError) throw subError
 

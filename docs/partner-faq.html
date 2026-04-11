@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Community Carpool — Partner FAQ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #16a34a;
+      --green-light: #dcfce7;
+      --green-dark: #14532d;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+    }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text);
+      background: #fff;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .header {
+      background: var(--green);
+      color: #fff;
+      padding: 48px 24px 40px;
+      text-align: center;
+    }
+    .header-logo {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.85;
+      margin-bottom: 12px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .header p {
+      font-size: 15px;
+      opacity: 0.88;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .section {
+      margin-bottom: 52px;
+    }
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green-light);
+      color: var(--green-dark);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .section h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text);
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--green-light);
+    }
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .faq-q {
+      font-weight: 600;
+      font-size: 14.5px;
+      padding: 16px 20px;
+      background: var(--bg);
+      color: var(--text);
+      cursor: default;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .faq-q::before {
+      content: "Q";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      background: var(--green);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      border-radius: 50%;
+      margin-top: 1px;
+    }
+    .faq-a {
+      padding: 16px 20px 16px 52px;
+      font-size: 14px;
+      color: #334155;
+      border-top: 1px solid var(--border);
+      background: #fff;
+    }
+    .faq-a p { margin-bottom: 8px; }
+    .faq-a p:last-child { margin-bottom: 0; }
+    .faq-a ul, .faq-a ol { margin: 8px 0 8px 16px; }
+    .faq-a li { margin-bottom: 4px; }
+    .faq-a strong { color: var(--text); }
+    .callout {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 13.5px;
+      color: #78350f;
+      margin: 16px 0;
+      display: flex;
+      gap: 10px;
+    }
+    .callout-green {
+      background: var(--green-light);
+      border-color: #86efac;
+      color: var(--green-dark);
+    }
+    .callout-icon { font-size: 16px; line-height: 1.5; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .tag-green { background: var(--green-light); color: var(--green-dark); }
+    .tag-blue { background: #eff6ff; color: #1d4ed8; }
+    .contact-box {
+      background: var(--green);
+      color: #fff;
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-top: 48px;
+      text-align: center;
+    }
+    .contact-box h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .contact-box p { font-size: 14px; opacity: 0.9; margin-bottom: 16px; }
+    .contact-box a {
+      display: inline-block;
+      background: #fff;
+      color: var(--green-dark);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 10px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    @media print {
+      .header { background: #fff; color: var(--text); border-bottom: 3px solid var(--green); }
+      .section-label { border: 1px solid var(--green); }
+      .contact-box { background: var(--bg); color: var(--text); border: 2px solid var(--green); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">Community Carpool · Partner FAQ</div>
+  <h1>Frequently Asked Questions for Partners</h1>
+  <p>Everything schools, universities, and organisations need to know before partnering with Community Carpool.</p>
+</div>
+
+<div class="container">
+
+  <!-- FUNCTIONALITY -->
+  <div class="section">
+    <div class="section-label">⚙️ Functionality</div>
+    <h2>How it works</h2>
+
+    <div class="faq-item">
+      <div class="faq-q">What is Community Carpool and what does it do?</div>
+      <div class="faq-a">
+        <p>Community Carpool is a free, privacy-focused carpooling matching service. People submit their daily commute route — where they travel from, where they travel to, and the days they commute — and the platform automatically finds others with compatible routes and schedules.</p>
+        <p>When a match is found, both parties receive an email with the other person's first name and last initial. Full contact details are only shared once <em>both</em> people express interest in connecting — a mutual consent model that protects users from unsolicited contact.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What information does a user submit?</div>
+      <div class="faq-a">
+        <p>Users provide:</p>
+        <ul>
+          <li>First name and last name</li>
+          <li>Email address</li>
+          <li>Origin location (e.g. neighbourhood or area)</li>
+          <li>Destination (e.g. workplace or campus)</li>
+          <li>Days of the week they commute</li>
+          <li>Whether they prefer to drive, ride as a passenger, or are open to either</li>
+        </ul>
+        <p>No phone numbers, home addresses, or payment details are collected at any point.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How does the matching algorithm work?</div>
+      <div class="faq-a">
+        <p>The matching algorithm scores compatibility based on:</p>
+        <ul>
+          <li><strong>Geographic overlap</strong> — how close the origin and destination points are to each other (using road distance where available, straight-line distance as fallback)</li>
+          <li><strong>Schedule overlap</strong> — how many commute days the two users share</li>
+          <li><strong>Role compatibility</strong> — drivers are matched with passengers; "open to either" users are matched with both</li>
+        </ul>
+        <p>A match strength score (0–100) is calculated. Only matches above a minimum threshold are surfaced to users.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can we restrict the platform to people within our organisation?</div>
+      <div class="faq-a">
+        <p>Yes. Community Carpool supports <strong>organisation-scoped matching</strong>, where users who register under your organisation's domain (or with a specific referral code) are matched preferentially or exclusively with other members of your organisation.</p>
+        <p>Contact us to discuss the setup — this typically involves a custom landing page with a dedicated referral link, and configuration on our end to enable organisation-level filtering.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is there a mobile app?</div>
+      <div class="faq-a">
+        <p>Community Carpool is a mobile-optimised web application — no app download is required. It works in any modern browser on iOS, Android, and desktop. Users access it at <strong>communitycarpool.org</strong> and all interactions (submitting a journey, viewing matches, expressing interest) happen via email links or the website.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How do users manage or delete their data?</div>
+      <div class="faq-a">
+        <p>Users can request deletion at any time from the <strong>communitycarpool.org/unsubscribe.html</strong> page. They enter their email address, and their account, submission, and match data is scheduled for permanent deletion within 24 hours. A confirmation email is sent once complete.</p>
+        <p>Submission data is also automatically purged after 30 days of inactivity by default (configurable), keeping the database clean and reducing data retention risk.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRIVACY -->
+  <div class="section">
+    <div class="section-label">🔏 Privacy</div>
+    <h2>Data privacy</h2>
+
+    <div class="faq-item">
+      <div class="faq-q">What personal data is collected and why?</div>
+      <div class="faq-a">
+        <p>Only the minimum data needed to provide the matching service:</p>
+        <ul>
+          <li><strong>Name &amp; email</strong> — to identify the user and deliver match notifications</li>
+          <li><strong>Origin &amp; destination</strong> — to calculate route overlap for matching</li>
+          <li><strong>Commute days &amp; role preference</strong> — to assess schedule and role compatibility</li>
+        </ul>
+        <p>No tracking cookies are set. The analytics tool used (Umami) is cookieless and privacy-first — it collects only anonymised, aggregate traffic data (page views, browser type, country) and cannot identify individual users.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is contact information shared with other users?</div>
+      <div class="faq-a">
+        <p>Contact details are revealed in stages, with explicit consent at each step:</p>
+        <ol>
+          <li>When a match is found, users see only the other person's <strong>first name and last initial</strong></li>
+          <li>Each user can independently express interest in connecting</li>
+          <li>Full name and email address are revealed to <em>both</em> users only when <strong>both have expressed mutual interest</strong></li>
+        </ol>
+        <p>This means no user can obtain another person's contact details without that person actively opting in first.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Does the platform use cookies or tracking?</div>
+      <div class="faq-a">
+        <p>No cookies are set for tracking or analytics purposes. The web analytics tool (Umami) is cookieless — it does not set any cookies, does not fingerprint users, and does not share data with third parties. No consent banner is required.</p>
+        <p>The only functional storage used is <code>sessionStorage</code> (cleared when the browser tab closes) to pass referral codes through the submission flow.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How long is data retained?</div>
+      <div class="faq-a">
+        <ul>
+          <li><strong>Submission data</strong> — retained for 30 days from the last activity date, then automatically purged</li>
+          <li><strong>Match records</strong> — retained as long as the associated submission is active</li>
+          <li><strong>User accounts</strong> — retained until the user requests deletion or their submission expires</li>
+          <li><strong>Deletion requests</strong> — processed within 24 hours; a permanent deletion log entry is kept (email address + date only) for audit purposes</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Where is data stored geographically?</div>
+      <div class="faq-a">
+        <p>User data is stored in <strong>Supabase</strong> (PostgreSQL), hosted in the <strong>ap-southeast-1 region (Singapore)</strong>. Supabase infrastructure runs on AWS. Transactional emails are sent via <strong>Resend</strong>, whose infrastructure is based in the US/EU.</p>
+        <p>No user data is stored on servers in a jurisdiction that conflicts with UAE data protection requirements. All third-party sub-processors are reputable, compliant providers.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- GDPR / COMPLIANCE -->
+  <div class="section">
+    <div class="section-label">📋 GDPR &amp; Compliance</div>
+    <h2>Legal &amp; regulatory</h2>
+
+    <div class="callout callout-green">
+      <div class="callout-icon">✅</div>
+      <div>Community Carpool is designed with privacy-by-default principles aligned with GDPR, UAE PDPL (Federal Decree-Law No. 45 of 2021), and comparable data protection frameworks.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What is the lawful basis for processing personal data?</div>
+      <div class="faq-a">
+        <p><strong>Consent</strong> — users explicitly submit their details to the platform for the purpose of being matched with carpool partners. The submission form makes this purpose clear. Users can withdraw consent at any time by requesting deletion.</p>
+        <p>No data is processed for secondary purposes (marketing, profiling, sale to third parties) without separate explicit consent.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can we sign a Data Processing Agreement (DPA)?</div>
+      <div class="faq-a">
+        <p>Yes. If your organisation requires a formal Data Processing Agreement — as is standard for GDPR Article 28 compliance when a controller engages a processor — we can provide one. Please reach out to discuss the scope and terms.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What data subject rights do users have?</div>
+      <div class="faq-a">
+        <p>Users can exercise the following rights at any time:</p>
+        <ul>
+          <li><strong>Right to access</strong> — users can request a copy of their data by contacting us</li>
+          <li><strong>Right to erasure</strong> — self-service deletion is available at <strong>communitycarpool.org/unsubscribe.html</strong>; data is purged within 24 hours</li>
+          <li><strong>Right to rectification</strong> — users can resubmit their journey details to update their information</li>
+          <li><strong>Right to object / opt out of communications</strong> — email preferences (match alerts, reminders, marketing) can be managed via the unsubscribe page</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Who are the sub-processors and are they GDPR-compliant?</div>
+      <div class="faq-a">
+        <ul>
+          <li><strong>Supabase</strong> (database &amp; backend) — SOC 2 Type II certified, GDPR-compliant, DPA available</li>
+          <li><strong>Resend</strong> (transactional email) — GDPR-compliant, DPA available</li>
+          <li><strong>Umami</strong> (cookieless analytics) — privacy-first by design, no personal data collected, no DPA required</li>
+          <li><strong>Google Maps</strong> (address autocomplete) — Google Cloud Platform, GDPR-compliant, only used to look up addresses typed by users (no personal data sent)</li>
+          <li><strong>GitHub Pages</strong> (static site hosting) — Microsoft, GDPR-compliant</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is there a privacy policy?</div>
+      <div class="faq-a">
+        <p>Yes. The privacy policy is accessible at <strong>communitycarpool.org</strong> and is linked from the submission form. It covers what data is collected, how it is used, retention periods, user rights, and contact details for data inquiries.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Do you comply with UAE data protection law (PDPL)?</div>
+      <div class="faq-a">
+        <p>Community Carpool is operated in the UAE context and is designed to align with the <strong>UAE Federal Decree-Law No. 45 of 2021 on Personal Data Protection (PDPL)</strong>. Key alignments include:</p>
+        <ul>
+          <li>Consent-based data collection with clear purpose</li>
+          <li>Minimal data collection (no data beyond what is needed)</li>
+          <li>User rights to access, rectify, and erase their data</li>
+          <li>Data retention limits (30-day auto-purge)</li>
+          <li>No sale of personal data to third parties</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECURITY -->
+  <div class="section">
+    <div class="section-label">🔒 Security</div>
+    <h2>Platform security</h2>
+
+    <div class="faq-item">
+      <div class="faq-q">How is data secured at rest and in transit?</div>
+      <div class="faq-a">
+        <ul>
+          <li><strong>In transit</strong> — all communications between users and the platform use HTTPS (TLS 1.2+). Emails are sent over encrypted SMTP connections.</li>
+          <li><strong>At rest</strong> — the Supabase database is encrypted at rest (AES-256) by default, as per AWS RDS standards.</li>
+          <li><strong>API keys &amp; secrets</strong> — all credentials (email API keys, database service role keys) are stored in Supabase Vault (encrypted secret storage), never in source code or frontend files.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Who has access to user data?</div>
+      <div class="faq-a">
+        <p>Access to user data is strictly limited:</p>
+        <ul>
+          <li><strong>Platform administrators</strong> — only designated super-admins can access the admin panel, protected by a separate authentication system with session tokens</li>
+          <li><strong>No public access</strong> — all database tables have Row Level Security (RLS) enabled; the public API key cannot read any user data directly</li>
+          <li><strong>Edge functions</strong> — server-side functions use a service role key that bypasses RLS, but only for specific, scoped operations (matching, sending emails, processing deletions)</li>
+          <li><strong>Third parties</strong> — no user data is shared with any third party except as required to deliver the service (e.g. email delivery via Resend)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is the source code publicly auditable?</div>
+      <div class="faq-a">
+        <p>The frontend source code is publicly available on GitHub (<strong>github.com/carpooling0/communitycarpool</strong>), which allows security researchers and partner IT teams to review the client-side code. Backend logic runs as server-side Supabase edge functions and is not exposed publicly, but can be shared for review under NDA upon request.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What happens if there is a data breach?</div>
+      <div class="faq-a">
+        <p>In the event of a confirmed data breach:</p>
+        <ul>
+          <li>Affected users are notified by email within 72 hours of discovery</li>
+          <li>Partner organisations are notified directly via their designated contact</li>
+          <li>The incident is documented in our incident log with root cause, scope, and remediation steps</li>
+          <li>Where required by GDPR / PDPL, notification is made to the relevant supervisory authority within the legally required timeframe</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Do you perform security audits or penetration testing?</div>
+      <div class="faq-a">
+        <p>The platform undergoes periodic security reviews covering authentication flows, API access controls, injection vulnerabilities, and data exposure risks. Supabase (our infrastructure provider) maintains SOC 2 Type II certification and conducts its own infrastructure-level security audits.</p>
+        <p>Partner organisations with specific security requirements (e.g. ISO 27001 alignment) are welcome to request a security questionnaire or schedule a technical review call.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MONETISATION -->
+  <div class="section">
+    <div class="section-label">💰 Monetisation</div>
+    <h2>Business model &amp; costs</h2>
+
+    <div class="faq-item">
+      <div class="faq-q">Is Community Carpool free to use?</div>
+      <div class="faq-a">
+        <p><strong>Yes — it is completely free for end users.</strong> There are no subscription fees, no in-app purchases, and no charges for matching or connecting with carpool partners.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is there a cost for the partner organisation?</div>
+      <div class="faq-a">
+        <p>Partnering with Community Carpool is currently <strong>free of charge</strong>. We are a community-focused initiative at an early stage, and our goal is to build adoption and demonstrate impact before introducing any commercial model.</p>
+        <p>If costs are introduced in the future, existing partners will be given advance notice and the opportunity to discuss terms before any change takes effect.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How does Community Carpool sustain itself financially?</div>
+      <div class="faq-a">
+        <p>The platform currently operates on free or low-cost tiers of all underlying services (Supabase, Resend, GitHub Pages), keeping operating costs extremely low. It is funded and operated voluntarily.</p>
+        <p>Potential future revenue models under consideration include optional premium features for organisations (e.g. branded landing pages, reporting dashboards, priority support) — but these would be add-ons, not gates on the core free service.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is user data sold or monetised?</div>
+      <div class="faq-a">
+        <p><strong>No.</strong> User data is never sold, rented, or shared with advertisers or data brokers. The platform does not run advertising. This is a core principle of the service and is reflected in the privacy policy.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What does a partnership involve on our end?</div>
+      <div class="faq-a">
+        <p>A typical partnership is lightweight:</p>
+        <ul>
+          <li><strong>Communication</strong> — share the Community Carpool link (or your organisation's custom landing page) with your employees/students via email, intranet, or notice boards</li>
+          <li><strong>Endorsement</strong> — an internal message from HR, sustainability, or student services significantly improves sign-up rates</li>
+          <li><strong>Coordination contact</strong> — nominate one person as the point of contact for any queries or data subject requests from your community</li>
+        </ul>
+        <p>There is no technical integration, no software to install, and no ongoing maintenance required from your side.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="contact-box">
+    <h3>Ready to discuss a partnership?</h3>
+    <p>Reach out to us directly — we're happy to answer further questions, provide a DPA, or set up a custom landing page for your organisation.</p>
+    <a href="mailto:carpooling0@gmail.com">carpooling0@gmail.com</a>
+  </div>
+
+</div>
+</body>
+</html>
