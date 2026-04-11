@@ -9,405 +9,195 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --green:   #1B5C3A;
-      --lime:    #B4E035;
-      --emerald: #10B981;
-      --text:    #1F2937;
-      --muted:   #6B7280;
-      --border:  #E5E7EB;
-      --bg:      #F9FAFB;
-      --white:   #FFFFFF;
-      --radius:  12px;
+      --green: #1B5C3A; --lime: #B4E035; --emerald: #10B981;
+      --text: #1F2937; --muted: #6B7280; --border: #E5E7EB;
+      --bg: #F9FAFB; --white: #FFFFFF; --radius: 12px;
     }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding-bottom: 60px;
-    }
+    /* ── Logo header: white (brand rule) ── */
+    .logo-header { background: var(--white); padding: 14px 24px; text-align: center; border-bottom: 1px solid var(--border); }
+    .logo-header img { height: 42px; width: auto; display: block; margin: 0 auto; }
 
-    /* ── Logo header: white background (brand rule) ── */
-    .logo-header {
-      background: var(--white);
-      padding: 14px 24px;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
-    }
-    .logo-header a { display: inline-block; }
-    .logo-header img { height: 42px; width: auto; display: block; }
+    /* ── Hero: compact green strip ── */
+    .hero { background: var(--green); padding: 12px 24px 16px; text-align: center; color: white; }
+    .hero h1 { font-family: 'Montserrat', sans-serif; font-size: clamp(15px, 3.5vw, 20px); font-weight: 900; line-height: 1.25; margin-bottom: 3px; }
+    .hero p { color: var(--lime); font-size: 12px; max-width: 460px; margin: 0 auto; line-height: 1.4; }
 
-    /* ── Hero: green, as compact as possible ── */
-    .hero {
-      background: var(--green);
-      padding: 14px 24px 18px;
-      text-align: center;
-      color: white;
-    }
-    .hero h1 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: clamp(16px, 4vw, 22px);
-      font-weight: 900;
-      line-height: 1.25;
-      margin-bottom: 4px;
-    }
-    .hero p {
-      color: var(--lime);
-      font-size: 13px;
-      max-width: 460px;
-      margin: 0 auto;
-      line-height: 1.5;
-    }
-
-    /* ── Progress bar ── */
-    .progress-wrap {
-      background: white;
-      border-bottom: 1px solid var(--border);
-      padding: 12px 20px;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 7px;
-      font-weight: 600;
-    }
-    .progress-label .step-num { color: var(--green); font-weight: 700; }
+    /* ── Progress ── */
+    .progress-wrap { background: white; border-bottom: 1px solid var(--border); padding: 10px 20px; position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+    .progress-label .sn { color: var(--green); font-weight: 700; }
     .progress-segments { display: flex; gap: 4px; }
-    .seg {
-      flex: 1;
-      height: 5px;
-      border-radius: 99px;
-      background: var(--border);
-      transition: background 0.3s;
-    }
+    .seg { flex: 1; height: 5px; border-radius: 99px; background: var(--border); transition: background 0.3s; }
     .seg.active { background: var(--lime); }
-    .seg.done   { background: var(--green); }
+    .seg.done { background: var(--green); }
 
     /* ── Card ── */
-    .form-outer {
-      max-width: 640px;
-      margin: 0 auto;
-      padding: 20px 16px 0;
-    }
+    .form-outer { max-width: 640px; margin: 16px auto 0; padding: 0 16px 24px; }
     .form-card {
-      background: white;
-      border-radius: var(--radius);
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-      overflow: hidden;
+      background: white; border-radius: var(--radius); box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      display: flex; flex-direction: column;
+      height: calc(100vh - 190px); min-height: 500px;
     }
 
     /* ── Carousel ── */
-    .carousel-wrap { overflow: hidden; }
-    .carousel-track {
-      display: flex;
-      transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+    .carousel-wrap { overflow: hidden; border-radius: var(--radius) var(--radius) 0 0; flex: 1; min-height: 0; }
+    .carousel-track { display: flex; transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1); height: 100%; }
     .slide {
-      flex: 0 0 100%;
-      width: 100%;
-      padding: 28px 28px 8px;
+      flex: 0 0 100%; width: 100%; padding: 24px 24px 16px;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin; scrollbar-color: #e5e7eb #f9fafb;
     }
-
-    .slide-title {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--green);
-      margin-bottom: 4px;
-      padding-top: 8px; /* blank space above title */
-    }
-    .slide-subtitle {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 22px;
-      line-height: 1.5;
-    }
+    .slide::-webkit-scrollbar { width: 4px; }
+    .slide::-webkit-scrollbar-track { background: #f9fafb; }
+    .slide::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
+    .slide-title { font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 700; color: var(--green); margin-bottom: 3px; padding-top: 6px; }
+    .slide-subtitle { font-size: 12px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+    .section-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+    .section-label { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; color: var(--green); margin-bottom: 14px; }
 
     /* ── Fields ── */
-    .field { margin-bottom: 16px; }
-    .field label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 5px;
-    }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
     .field label em { font-style: italic; font-weight: 400; color: var(--muted); }
-    .input-base {
-      width: 100%;
-      padding: 10px 13px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-family: 'Inter', sans-serif;
-      font-size: 15px;
-      color: var(--text);
-      background: white;
-      transition: border-color 0.2s;
-      -webkit-appearance: none;
-      appearance: none;
-    }
-    .input-base:focus {
-      outline: none;
-      border-color: var(--emerald);
-      box-shadow: 0 0 0 3px rgba(16,185,129,0.12);
-    }
+    .input-base { width: 100%; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 15px; color: var(--text); background: white; transition: border-color 0.2s; -webkit-appearance: none; appearance: none; }
+    .input-base:focus { outline: none; border-color: var(--emerald); box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
     .input-base.error { border-color: #ef4444; }
-    input[type="text"].input-base,
-    input[type="email"].input-base,
-    input[type="url"].input-base,
-    input[type="tel"].input-base { }
-    textarea.input-base {
-      resize: vertical;
-      min-height: 96px;
-      line-height: 1.6;
-    }
-    select.input-base { cursor: pointer; }
-    .field .hint {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-    .field-error {
-      font-size: 12px;
-      color: #ef4444;
-      margin-top: 4px;
-      display: none;
-    }
+    textarea.input-base { resize: vertical; min-height: 90px; line-height: 1.6; }
+    .field-error { font-size: 12px; color: #ef4444; margin-top: 4px; display: none; }
     .field-error.show { display: block; }
+
+    /* ── Two-column row ── */
+    .field-row { display: flex; gap: 10px; }
+    .field-row .field { flex: 1; margin-bottom: 0; }
 
     /* ── Phone row ── */
     .phone-row { display: flex; gap: 8px; }
-    .phone-code-select {
-      width: 128px;
-      flex-shrink: 0;
-      padding: 10px 10px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      color: var(--text);
-      background: white;
-      cursor: pointer;
-      -webkit-appearance: none;
-      appearance: none;
-      transition: border-color 0.2s;
-    }
-    .phone-code-select:focus {
-      outline: none;
-      border-color: var(--emerald);
-      box-shadow: 0 0 0 3px rgba(16,185,129,0.12);
-    }
     .phone-number-input { flex: 1; }
 
-    /* ── Country row ── */
-    .country-row { display: flex; gap: 8px; }
-    .country-row .field { flex: 1; margin-bottom: 0; }
+    /* ── Custom Select ── */
+    .cs-wrap { position: relative; user-select: none; }
+    .cs-trigger {
+      display: flex; align-items: center; gap: 7px; padding: 10px 12px;
+      border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer;
+      background: white; font-size: 14px; color: var(--text);
+      transition: border-color 0.2s; min-height: 42px;
+    }
+    .cs-trigger:hover { border-color: var(--emerald); }
+    .cs-trigger.open { border-color: var(--emerald); box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
+    .cs-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cs-placeholder { color: var(--muted); }
+    .cs-chevron { color: var(--muted); flex-shrink: 0; transition: transform 0.2s; }
+    .cs-trigger.open .cs-chevron { transform: rotate(180deg); }
+    .cs-panel {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: white; border: 1.5px solid var(--border); border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.13); z-index: 300; display: none; overflow: hidden;
+    }
+    .cs-panel.open { display: block; }
+    .cs-search { width: 100%; padding: 9px 12px; border: none; border-bottom: 1px solid var(--border); font-size: 14px; font-family: 'Inter', sans-serif; outline: none; }
+    .cs-list {
+      max-height: 220px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin; scrollbar-color: var(--green) #f1f5f9;
+    }
+    .cs-list::-webkit-scrollbar { width: 4px; }
+    .cs-list::-webkit-scrollbar-track { background: #f1f5f9; }
+    .cs-list::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 99px; }
+    .cs-list::-webkit-scrollbar-thumb:hover { background: var(--green); }
+    .cs-option { padding: 8px 12px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .cs-option:hover { background: #f0fdf4; }
+    .cs-option.selected { background: #dcfce7; font-weight: 600; }
+    .cs-option.hidden { display: none; }
+    /* Compact phone-code trigger */
+    .phone-cs { width: 130px; flex-shrink: 0; }
+    .phone-cs .cs-label { font-size: 14px; }
 
     /* ── Resume upload ── */
-    .file-label {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border: 1.5px dashed var(--border);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      font-size: 14px;
-      color: var(--muted);
-    }
+    .file-label { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1.5px dashed var(--border); border-radius: 8px; cursor: pointer; transition: border-color 0.2s, background 0.2s; font-size: 14px; color: var(--muted); }
     .file-label:hover { border-color: var(--emerald); background: #f0fdf4; color: var(--green); }
-    .file-label svg { flex-shrink: 0; }
     #resume-status { font-size: 12px; margin-top: 5px; color: var(--muted); }
     #resume-status.ok { color: var(--emerald); }
-    #resume-status.uploading { color: var(--muted); }
     #resume-status.err { color: #ef4444; }
 
     /* ── Pill options ── */
     .pill-group { display: flex; flex-wrap: wrap; gap: 7px; }
     .pill-group input { display: none; }
-    .pill-group label {
-      display: inline-block;
-      padding: 7px 15px;
-      border: 1.5px solid var(--border);
-      border-radius: 99px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.18s;
-      user-select: none;
-      margin: 0;
-    }
-    .pill-group input:checked + label {
-      background: var(--green);
-      border-color: var(--green);
-      color: white;
-    }
+    .pill-group label { display: inline-block; padding: 7px 14px; border: 1.5px solid var(--border); border-radius: 99px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; transition: all 0.15s; user-select: none; margin: 0; }
+    .pill-group input:checked + label { background: var(--green); border-color: var(--green); color: white; }
     .pill-group label:hover { border-color: var(--emerald); color: var(--green); }
     .pill-group input:checked + label:hover { color: white; }
 
     /* ── Rating boxes ── */
     .rating-group { display: flex; flex-direction: column; gap: 14px; }
-    .rating-row { }
-    .rating-row .r-label { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 7px; }
-    .stars {
-      display: flex;
-      flex-direction: row-reverse;
-      justify-content: flex-end;
-      gap: 5px;
-    }
+    .r-label { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 7px; }
+    .stars { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 5px; }
     .stars input { display: none; }
-    .stars label {
-      width: 36px;
-      height: 36px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.15s;
-      margin: 0;
-    }
+    .stars label { width: 34px; height: 34px; border: 1.5px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; transition: all 0.15s; margin: 0; }
     .stars input:checked ~ label { background: var(--green); border-color: var(--green); color: white; }
     .stars label:hover { border-color: var(--emerald); color: var(--green); }
     .stars input:checked + label { background: var(--green); border-color: var(--green); color: white; }
 
-    /* ── Navigation ── */
-    .slide-nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 28px 24px;
-      border-top: 1px solid var(--border);
-    }
-    .btn-back {
-      background: none;
-      border: 1.5px solid var(--border);
-      color: var(--muted);
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      transition: all 0.2s;
-    }
+    /* ── Nav: always visible at bottom of card ── */
+    .slide-nav { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px 18px; border-top: 1px solid var(--border); background: white; z-index: 15; border-radius: 0 0 var(--radius) var(--radius); box-shadow: 0 -3px 12px rgba(0,0,0,0.06); flex-shrink: 0; }
+    .btn-back { background: none; border: 1.5px solid var(--border); color: var(--muted); padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
     .btn-back:hover { border-color: var(--text); color: var(--text); }
     .btn-back:disabled { opacity: 0.3; pointer-events: none; }
-    .btn-next {
-      background: var(--green);
-      color: white;
-      border: none;
-      padding: 12px 28px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: 'Montserrat', sans-serif;
-      letter-spacing: 0.01em;
-      transition: background 0.2s;
-    }
+    .btn-next { background: var(--green); color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Montserrat', sans-serif; letter-spacing: 0.01em; transition: background 0.2s; }
     .btn-next:hover { background: #164d30; }
     .btn-next.submit-btn { background: var(--emerald); }
     .btn-next.submit-btn:hover { background: #059669; }
     .btn-next:disabled { opacity: 0.6; pointer-events: none; }
 
-    /* ── Success screen ── */
-    .success-screen {
-      display: none;
-      text-align: center;
-      padding: 56px 32px;
-    }
+    /* ── Success ── */
+    .success-screen { display: none; text-align: center; padding: 52px 32px; }
     .success-screen.show { display: block; }
-    .success-icon {
-      width: 72px; height: 72px;
-      background: #dcfce7;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px;
-      font-size: 32px;
-    }
-    .success-screen h2 {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 22px;
-      font-weight: 900;
-      color: var(--green);
-      margin-bottom: 12px;
-    }
-    .success-screen p {
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.7;
-      max-width: 380px;
-      margin: 0 auto 8px;
-    }
+    .success-icon { width: 68px; height: 68px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; font-size: 30px; }
+    .success-screen h2 { font-family: 'Montserrat', sans-serif; font-size: 21px; font-weight: 900; color: var(--green); margin-bottom: 10px; }
+    .success-screen p { color: var(--muted); font-size: 15px; line-height: 1.7; max-width: 360px; margin: 0 auto 6px; }
 
-    /* ── Honeypot (hidden from humans, bots fill it) ── */
+    /* ── Honeypot ── */
     .hp-field { display: none !important; }
 
     @media (max-width: 480px) {
-      .slide { padding: 22px 18px 8px; }
-      .slide-nav { padding: 14px 18px 20px; }
-      .stars label { width: 32px; height: 32px; font-size: 13px; }
-      .phone-code-select { width: 110px; }
+      .slide { padding: 18px 16px 12px; }
+      .slide-nav { padding: 12px 16px 16px; }
+      .stars label { width: 30px; height: 30px; }
+      .form-card { height: calc(100vh - 170px); min-height: 460px; }
     }
   </style>
 </head>
 <body>
 
-<!-- Logo on white background (brand rule: no logo on dark backgrounds) -->
 <header class="logo-header">
-  <a href="https://communitycarpool.org">
-    <img src="/logo-slogan.png" alt="Community Carpool">
-  </a>
+  <a href="https://communitycarpool.org"><img src="/logo-slogan.png" alt="Community Carpool"></a>
 </header>
 
-<!-- Compact green hero strip -->
 <div class="hero">
   <h1>Join the Community Carpool Team</h1>
   <p>Motivated volunteers wanted to help grow carpooling across the UAE.</p>
 </div>
 
-<!-- Progress bar -->
 <div class="progress-wrap">
   <div class="progress-label">
-    <span id="step-label" class="step-num">Step 1 of 6</span>
+    <span id="step-label" class="sn">Step 1 of 4</span>
     <span id="section-name">Basic Info</span>
   </div>
-  <div class="progress-segments" id="progress-segs">
+  <div class="progress-segments">
     <div class="seg active" data-i="0"></div>
     <div class="seg" data-i="1"></div>
     <div class="seg" data-i="2"></div>
     <div class="seg" data-i="3"></div>
-    <div class="seg" data-i="4"></div>
-    <div class="seg" data-i="5"></div>
   </div>
 </div>
 
-<!-- Form -->
 <div class="form-outer">
 <div class="form-card">
-
   <div class="carousel-wrap">
   <div class="carousel-track" id="track">
 
-    <!-- ══════════════════════════════════════════════
-         SLIDE 1 — Basic Info
-    ══════════════════════════════════════════════ -->
+    <!-- ══ SLIDE 1: Basic Info ══ -->
     <div class="slide" data-section="Basic Info">
       <div class="slide-title">Let's start with the basics</div>
       <div class="slide-subtitle">A few details to help us know who you are.</div>
@@ -424,123 +214,70 @@
         <div class="field-error" id="err-email">Please enter a valid email address.</div>
       </div>
 
-      <!-- Phone split: country code + number -->
+      <!-- Phone: custom country-code select + number input -->
       <div class="field">
-        <label><span>Phone / WhatsApp</span> <em>(optional)</em></label>
+        <label>Phone / WhatsApp <em>(optional)</em></label>
         <div class="phone-row">
-          <select id="phone_code" class="phone-code-select" title="Country code">
-            <option value="+971">🇦🇪 +971</option>
-            <option value="+966">🇸🇦 +966</option>
-            <option value="+974">🇶🇦 +974</option>
-            <option value="+965">🇰🇼 +965</option>
-            <option value="+973">🇧🇭 +973</option>
-            <option value="+968">🇴🇲 +968</option>
-            <option value="+91">🇮🇳 +91</option>
-            <option value="+92">🇵🇰 +92</option>
-            <option value="+880">🇧🇩 +880</option>
-            <option value="+63">🇵🇭 +63</option>
-            <option value="+961">🇱🇧 +961</option>
-            <option value="+962">🇯🇴 +962</option>
-            <option value="+20">🇪🇬 +20</option>
-            <option value="+249">🇸🇩 +249</option>
-            <option value="+212">🇲🇦 +212</option>
-            <option value="+44">🇬🇧 +44</option>
-            <option value="+1">🇺🇸 +1</option>
-            <option value="+61">🇦🇺 +61</option>
-            <option value="+33">🇫🇷 +33</option>
-            <option value="+49">🇩🇪 +49</option>
-            <option value="+90">🇹🇷 +90</option>
-            <option value="+98">🇮🇷 +98</option>
-            <option value="+967">🇾🇪 +967</option>
-            <option value="+964">🇮🇶 +964</option>
-          </select>
+          <div class="cs-wrap phone-cs" id="cs-phone-wrap">
+            <div class="cs-trigger" id="cs-phone-trigger">
+              <span class="cs-label" id="cs-phone-label">🇦🇪 +971</span>
+              <svg class="cs-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="cs-panel" id="cs-phone-panel">
+              <input type="text" class="cs-search" id="cs-phone-search" placeholder="Search country…" autocomplete="off">
+              <div class="cs-list" id="cs-phone-list"></div>
+            </div>
+          </div>
+          <input type="hidden" id="phone_code" value="+971">
           <input type="tel" id="phone_number" class="input-base phone-number-input" placeholder="50 000 0000">
         </div>
       </div>
 
-      <!-- City + Country on same row -->
-      <div class="country-row">
-        <div class="field">
+      <!-- City + Country row -->
+      <div class="field-row" style="margin-bottom:14px;">
+        <div class="field" style="margin-bottom:0;">
           <label for="city">City <em>(optional)</em></label>
           <input type="text" id="city" class="input-base" placeholder="e.g. Dubai">
         </div>
-        <div class="field">
-          <label for="country">Country <em>(optional)</em></label>
-          <select id="country" class="input-base">
-            <option value="">— Select —</option>
-            <option>🇦🇪 United Arab Emirates</option>
-            <option>🇸🇦 Saudi Arabia</option>
-            <option>🇶🇦 Qatar</option>
-            <option>🇰🇼 Kuwait</option>
-            <option>🇧🇭 Bahrain</option>
-            <option>🇴🇲 Oman</option>
-            <option>🇾🇪 Yemen</option>
-            <option>🇮🇶 Iraq</option>
-            <option>🇯🇴 Jordan</option>
-            <option>🇱🇧 Lebanon</option>
-            <option>🇸🇾 Syria</option>
-            <option>🇪🇬 Egypt</option>
-            <option>🇸🇩 Sudan</option>
-            <option>🇱🇾 Libya</option>
-            <option>🇲🇦 Morocco</option>
-            <option>🇩🇿 Algeria</option>
-            <option>🇹🇳 Tunisia</option>
-            <option>🇮🇳 India</option>
-            <option>🇵🇰 Pakistan</option>
-            <option>🇧🇩 Bangladesh</option>
-            <option>🇵🇭 Philippines</option>
-            <option>🇳🇵 Nepal</option>
-            <option>🇱🇰 Sri Lanka</option>
-            <option>🇮🇷 Iran</option>
-            <option>🇹🇷 Turkey</option>
-            <option>🇬🇧 United Kingdom</option>
-            <option>🇺🇸 United States</option>
-            <option>🇨🇦 Canada</option>
-            <option>🇦🇺 Australia</option>
-            <option>🇫🇷 France</option>
-            <option>🇩🇪 Germany</option>
-            <option>🇮🇹 Italy</option>
-            <option>🇪🇸 Spain</option>
-            <option>🇳🇱 Netherlands</option>
-            <option>🇨🇭 Switzerland</option>
-            <option>🇸🇪 Sweden</option>
-            <option>🇳🇴 Norway</option>
-            <option>🇩🇰 Denmark</option>
-            <option>🌍 Other</option>
-          </select>
+        <div class="field" style="margin-bottom:0;">
+          <label>Country <em>(optional)</em></label>
+          <div class="cs-wrap" id="cs-country-wrap">
+            <div class="cs-trigger" id="cs-country-trigger">
+              <span class="cs-label cs-placeholder" id="cs-country-label">Select country</span>
+              <svg class="cs-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="cs-panel" id="cs-country-panel">
+              <input type="text" class="cs-search" id="cs-country-search" placeholder="Search country…" autocomplete="off">
+              <div class="cs-list" id="cs-country-list"></div>
+            </div>
+          </div>
+          <input type="hidden" id="country_val" value="">
         </div>
       </div>
 
-      <div class="field" style="margin-top:16px;">
+      <div class="field">
         <label for="linkedin">LinkedIn <em>(optional)</em></label>
         <input type="url" id="linkedin" class="input-base" placeholder="linkedin.com/in/your-profile">
       </div>
 
-      <!-- Resume upload -->
       <div class="field">
         <label>Resume / CV <em>(optional — PDF or Word, max 5 MB)</em></label>
         <label class="file-label" for="resume_file">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 16V4m0 12-4-4m4 4 4-4M4 20h16"/></svg>
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 16V4m0 12-4-4m4 4 4-4M4 20h16"/></svg>
           <span id="file-label-text">Click to upload or drag a file here</span>
         </label>
         <input type="file" id="resume_file" accept=".pdf,.doc,.docx" style="display:none">
         <div id="resume-status"></div>
       </div>
 
-      <!-- What describes you best? -->
       <div class="field">
         <label>What describes you best?</label>
         <div class="pill-group">
-          <input type="radio" name="current_status" id="st-ms" value="Middle School (Gr. 6–8)">
-          <label for="st-ms">Middle School (Gr. 6–8)</label>
-          <input type="radio" name="current_status" id="st-hs" value="High School (Gr. 9–12)">
-          <label for="st-hs">High School (Gr. 9–12)</label>
-          <input type="radio" name="current_status" id="st-college" value="College Student">
-          <label for="st-college">College Student</label>
-          <input type="radio" name="current_status" id="st-working" value="Working Professional">
-          <label for="st-working">Working Professional</label>
-          <input type="radio" name="current_status" id="st-other" value="Other">
-          <label for="st-other">Other</label>
+          <input type="radio" name="current_status" id="st-ms" value="Middle School (Gr. 6–8)"><label for="st-ms">Middle School (Gr. 6–8)</label>
+          <input type="radio" name="current_status" id="st-hs" value="High School (Gr. 9–12)"><label for="st-hs">High School (Gr. 9–12)</label>
+          <input type="radio" name="current_status" id="st-college" value="College Student"><label for="st-college">College Student</label>
+          <input type="radio" name="current_status" id="st-working" value="Working Professional"><label for="st-working">Working Professional</label>
+          <input type="radio" name="current_status" id="st-other" value="Other"><label for="st-other">Other</label>
         </div>
       </div>
 
@@ -549,84 +286,62 @@
         <input type="text" id="school" class="input-base" placeholder="e.g. AUS, GEMS Wellington, UAEU…">
       </div>
 
-      <!-- Honeypot — hidden from humans, bots fill it -->
       <div class="hp-field" aria-hidden="true">
         <input type="text" name="website" id="hp_website" tabindex="-1" autocomplete="off">
       </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════
-         SLIDE 2 — Availability
-    ══════════════════════════════════════════════ -->
-    <div class="slide" data-section="Availability">
-      <div class="slide-title">Your availability</div>
-      <div class="slide-subtitle">We're flexible — even a few hours a week makes a real difference.</div>
+    <!-- ══ SLIDE 2: Availability + Areas of Interest ══ -->
+    <div class="slide" data-section="Availability &amp; Interests">
+      <div class="slide-title">Availability &amp; Interests</div>
+      <div class="slide-subtitle">Tell us when you're free and what you'd like to work on.</div>
+
+      <div class="section-label">Your Availability</div>
 
       <div class="field">
         <label>How many hours per week can you commit?</label>
         <div class="pill-group">
-          <input type="radio" name="hours_per_week" id="h1" value="1–3 hours">
-          <label for="h1">1–3 hours</label>
-          <input type="radio" name="hours_per_week" id="h2" value="3–6 hours">
-          <label for="h2">3–6 hours</label>
-          <input type="radio" name="hours_per_week" id="h3" value="6–10 hours">
-          <label for="h3">6–10 hours</label>
-          <input type="radio" name="hours_per_week" id="h4" value="10+ hours">
-          <label for="h4">10+ hours</label>
+          <input type="radio" name="hours_per_week" id="h1" value="1–3 hours"><label for="h1">1–3 hours</label>
+          <input type="radio" name="hours_per_week" id="h2" value="3–6 hours"><label for="h2">3–6 hours</label>
+          <input type="radio" name="hours_per_week" id="h3" value="6–10 hours"><label for="h3">6–10 hours</label>
+          <input type="radio" name="hours_per_week" id="h4" value="10+ hours"><label for="h4">10+ hours</label>
         </div>
       </div>
 
       <div class="field">
         <label>When are you generally available?</label>
         <div class="pill-group">
-          <input type="checkbox" name="availability" id="av-wkm" value="Weekday mornings">
-          <label for="av-wkm">Weekday mornings</label>
-          <input type="checkbox" name="availability" id="av-wka" value="Weekday afternoons">
-          <label for="av-wka">Weekday afternoons</label>
-          <input type="checkbox" name="availability" id="av-wke" value="Weekday evenings">
-          <label for="av-wke">Weekday evenings</label>
-          <input type="checkbox" name="availability" id="av-wknd" value="Weekends">
-          <label for="av-wknd">Weekends</label>
-          <input type="checkbox" name="availability" id="av-flex" value="Flexible">
-          <label for="av-flex">Flexible</label>
+          <input type="checkbox" name="availability" id="av-wkm" value="Weekday mornings"><label for="av-wkm">Weekday mornings</label>
+          <input type="checkbox" name="availability" id="av-wka" value="Weekday afternoons"><label for="av-wka">Weekday afternoons</label>
+          <input type="checkbox" name="availability" id="av-wke" value="Weekday evenings"><label for="av-wke">Weekday evenings</label>
+          <input type="checkbox" name="availability" id="av-wknd" value="Weekends"><label for="av-wknd">Weekends</label>
+          <input type="checkbox" name="availability" id="av-flex" value="Flexible"><label for="av-flex">Flexible</label>
         </div>
       </div>
 
       <div class="field">
-        <label for="preferred_times">Any specific times that work best? <em>(optional)</em></label>
+        <label for="preferred_times">Specific times that work best? <em>(optional)</em></label>
         <input type="text" id="preferred_times" class="input-base" placeholder="e.g. Weekday 9am–12pm, or after 6pm">
       </div>
-    </div>
 
-    <!-- ══════════════════════════════════════════════
-         SLIDE 3 — Areas of Interest
-    ══════════════════════════════════════════════ -->
-    <div class="slide" data-section="Areas of Interest">
-      <div class="slide-title">What excites you most?</div>
-      <div class="slide-subtitle">Pick everything that interests you — we'll match tasks accordingly.</div>
+      <hr class="section-divider">
+      <div class="section-label">Areas of Interest</div>
 
       <div class="field">
-        <label>Areas of Interest <em>(select all that apply)</em></label>
+        <label><em>(Select all that apply)</em></label>
         <div class="pill-group">
-          <input type="checkbox" name="areas_of_interest" id="ai-community" value="Community Outreach">
-          <label for="ai-community">Community Outreach</label>
-          <input type="checkbox" name="areas_of_interest" id="ai-social" value="Social Media">
-          <label for="ai-social">Social Media</label>
-          <input type="checkbox" name="areas_of_interest" id="ai-content" value="Content Writing">
-          <label for="ai-content">Content Writing</label>
-          <input type="checkbox" name="areas_of_interest" id="ai-ops" value="Operations">
-          <label for="ai-ops">Operations</label>
-          <input type="checkbox" name="areas_of_interest" id="ai-design" value="Design">
-          <label for="ai-design">Design</label>
-          <input type="checkbox" name="areas_of_interest" id="ai-tech" value="Tech / Data">
-          <label for="ai-tech">Tech / Data</label>
-          <input type="checkbox" name="areas_of_interest" id="ai-partnerships" value="Partnerships">
-          <label for="ai-partnerships">Partnerships</label>
+          <input type="checkbox" name="areas_of_interest" id="ai-community" value="Community Outreach"><label for="ai-community">Community Outreach</label>
+          <input type="checkbox" name="areas_of_interest" id="ai-social" value="Social Media"><label for="ai-social">Social Media</label>
+          <input type="checkbox" name="areas_of_interest" id="ai-content" value="Content Writing"><label for="ai-content">Content Writing</label>
+          <input type="checkbox" name="areas_of_interest" id="ai-ops" value="Operations"><label for="ai-ops">Operations</label>
+          <input type="checkbox" name="areas_of_interest" id="ai-design" value="Design"><label for="ai-design">Design</label>
+          <input type="checkbox" name="areas_of_interest" id="ai-tech" value="Tech / Data"><label for="ai-tech">Tech / Data</label>
+          <input type="checkbox" name="areas_of_interest" id="ai-partnerships" value="Partnerships"><label for="ai-partnerships">Partnerships</label>
         </div>
       </div>
 
       <div class="field">
-        <label for="primary_interest">If you had to pick one, what's your top area?</label>
+        <label for="primary_interest">If you had to pick just one, what's your top area?</label>
         <select id="primary_interest" class="input-base">
           <option value="">— Select one —</option>
           <option>Community Outreach</option>
@@ -640,52 +355,26 @@
       </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════
-         SLIDE 4 — Scenarios (2 questions, both optional)
-    ══════════════════════════════════════════════ -->
-    <div class="slide" data-section="Practical Scenarios">
-      <div class="slide-title">A couple of quick scenarios</div>
-      <div class="slide-subtitle">No right or wrong answers — just show us how you think. Both are optional.</div>
-
-      <div class="field">
-        <label for="scenario_approach">We want to reach 50 new users in a university campus this month. What would you do? <em>(optional)</em></label>
-        <textarea id="scenario_approach" class="input-base" placeholder="Walk us through your approach…"></textarea>
-      </div>
-
-      <div class="field">
-        <label for="scenario_followup">A user submits their journey but hasn't been matched after 2 weeks. They email us, frustrated. How do you handle it? <em>(optional)</em></label>
-        <textarea id="scenario_followup" class="input-base" placeholder="Your response…"></textarea>
-      </div>
-    </div>
-
-    <!-- ══════════════════════════════════════════════
-         SLIDE 5 — Skills & Reliability
-    ══════════════════════════════════════════════ -->
-    <div class="slide" data-section="Effort & Reliability">
+    <!-- ══ SLIDE 3: Skills & Reliability (was Step 5) ══ -->
+    <div class="slide" data-section="Skills &amp; Reliability">
       <div class="slide-title">About you &amp; your working style</div>
       <div class="slide-subtitle">Rate yourself honestly — 1 = not comfortable, 5 = very comfortable.</div>
 
       <div class="field">
         <label>Prior experience <em>(select all that apply)</em></label>
         <div class="pill-group">
-          <input type="checkbox" name="prior_experience" id="pe-volunteer" value="Volunteering">
-          <label for="pe-volunteer">Volunteering</label>
-          <input type="checkbox" name="prior_experience" id="pe-internship" value="Internship">
-          <label for="pe-internship">Internship</label>
-          <input type="checkbox" name="prior_experience" id="pe-startup" value="Startup / Side project">
-          <label for="pe-startup">Startup / Side project</label>
-          <input type="checkbox" name="prior_experience" id="pe-club" value="Student club">
-          <label for="pe-club">Student club</label>
-          <input type="checkbox" name="prior_experience" id="pe-work" value="Part-time / Full-time job">
-          <label for="pe-work">Part-time / Full-time job</label>
-          <input type="checkbox" name="prior_experience" id="pe-none" value="None yet">
-          <label for="pe-none">None yet</label>
+          <input type="checkbox" name="prior_experience" id="pe-vol" value="Volunteering"><label for="pe-vol">Volunteering</label>
+          <input type="checkbox" name="prior_experience" id="pe-int" value="Internship"><label for="pe-int">Internship</label>
+          <input type="checkbox" name="prior_experience" id="pe-st" value="Startup / Side project"><label for="pe-st">Startup / Side project</label>
+          <input type="checkbox" name="prior_experience" id="pe-club" value="Student club"><label for="pe-club">Student club</label>
+          <input type="checkbox" name="prior_experience" id="pe-work" value="Part-time / Full-time job"><label for="pe-work">Part-time / Full-time job</label>
+          <input type="checkbox" name="prior_experience" id="pe-none" value="None yet"><label for="pe-none">None yet</label>
         </div>
       </div>
 
       <div class="field">
         <div class="rating-group">
-          <div class="rating-row">
+          <div>
             <div class="r-label">Writing clearly (emails, captions, messages)</div>
             <div class="stars">
               <input type="radio" name="comfort_writing" id="cw5" value="5"><label for="cw5">5</label>
@@ -695,7 +384,7 @@
               <input type="radio" name="comfort_writing" id="cw1" value="1"><label for="cw1">1</label>
             </div>
           </div>
-          <div class="rating-row">
+          <div>
             <div class="r-label">Talking to strangers / cold outreach</div>
             <div class="stars">
               <input type="radio" name="comfort_strangers" id="cs5" value="5"><label for="cs5">5</label>
@@ -705,7 +394,7 @@
               <input type="radio" name="comfort_strangers" id="cs1" value="1"><label for="cs1">1</label>
             </div>
           </div>
-          <div class="rating-row">
+          <div>
             <div class="r-label">Doing repetitive or admin-style tasks</div>
             <div class="stars">
               <input type="radio" name="comfort_repetitive_tasks" id="cr5" value="5"><label for="cr5">5</label>
@@ -719,116 +408,271 @@
       </div>
 
       <div class="field">
-        <label for="ok_with_repetitive">Some tasks involve repetitive outreach — messaging, tracking, following up. What do you think? <em>(optional)</em></label>
+        <label for="ok_with_repetitive">Some tasks involve repetitive outreach — messaging, tracking, following up. Thoughts? <em>(optional)</em></label>
         <textarea id="ok_with_repetitive" class="input-base" placeholder="Your thoughts…"></textarea>
       </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════
-         SLIDE 6 — Motivation
-    ══════════════════════════════════════════════ -->
-    <div class="slide" data-section="Motivation">
-      <div class="slide-title">Finally — what drives you?</div>
-      <div class="slide-subtitle">This helps us understand who you are beyond your CV.</div>
+    <!-- ══ SLIDE 4: Scenarios + Motivation ══ -->
+    <div class="slide" data-section="Scenarios &amp; Motivation">
+      <div class="slide-title">Scenarios &amp; Motivation</div>
+      <div class="slide-subtitle">No right or wrong answers — just show us how you think. All optional.</div>
+
+      <div class="section-label">Quick Scenarios</div>
+
+      <div class="field">
+        <label for="scenario_approach">We want to reach 50 new users at a university campus this month. What would you do? <em>(optional)</em></label>
+        <textarea id="scenario_approach" class="input-base" placeholder="Walk us through your approach…"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="scenario_followup">A user submitted their journey but hasn't been matched after 2 weeks. They email us, frustrated. How do you handle it? <em>(optional)</em></label>
+        <textarea id="scenario_followup" class="input-base" placeholder="Your response…"></textarea>
+      </div>
+
+      <hr class="section-divider">
+      <div class="section-label">Motivation</div>
 
       <div class="field">
         <label for="motivation">Why do you want to be part of Community Carpool? What excites you about this mission? <em>(optional)</em></label>
-        <textarea id="motivation" class="input-base" rows="7" placeholder="Tell us what brought you here and what you hope to contribute…"></textarea>
+        <textarea id="motivation" class="input-base" rows="5" placeholder="Tell us what brought you here and what you hope to contribute…"></textarea>
       </div>
     </div>
 
-  </div><!-- /carousel-track -->
+  </div><!-- /track -->
   </div><!-- /carousel-wrap -->
 
-  <!-- Navigation -->
   <div class="slide-nav" id="slide-nav">
     <button class="btn-back" id="btn-back" disabled>&#8592; Back</button>
     <button class="btn-next" id="btn-next">Next &nbsp;&#8594;</button>
   </div>
 
-  <!-- Success screen -->
   <div class="success-screen" id="success-screen">
     <div class="success-icon">&#127881;</div>
     <h2>Application Received!</h2>
     <p>We've received your application and will read it personally. If there's a good fit, we'll reach out within a few days.</p>
-    <p style="margin-top:8px;font-size:13px;">Thanks for wanting to be part of something real.</p>
+    <p style="margin-top:6px;font-size:13px;">Thanks for wanting to be part of something real.</p>
   </div>
 
 </div><!-- /form-card -->
 </div><!-- /form-outer -->
 
 <script>
+// ── Country data (alphabetical by name) ──────────────────────────────────────
+const COUNTRY_DATA = [
+  ['Afghanistan','🇦🇫','+93'],['Albania','🇦🇱','+355'],['Algeria','🇩🇿','+213'],
+  ['Andorra','🇦🇩','+376'],['Angola','🇦🇴','+244'],['Antigua and Barbuda','🇦🇬','+1268'],
+  ['Argentina','🇦🇷','+54'],['Armenia','🇦🇲','+374'],['Australia','🇦🇺','+61'],
+  ['Austria','🇦🇹','+43'],['Azerbaijan','🇦🇿','+994'],['Bahamas','🇧🇸','+1242'],
+  ['Bahrain','🇧🇭','+973'],['Bangladesh','🇧🇩','+880'],['Barbados','🇧🇧','+1246'],
+  ['Belarus','🇧🇾','+375'],['Belgium','🇧🇪','+32'],['Belize','🇧🇿','+501'],
+  ['Benin','🇧🇯','+229'],['Bhutan','🇧🇹','+975'],['Bolivia','🇧🇴','+591'],
+  ['Bosnia and Herzegovina','🇧🇦','+387'],['Botswana','🇧🇼','+267'],['Brazil','🇧🇷','+55'],
+  ['Brunei','🇧🇳','+673'],['Bulgaria','🇧🇬','+359'],['Burkina Faso','🇧🇫','+226'],
+  ['Burundi','🇧🇮','+257'],['Cambodia','🇰🇭','+855'],['Cameroon','🇨🇲','+237'],
+  ['Canada','🇨🇦','+1'],['Cape Verde','🇨🇻','+238'],['Central African Republic','🇨🇫','+236'],
+  ['Chad','🇹🇩','+235'],['Chile','🇨🇱','+56'],['China','🇨🇳','+86'],
+  ['Colombia','🇨🇴','+57'],['Comoros','🇰🇲','+269'],['Congo (DRC)','🇨🇩','+243'],
+  ['Congo (Republic)','🇨🇬','+242'],['Costa Rica','🇨🇷','+506'],['Croatia','🇭🇷','+385'],
+  ['Cuba','🇨🇺','+53'],['Cyprus','🇨🇾','+357'],['Czech Republic','🇨🇿','+420'],
+  ['Denmark','🇩🇰','+45'],['Djibouti','🇩🇯','+253'],['Dominica','🇩🇲','+1767'],
+  ['Dominican Republic','🇩🇴','+1809'],['Ecuador','🇪🇨','+593'],['Egypt','🇪🇬','+20'],
+  ['El Salvador','🇸🇻','+503'],['Equatorial Guinea','🇬🇶','+240'],['Eritrea','🇪🇷','+291'],
+  ['Estonia','🇪🇪','+372'],['Eswatini','🇸🇿','+268'],['Ethiopia','🇪🇹','+251'],
+  ['Fiji','🇫🇯','+679'],['Finland','🇫🇮','+358'],['France','🇫🇷','+33'],
+  ['Gabon','🇬🇦','+241'],['Gambia','🇬🇲','+220'],['Georgia','🇬🇪','+995'],
+  ['Germany','🇩🇪','+49'],['Ghana','🇬🇭','+233'],['Greece','🇬🇷','+30'],
+  ['Grenada','🇬🇩','+1473'],['Guatemala','🇬🇹','+502'],['Guinea','🇬🇳','+224'],
+  ['Guinea-Bissau','🇬🇼','+245'],['Guyana','🇬🇾','+592'],['Haiti','🇭🇹','+509'],
+  ['Honduras','🇭🇳','+504'],['Hungary','🇭🇺','+36'],['Iceland','🇮🇸','+354'],
+  ['India','🇮🇳','+91'],['Indonesia','🇮🇩','+62'],['Iran','🇮🇷','+98'],
+  ['Iraq','🇮🇶','+964'],['Ireland','🇮🇪','+353'],['Israel','🇮🇱','+972'],
+  ['Italy','🇮🇹','+39'],['Jamaica','🇯🇲','+1876'],['Japan','🇯🇵','+81'],
+  ['Jordan','🇯🇴','+962'],['Kazakhstan','🇰🇿','+7'],['Kenya','🇰🇪','+254'],
+  ['Kiribati','🇰🇮','+686'],['Kuwait','🇰🇼','+965'],['Kyrgyzstan','🇰🇬','+996'],
+  ['Laos','🇱🇦','+856'],['Latvia','🇱🇻','+371'],['Lebanon','🇱🇧','+961'],
+  ['Lesotho','🇱🇸','+266'],['Liberia','🇱🇷','+231'],['Libya','🇱🇾','+218'],
+  ['Liechtenstein','🇱🇮','+423'],['Lithuania','🇱🇹','+370'],['Luxembourg','🇱🇺','+352'],
+  ['Madagascar','🇲🇬','+261'],['Malawi','🇲🇼','+265'],['Malaysia','🇲🇾','+60'],
+  ['Maldives','🇲🇻','+960'],['Mali','🇲🇱','+223'],['Malta','🇲🇹','+356'],
+  ['Marshall Islands','🇲🇭','+692'],['Mauritania','🇲🇷','+222'],['Mauritius','🇲🇺','+230'],
+  ['Mexico','🇲🇽','+52'],['Micronesia','🇫🇲','+691'],['Moldova','🇲🇩','+373'],
+  ['Monaco','🇲🇨','+377'],['Mongolia','🇲🇳','+976'],['Montenegro','🇲🇪','+382'],
+  ['Morocco','🇲🇦','+212'],['Mozambique','🇲🇿','+258'],['Myanmar','🇲🇲','+95'],
+  ['Namibia','🇳🇦','+264'],['Nauru','🇳🇷','+674'],['Nepal','🇳🇵','+977'],
+  ['Netherlands','🇳🇱','+31'],['New Zealand','🇳🇿','+64'],['Nicaragua','🇳🇮','+505'],
+  ['Niger','🇳🇪','+227'],['Nigeria','🇳🇬','+234'],['North Korea','🇰🇵','+850'],
+  ['North Macedonia','🇲🇰','+389'],['Norway','🇳🇴','+47'],['Oman','🇴🇲','+968'],
+  ['Pakistan','🇵🇰','+92'],['Palau','🇵🇼','+680'],['Palestine','🇵🇸','+970'],
+  ['Panama','🇵🇦','+507'],['Papua New Guinea','🇵🇬','+675'],['Paraguay','🇵🇾','+595'],
+  ['Peru','🇵🇪','+51'],['Philippines','🇵🇭','+63'],['Poland','🇵🇱','+48'],
+  ['Portugal','🇵🇹','+351'],['Qatar','🇶🇦','+974'],['Romania','🇷🇴','+40'],
+  ['Russia','🇷🇺','+7'],['Rwanda','🇷🇼','+250'],['Saint Kitts and Nevis','🇰🇳','+1869'],
+  ['Saint Lucia','🇱🇨','+1758'],['Saint Vincent and the Grenadines','🇻🇨','+1784'],
+  ['Samoa','🇼🇸','+685'],['San Marino','🇸🇲','+378'],['Saudi Arabia','🇸🇦','+966'],
+  ['Senegal','🇸🇳','+221'],['Serbia','🇷🇸','+381'],['Seychelles','🇸🇨','+248'],
+  ['Sierra Leone','🇸🇱','+232'],['Singapore','🇸🇬','+65'],['Slovakia','🇸🇰','+421'],
+  ['Slovenia','🇸🇮','+386'],['Solomon Islands','🇸🇧','+677'],['Somalia','🇸🇴','+252'],
+  ['South Africa','🇿🇦','+27'],['South Korea','🇰🇷','+82'],['South Sudan','🇸🇸','+211'],
+  ['Spain','🇪🇸','+34'],['Sri Lanka','🇱🇰','+94'],['Sudan','🇸🇩','+249'],
+  ['Suriname','🇸🇷','+597'],['Sweden','🇸🇪','+46'],['Switzerland','🇨🇭','+41'],
+  ['Syria','🇸🇾','+963'],['Taiwan','🇹🇼','+886'],['Tajikistan','🇹🇯','+992'],
+  ['Tanzania','🇹🇿','+255'],['Thailand','🇹🇭','+66'],['Timor-Leste','🇹🇱','+670'],
+  ['Togo','🇹🇬','+228'],['Tonga','🇹🇴','+676'],['Trinidad and Tobago','🇹🇹','+1868'],
+  ['Tunisia','🇹🇳','+216'],['Turkey','🇹🇷','+90'],['Turkmenistan','🇹🇲','+993'],
+  ['Tuvalu','🇹🇻','+688'],['Uganda','🇺🇬','+256'],['Ukraine','🇺🇦','+380'],
+  ['United Arab Emirates','🇦🇪','+971'],['United Kingdom','🇬🇧','+44'],['United States','🇺🇸','+1'],
+  ['Uruguay','🇺🇾','+598'],['Uzbekistan','🇺🇿','+998'],['Vanuatu','🇻🇺','+678'],
+  ['Venezuela','🇻🇪','+58'],['Vietnam','🇻🇳','+84'],['Yemen','🇾🇪','+967'],
+  ['Zambia','🇿🇲','+260'],['Zimbabwe','🇿🇼','+263']
+]
+
+// ── Custom select builder ─────────────────────────────────────────────────────
+function buildCustomSelect({ listEl, searchEl, triggerEl, labelEl, panelEl, items, defaultValue, isPhone, onSelect }) {
+  // items: [name, flag, code]
+  // isPhone: shows "flag code" in trigger; else shows "flag name"
+
+  // Build list items
+  items.forEach(([name, flag, code]) => {
+    const li = document.createElement('div')
+    li.className = 'cs-option'
+    li.dataset.value = isPhone ? code : name
+    li.dataset.search = name.toLowerCase()
+    if (isPhone) {
+      li.innerHTML = `<span>${flag}</span><span style="min-width:44px;font-variant-numeric:tabular-nums;">${code}</span><span style="color:#6B7280;font-size:13px;">${name}</span>`
+    } else {
+      li.innerHTML = `<span>${flag}</span><span>${name}</span>`
+    }
+    li.addEventListener('click', () => {
+      select(name, flag, code, li)
+      closePanel()
+    })
+    listEl.appendChild(li)
+  })
+
+  function select(name, flag, code, optEl) {
+    listEl.querySelectorAll('.cs-option').forEach(o => o.classList.remove('selected'))
+    if (optEl) optEl.classList.add('selected')
+    if (isPhone) {
+      labelEl.textContent = `${flag} ${code}`
+      labelEl.classList.remove('cs-placeholder')
+    } else {
+      labelEl.textContent = `${flag} ${name}`
+      labelEl.classList.remove('cs-placeholder')
+    }
+    onSelect(name, flag, code)
+  }
+
+  // Set default
+  if (defaultValue) {
+    const def = items.find(([n,,c]) => isPhone ? c === defaultValue : n === defaultValue)
+    if (def) {
+      const [n, f, c] = def
+      const li = listEl.querySelector(`[data-value="${isPhone ? c : n}"]`)
+      select(n, f, c, li)
+    }
+  }
+
+  // Toggle
+  triggerEl.addEventListener('click', (e) => {
+    e.stopPropagation()
+    const isOpen = panelEl.classList.contains('open')
+    document.querySelectorAll('.cs-panel.open').forEach(p => { p.classList.remove('open'); p.closest('.cs-wrap').querySelector('.cs-trigger').classList.remove('open') })
+    if (!isOpen) {
+      panelEl.classList.add('open')
+      triggerEl.classList.add('open')
+      searchEl.value = ''
+      filterList('')
+      setTimeout(() => searchEl.focus(), 60)
+      // Scroll selected into view
+      const sel = listEl.querySelector('.selected')
+      if (sel) sel.scrollIntoView({ block: 'nearest' })
+    }
+  })
+
+  // Search
+  searchEl.addEventListener('input', () => filterList(searchEl.value.toLowerCase()))
+
+  function filterList(q) {
+    listEl.querySelectorAll('.cs-option').forEach(o => {
+      o.classList.toggle('hidden', q.length > 0 && !o.dataset.search.includes(q))
+    })
+  }
+
+  // Close on outside click
+  document.addEventListener('click', closePanel)
+  function closePanel() {
+    panelEl.classList.remove('open')
+    triggerEl.classList.remove('open')
+  }
+}
+
+// Init phone-code select
+buildCustomSelect({
+  listEl: document.getElementById('cs-phone-list'),
+  searchEl: document.getElementById('cs-phone-search'),
+  triggerEl: document.getElementById('cs-phone-trigger'),
+  labelEl: document.getElementById('cs-phone-label'),
+  panelEl: document.getElementById('cs-phone-panel'),
+  items: COUNTRY_DATA,
+  defaultValue: '+971',
+  isPhone: true,
+  onSelect: (name, flag, code) => { document.getElementById('phone_code').value = code }
+})
+
+// Init country select
+buildCustomSelect({
+  listEl: document.getElementById('cs-country-list'),
+  searchEl: document.getElementById('cs-country-search'),
+  triggerEl: document.getElementById('cs-country-trigger'),
+  labelEl: document.getElementById('cs-country-label'),
+  panelEl: document.getElementById('cs-country-panel'),
+  items: COUNTRY_DATA,
+  defaultValue: '',
+  isPhone: false,
+  onSelect: (name) => { document.getElementById('country_val').value = name }
+})
+
 // ── Config ────────────────────────────────────────────────────────────────────
 const SUPABASE_URL  = 'https://tbkjealpnoriwdosvmju.supabase.co'
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRia2plYWxwbm9yaXdkb3N2bWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMTg2ODAsImV4cCI6MjA4Njg5NDY4MH0.K0iS87GLgAZhYwFIQNphVFrarMzFxECkFYFvxpeVcsA'
 const FN_URL = `${SUPABASE_URL}/functions/v1/submit-intern-application`
-
-const TOTAL        = 6
-const SECTION_NAMES = ['Basic Info','Availability','Areas of Interest','Practical Scenarios','Effort & Reliability','Motivation']
-
-// ── Bot protection: record load time ─────────────────────────────────────────
+const TOTAL = 4
+const SECTION_NAMES = ['Basic Info', 'Availability & Interests', 'Skills & Reliability', 'Scenarios & Motivation']
 const FORM_LOAD_TIME = Date.now()
 
-let current     = 0
-let resumeUrl   = null  // set after successful upload
-let resumeUploadPending = false
+let current = 0, resumeUrl = null, resumeUploadPending = false
 
-const track         = document.getElementById('track')
-const btnBack       = document.getElementById('btn-back')
-const btnNext       = document.getElementById('btn-next')
-const segs          = document.querySelectorAll('.seg')
-const stepLabel     = document.getElementById('step-label')
-const secName       = document.getElementById('section-name')
-const successScreen = document.getElementById('success-screen')
-const slideNav      = document.getElementById('slide-nav')
-const carouselWrap  = document.querySelector('.carousel-wrap')
+const track    = document.getElementById('track')
+const btnBack  = document.getElementById('btn-back')
+const btnNext  = document.getElementById('btn-next')
+const segs     = document.querySelectorAll('.seg')
+const stepLbl  = document.getElementById('step-label')
+const secName  = document.getElementById('section-name')
+const success  = document.getElementById('success-screen')
+const slideNav = document.getElementById('slide-nav')
 
 // ── Resume upload ─────────────────────────────────────────────────────────────
-const resumeInput   = document.getElementById('resume_file')
-const resumeStatus  = document.getElementById('resume-status')
-const fileLabelText = document.getElementById('file-label-text')
+const resumeInput  = document.getElementById('resume_file')
+const resumeStatus = document.getElementById('resume-status')
 
 resumeInput.addEventListener('change', async () => {
   const file = resumeInput.files[0]
   if (!file) return
-  if (file.size > 5 * 1024 * 1024) {
-    resumeStatus.className = 'err'
-    resumeStatus.textContent = 'File too large — max 5 MB.'
-    resumeInput.value = ''
-    return
-  }
-  fileLabelText.textContent = file.name
-  resumeStatus.className = 'uploading'
-  resumeStatus.textContent = '⏳ Uploading…'
+  if (file.size > 5 * 1024 * 1024) { resumeStatus.className = 'err'; resumeStatus.textContent = 'File too large — max 5 MB.'; resumeInput.value = ''; return }
+  document.getElementById('file-label-text').textContent = file.name
+  resumeStatus.className = 'uploading'; resumeStatus.textContent = '⏳ Uploading…'
   resumeUploadPending = true
-
   try {
-    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')
-    const path = `${Date.now()}_${safeName}`
+    const path = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`
     const res = await fetch(`${SUPABASE_URL}/storage/v1/object/intern-resumes/${path}`, {
       method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON,
-        'Authorization': `Bearer ${SUPABASE_ANON}`,
-        'Content-Type': file.type || 'application/octet-stream',
-        'x-upsert': 'false'
-      },
+      headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`, 'Content-Type': file.type || 'application/octet-stream', 'x-upsert': 'false' },
       body: file
     })
-    if (res.ok) {
-      resumeUrl = `${SUPABASE_URL}/storage/v1/object/public/intern-resumes/${path}`
-      resumeStatus.className = 'ok'
-      resumeStatus.textContent = '✓ Uploaded successfully'
-    } else {
-      const txt = await res.text()
-      console.error('Resume upload failed:', txt)
-      resumeStatus.className = 'err'
-      resumeStatus.textContent = 'Upload failed — you can still submit without it.'
-    }
-  } catch (e) {
-    resumeStatus.className = 'err'
-    resumeStatus.textContent = 'Upload error — you can still submit without it.'
-  }
+    if (res.ok) { resumeUrl = `${SUPABASE_URL}/storage/v1/object/public/intern-resumes/${path}`; resumeStatus.className = 'ok'; resumeStatus.textContent = '✓ Uploaded successfully' }
+    else { resumeStatus.className = 'err'; resumeStatus.textContent = 'Upload failed — you can still submit without it.' }
+  } catch { resumeStatus.className = 'err'; resumeStatus.textContent = 'Upload error — you can still submit without it.' }
   resumeUploadPending = false
 })
 
@@ -836,156 +680,77 @@ resumeInput.addEventListener('change', async () => {
 function goTo(idx) {
   current = idx
   track.style.transform = `translateX(-${current * 100}%)`
+  // Scroll incoming slide back to top
+  const slides = track.querySelectorAll('.slide')
+  if (slides[idx]) slides[idx].scrollTop = 0
   btnBack.disabled = current === 0
-
-  if (current === TOTAL - 1) {
-    btnNext.textContent = 'Submit Application ✓'
-    btnNext.classList.add('submit-btn')
-  } else {
-    btnNext.textContent = 'Next →'
-    btnNext.classList.remove('submit-btn')
-  }
-
-  stepLabel.textContent = `Step ${current + 1} of ${TOTAL}`
-  secName.textContent   = SECTION_NAMES[current]
-
-  segs.forEach((s, i) => {
-    s.classList.remove('active', 'done')
-    if (i < current)      s.classList.add('done')
-    else if (i === current) s.classList.add('active')
-  })
+  if (current === TOTAL - 1) { btnNext.textContent = 'Submit Application ✓'; btnNext.classList.add('submit-btn') }
+  else { btnNext.textContent = 'Next →'; btnNext.classList.remove('submit-btn') }
+  stepLbl.textContent = `Step ${current + 1} of ${TOTAL}`
+  secName.textContent = SECTION_NAMES[current]
+  segs.forEach((s, i) => { s.classList.remove('active','done'); if (i < current) s.classList.add('done'); else if (i === current) s.classList.add('active') })
 }
 
-// ── Validation (slide 1 only — rest are optional) ────────────────────────────
+// ── Validation ────────────────────────────────────────────────────────────────
 function validateSlide(idx) {
   if (idx !== 0) return true
   let ok = true
-  const nameEl  = document.getElementById('full_name')
-  const emailEl = document.getElementById('email')
-  const errName  = document.getElementById('err-full_name')
-  const errEmail = document.getElementById('err-email')
-
-  if (!nameEl.value.trim()) {
-    nameEl.classList.add('error'); errName.classList.add('show'); ok = false
-  } else {
-    nameEl.classList.remove('error'); errName.classList.remove('show')
-  }
-  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailEl.value.trim() || !emailRe.test(emailEl.value.trim())) {
-    emailEl.classList.add('error'); errEmail.classList.add('show'); ok = false
-  } else {
-    emailEl.classList.remove('error'); errEmail.classList.remove('show')
-  }
+  const n = document.getElementById('full_name'), e = document.getElementById('email')
+  const en = document.getElementById('err-full_name'), ee = document.getElementById('err-email')
+  if (!n.value.trim()) { n.classList.add('error'); en.classList.add('show'); ok = false } else { n.classList.remove('error'); en.classList.remove('show') }
+  if (!e.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.value.trim())) { e.classList.add('error'); ee.classList.add('show'); ok = false } else { e.classList.remove('error'); ee.classList.remove('show') }
   return ok
 }
 
-// ── Collect all form data ─────────────────────────────────────────────────────
+// ── Collect data ──────────────────────────────────────────────────────────────
 function collectData() {
   const getChecked = n => [...document.querySelectorAll(`input[name="${n}"]:checked`)].map(el => el.value)
   const getRadio   = n => (document.querySelector(`input[name="${n}"]:checked`) || {}).value || null
   const getRating  = n => { const v = getRadio(n); return v ? parseInt(v) : null }
-  const getText    = id => { const el = document.getElementById(id); return el?.value?.trim() || null }
+  const getText    = id => document.getElementById(id)?.value?.trim() || null
   const getSelect  = id => { const el = document.getElementById(id); return el?.value || null }
-
-  const avChecked = getChecked('availability')
-  const phoneCode = document.getElementById('phone_code').value
-  const phoneNum  = getText('phone_number')
-  const phone     = phoneNum ? `${phoneCode} ${phoneNum}` : null
-
-  // city + country
-  const city    = getText('city')
-  const country = getSelect('country')
-  let city_country = [city, country].filter(Boolean).join(', ') || null
-
+  const phoneCode  = document.getElementById('phone_code').value
+  const phoneNum   = getText('phone_number')
+  const city       = getText('city')
+  const country    = getText('country_val')
   return {
-    full_name:               getText('full_name'),
-    email:                   getText('email'),
-    phone,
-    city_country,
-    school:                  getText('school'),
-    current_status:          getRadio('current_status'),
-    linkedin:                getText('linkedin'),
-    resume_url:              resumeUrl,
-    hours_per_week:          getRadio('hours_per_week'),
-    availability:            avChecked.length ? avChecked.join(', ') : null,
-    preferred_times:         getText('preferred_times'),
-    areas_of_interest:       getChecked('areas_of_interest'),
-    primary_interest:        getSelect('primary_interest'),
-    scenario_reply:          null,
-    scenario_approach:       getText('scenario_approach'),
-    scenario_followup:       getText('scenario_followup'),
-    prior_experience:        getChecked('prior_experience'),
-    comfort_writing:         getRating('comfort_writing'),
-    comfort_strangers:       getRating('comfort_strangers'),
-    comfort_repetitive_tasks: getRating('comfort_repetitive_tasks'),
-    ok_with_repetitive:      getText('ok_with_repetitive'),
-    motivation:              getText('motivation'),
-    primary_interest:        getSelect('primary_interest'),
-    // Bot signals (server-side checked)
-    _hp:                     document.getElementById('hp_website').value,
-    _load_ms:                Date.now() - FORM_LOAD_TIME,
+    full_name: getText('full_name'), email: getText('email'),
+    phone: phoneNum ? `${phoneCode} ${phoneNum}` : null,
+    city_country: [city, country].filter(Boolean).join(', ') || null,
+    school: getText('school'), current_status: getRadio('current_status'),
+    linkedin: getText('linkedin'), resume_url: resumeUrl,
+    hours_per_week: getRadio('hours_per_week'),
+    availability: getChecked('availability').join(', ') || null,
+    preferred_times: getText('preferred_times'),
+    areas_of_interest: getChecked('areas_of_interest'),
+    primary_interest: getSelect('primary_interest'),
+    scenario_reply: null, scenario_approach: getText('scenario_approach'), scenario_followup: getText('scenario_followup'),
+    prior_experience: getChecked('prior_experience'),
+    comfort_writing: getRating('comfort_writing'), comfort_strangers: getRating('comfort_strangers'), comfort_repetitive_tasks: getRating('comfort_repetitive_tasks'),
+    ok_with_repetitive: getText('ok_with_repetitive'), motivation: getText('motivation'),
+    _hp: document.getElementById('hp_website').value, _load_ms: Date.now() - FORM_LOAD_TIME,
   }
 }
 
 // ── Submit ────────────────────────────────────────────────────────────────────
 async function submitForm() {
-  if (resumeUploadPending) {
-    btnNext.textContent = 'Waiting for upload…'
-    // wait up to 8 seconds
-    for (let i = 0; i < 16; i++) {
-      await new Promise(r => setTimeout(r, 500))
-      if (!resumeUploadPending) break
-    }
-  }
-
-  btnNext.disabled    = true
-  btnNext.textContent = 'Submitting…'
-
+  if (resumeUploadPending) { btnNext.textContent = 'Waiting for upload…'; for (let i=0;i<16;i++) { await new Promise(r=>setTimeout(r,500)); if (!resumeUploadPending) break } }
+  btnNext.disabled = true; btnNext.textContent = 'Submitting…'
   try {
-    const res = await fetch(FN_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON },
-      body: JSON.stringify(collectData()),
-    })
+    const res  = await fetch(FN_URL, { method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON}, body:JSON.stringify(collectData()) })
     const json = await res.json()
-
     if (json.success) {
-      carouselWrap.style.display = 'none'
-      slideNav.style.display     = 'none'
-      successScreen.classList.add('show')
+      document.querySelector('.carousel-wrap').style.display = 'none'
+      slideNav.style.display = 'none'; success.classList.add('show')
       segs.forEach(s => { s.classList.remove('active'); s.classList.add('done') })
-      stepLabel.textContent = 'Complete!'
-      secName.textContent   = 'Thank you'
-    } else {
-      alert('Something went wrong: ' + (json.error || 'Please try again.'))
-      btnNext.disabled    = false
-      btnNext.textContent = 'Submit Application ✓'
-    }
-  } catch {
-    alert('Network error. Please check your connection and try again.')
-    btnNext.disabled    = false
-    btnNext.textContent = 'Submit Application ✓'
-  }
+      stepLbl.textContent = 'Complete!'; secName.textContent = 'Thank you'
+    } else { alert('Something went wrong: ' + (json.error||'Please try again.')); btnNext.disabled=false; btnNext.textContent='Submit Application ✓' }
+  } catch { alert('Network error. Please check your connection and try again.'); btnNext.disabled=false; btnNext.textContent='Submit Application ✓' }
 }
 
-// ── Button handlers ───────────────────────────────────────────────────────────
-btnNext.addEventListener('click', () => {
-  if (!validateSlide(current)) return
-  if (current === TOTAL - 1) {
-    submitForm()
-  } else {
-    goTo(current + 1)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-})
-
-btnBack.addEventListener('click', () => {
-  if (current > 0) { goTo(current - 1); window.scrollTo({ top: 0, behavior: 'smooth' }) }
-})
-
-// Init
+btnNext.addEventListener('click', () => { if (!validateSlide(current)) return; if (current===TOTAL-1) submitForm(); else goTo(current+1) })
+btnBack.addEventListener('click', () => { if (current>0) goTo(current-1) })
 goTo(0)
 </script>
-
 </body>
 </html>
