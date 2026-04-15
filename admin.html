@@ -1567,6 +1567,47 @@ function renderLocationList(items, key, labelFn) {
   }).join('')}</ul>`
 }
 
+function renderAcquisitionCombined(refRows, clientRows) {
+  const modeCfg = {
+    individual: { label: 'Individual', bg: '#f0fdf4', color: 'var(--green-dark)' },
+    campaign:   { label: 'Campaign',   bg: '#eff6ff', color: '#1d4ed8' },
+    client:     { label: 'Client',     bg: '#f5f3ff', color: '#6d28d9' }
+  }
+  const all = [
+    ...(refRows||[]).map(it => ({ ...it, _mode: it.mode || 'individual' })),
+    ...(clientRows||[]).map(it => ({ ...it, _mode: 'client' }))
+  ].sort((a, b) => b.count - a.count)
+
+  if (!all.length) return '<p style="color:var(--text-muted);font-size:13px;padding:16px 0;text-align:center">No acquisition data yet — no referral or client links used</p>'
+
+  const max   = all[0].count || 1
+  const total = all.reduce((s, it) => s + it.count, 0)
+
+  return `<ul class="loc-list loc-scroll">${all.map(it => {
+    const cfg  = modeCfg[it._mode] || modeCfg.individual
+    const badge = `<span style="font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px;background:${cfg.bg};color:${cfg.color};flex-shrink:0;white-space:nowrap">${cfg.label}</span>`
+    let label, tipAttr = ''
+    if (it._mode === 'client') {
+      label = it.name || it.ref || '—'
+    } else if (it._mode === 'campaign') {
+      label = [it.source, it.medium ? `(${it.medium})` : '', it.person_campaign_name].filter(Boolean).join(' · ') || it.ref || '—'
+      if (it.ref) tipAttr = ` data-tip="cmp ${esc(it.ref)}"`
+    } else {
+      label = it.name || it.ref || '—'
+      if (it.ref) tipAttr = ` data-tip="ref ${esc(it.ref)}"`
+    }
+    const pct = total > 0 ? Math.round(it.count / total * 100) : 0
+    return `<li>
+      <div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 0;overflow:hidden">
+        ${badge}
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;cursor:${tipAttr?'help':'default'}"${tipAttr}>${esc(label)}</span>
+      </div>
+      <div class="loc-bar-wrap"><div class="loc-bar"><div class="loc-bar-inner" style="width:${Math.round(it.count/max*100)}%"></div></div></div>
+      <span class="loc-count">${it.count} (${pct}%)</span>
+    </li>`
+  }).join('')}</ul>`
+}
+
 function renderAcquisitionList(items, key) {
   if (!items?.length) return '<p style="color:var(--text-muted);font-size:13px;padding:12px 0;text-align:center">No data yet — referral links not used</p>'
   const max = items[0]?.count || 1
@@ -1751,18 +1792,11 @@ function renderDashboard(data, an) {
   </div>`
 
   // Row 11 – Acquisition Sources
-  const hasRefData = (charts.refBreakdown||[]).length > 0 || (charts.utmSourceBreakdown||[]).length > 0
-  if (hasRefData) {
-    html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Acquisition Sources</div><span class="kpi-tip" style="font-size:13px;margin-left:2px">ⓘ<span class="kpi-tooltip" style="white-space:normal;width:260px">Shows which referral links and campaigns are driving sign-ups. Individual Referral Links tracks users who registered via a ?ref=NNN link. Campaign Sources tracks users who registered via a ?cmp=NNN campaign link. Hover over a code to see the name or campaign details.</span></span></div></div>
-    <div class="chart-grid-2" style="margin-bottom:24px">
-      <div class="chart-card" style="border-top:3px solid var(--green)">
-        <h3>Individual Referral Links <span style="font-size:11px;color:var(--text-muted);font-weight:400">(ref codes)</span></h3>
-        ${renderAcquisitionList(charts.refBreakdown||[], 'ref')}
-      </div>
-      <div class="chart-card" style="border-top:3px solid var(--green)">
-        <h3>Campaign Sources <span style="font-size:11px;color:var(--text-muted);font-weight:400">(utm_source)</span></h3>
-        ${renderAcquisitionList(charts.utmSourceBreakdown||[], 'source')}
-      </div>
+  const hasAcqData = (charts.refBreakdown||[]).length > 0 || (charts.clientBreakdown||[]).length > 0
+  if (hasAcqData) {
+    html += `<div style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Acquisition Sources</div><span class="kpi-tip" style="font-size:13px;margin-left:2px">ⓘ<span class="kpi-tooltip" style="white-space:normal;width:280px">Shows which links are driving sign-ups, sorted by submissions. <strong>Individual</strong> = personal referral links (?ref=NNN). <strong>Campaign</strong> = tracked campaign links (?cmp=NNN). <strong>Client</strong> = org-specific landing pages (?client=xxx). Hover a row to see the ref/cmp code.</span></span></div></div>
+    <div class="chart-card" style="margin-bottom:24px;border-top:3px solid var(--green)">
+      ${renderAcquisitionCombined(charts.refBreakdown||[], charts.clientBreakdown||[])}
     </div>`
   }
 
