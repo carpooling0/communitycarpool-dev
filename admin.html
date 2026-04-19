@@ -1642,14 +1642,15 @@ function renderDashboard(data, an) {
   // Row 2 – Analytics Stats (blue, date-range sensitive)
   if (an) {
     const bounceRate = an.visits > 0 ? ((an.bounces / an.visits) * 100).toFixed(1) : '—'
-    const avgDuration = an.visits > 0 ? Math.round(an.totaltime / an.visits) : 0
+    const nonBounceVisits = an.visits - an.bounces
+    const avgDuration = nonBounceVisits > 0 ? Math.round(an.totaltime / nonBounceVisits) : 0
     const fmtDur = d => d >= 60 ? `${Math.floor(d/60)}m ${d%60}s` : `${d}s`
     html += `<div style="margin:18px 0 8px"><div style="display:flex;align-items:center;gap:8px"><div class="section-title">Web Traffic</div><span style="font-size:11px;font-weight:600;color:var(--blue);background:#dbeafe;padding:2px 8px;border-radius:20px">📊 Analytics</span></div></div>
     <div class="kpi-grid kpi-5" style="margin-bottom:22px">
       <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Visitors <span class="kpi-tip">ⓘ<span class="kpi-tooltip">Unique individuals identified by browser fingerprint in the selected date range. Each person is counted once even if they visit multiple times.</span></span></div><div class="kpi-value" style="color:var(--blue)">${an.visitors.toLocaleString()}</div><div class="kpi-sub">unique</div></div>
       <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Views <span class="kpi-tip">ⓘ<span class="kpi-tooltip">Total page loads in the selected period. One visitor browsing 5 pages = 5 views. Views ÷ Visitors = avg pages per person.</span></span></div><div class="kpi-value" style="color:var(--blue)">${an.pageviews.toLocaleString()}</div><div class="kpi-sub">page loads</div></div>
       <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Bounce Rate <span class="kpi-tip">ⓘ<span class="kpi-tooltip">% of sessions where the visitor viewed only one page and left with no further interaction. Lower is better — it means visitors are exploring the site.</span></span></div><div class="kpi-value" style="color:var(--blue)">${bounceRate}${bounceRate!=='—'?'%':''}</div><div class="kpi-sub">single-page sessions</div></div>
-      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Visit Duration <span class="kpi-tip">ⓘ<span class="kpi-tooltip">Average time spent per session, calculated as total engaged time ÷ number of sessions. Longer = more engaged visitors.</span></span></div><div class="kpi-value" style="color:var(--blue)">${fmtDur(avgDuration)}</div><div class="kpi-sub">avg per session</div></div>
+      <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Visit Duration <span class="kpi-tip">ⓘ<span class="kpi-tooltip">Average time per engaged session — bounce visits (single page, no interaction) are excluded. Calculated as total time ÷ non-bounce sessions. A truer signal of how long users actually spend on the site.</span></span></div><div class="kpi-value" style="color:var(--blue)">${fmtDur(avgDuration)}</div><div class="kpi-sub">avg excl. bounces</div></div>
       <div class="kpi-card" style="border-top:3px solid var(--blue)"><div class="kpi-label">Social Shares <span class="kpi-tip">ⓘ<span class="kpi-tooltip">Number of times the WhatsApp/share button was tapped, tracked as a custom analytics event. Indicates viral sharing activity.</span></span></div><div class="kpi-value" style="color:var(--blue)">${an.waShares.toLocaleString()}</div><div class="kpi-sub">share taps</div></div>
     </div>`
   } else {
@@ -3371,7 +3372,8 @@ function renderAnalytics(data, unit) {
   const totaltime  = gv('totaltime')
 
   const bounceRate = visits > 0 ? ((bounces / visits) * 100).toFixed(1) : '0.0'
-  const avgDuration = visits > 0 ? Math.round(totaltime / visits) : 0
+  const nonBounceVisits = visits - bounces
+  const avgDuration = nonBounceVisits > 0 ? Math.round(totaltime / nonBounceVisits) : 0
   const fmtDur = d => d >= 60 ? `${Math.floor(d/60)}m ${d%60}s` : `${d}s`
   const fmtChg = (v) => {
     if (v === null || v === undefined) return ''
