@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agents | Community Carpool</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --green: #16a34a; --green-dark: #15803d; --green-light: #dcfce7;
+      --red: #dc2626; --red-light: #fee2e2;
+      --blue: #2563eb; --blue-light: #dbeafe;
+      --bg: #f3f4f6; --card: #fff; --border: #e5e7eb;
+      --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08); --radius: 10px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+    .hidden { display: none !important; }
+
+    /* AUTH SCREEN */
+    #authScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .auth-msg { font-size: 14px; color: var(--text-secondary); }
+
+    /* TOPBAR */
+    .topbar { height: 56px; background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; padding: 0 24px; position: sticky; top: 0; z-index: 10; }
+    .back-link { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 500; color: var(--text-secondary); text-decoration: none; border: 1px solid var(--border); border-radius: 7px; padding: 5px 11px; transition: background 0.15s, color 0.15s; }
+    .back-link:hover { background: var(--bg); color: var(--text); }
+    .back-link svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .topbar-title { font-size: 16px; font-weight: 700; flex: 1; }
+    .topbar-user { font-size: 13px; color: var(--text-secondary); }
+
+    /* CONTENT */
+    .page { max-width: 880px; margin: 0 auto; padding: 28px 24px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; }
+    .page-header-text h1 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .page-header-text p { font-size: 13px; color: var(--text-muted); }
+
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13.5px; font-weight: 600; font-family: inherit; cursor: pointer; border: none; transition: opacity 0.15s, background 0.15s; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--green); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--green-dark); }
+
+    /* FILTERS */
+    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    .filter-btn { background: #f3f4f6; border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px; font-size: 12.5px; font-weight: 500; cursor: pointer; font-family: inherit; color: var(--text-secondary); transition: all 0.15s; }
+    .filter-btn.active { background: var(--green-dark); color: #fff; border-color: var(--green-dark); }
+
+    /* CARDS */
+    .reddit-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+    .reddit-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .reddit-card-title { font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 4px; }
+    .reddit-card-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11.5px; font-weight: 600; }
+    .badge-relevance { background: #eff6ff; color: #1d4ed8; }
+    .badge-intent { background: #f3f4f6; color: var(--text-secondary); }
+    .badge-status { background: #f3f4f6; color: var(--text-muted); text-transform: capitalize; }
+    .reply-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 5px; }
+    .reply-box { background: #f9fafb; border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; font-size: 13px; color: var(--text); line-height: 1.5; margin-bottom: 6px; position: relative; padding-right: 52px; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; background: #fff; border: 1px solid var(--border); border-radius: 5px; padding: 2px 8px; font-size: 11px; cursor: pointer; font-family: inherit; color: var(--text-secondary); }
+    .copy-btn:hover { background: #f3f4f6; }
+    .card-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .action-btn { border: 1px solid var(--border); background: #fff; border-radius: 6px; padding: 5px 12px; font-size: 12.5px; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.15s; }
+    .action-btn:hover { background: #f3f4f6; }
+    .action-btn.used { color: #16a34a; border-color: #bbf7d0; }
+    .action-btn.save { color: #1d4ed8; border-color: #bfdbfe; }
+    .action-btn.skip { color: var(--text-muted); }
+
+    /* EMPTY / LOADING */
+    .empty-state { text-align: center; padding: 60px 24px; color: var(--text-muted); font-size: 14px; }
+    .loading { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 60px 24px; color: var(--text-muted); font-size: 14px; }
+    .spinner { width: 18px; height: 18px; border: 2.5px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div id="authScreen"><p class="auth-msg">Checking session…</p></div>
+
+<div id="app" class="hidden">
+  <div class="topbar">
+    <a class="back-link" href="admin.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Admin
+    </a>
+    <span class="topbar-title">Agents</span>
+    <span class="topbar-user" id="topbarUser"></span>
+  </div>
+
+  <div class="page">
+    <div class="page-header">
+      <div class="page-header-text">
+        <h1>Reddit Agent</h1>
+        <p>Relevant posts from Reddit — review and post manually.</p>
+      </div>
+      <button class="btn btn-primary" onclick="runFetch()" id="runBtn">▶ Run Now</button>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('pending',this)">Pending</button>
+      <button class="filter-btn" onclick="setFilter('saved',this)">Saved</button>
+      <button class="filter-btn" onclick="setFilter('used',this)">Used</button>
+      <button class="filter-btn" onclick="setFilter('skipped',this)">Skipped</button>
+      <button class="filter-btn" onclick="setFilter('all',this)">All</button>
+    </div>
+
+    <div id="content"><div class="loading"><span class="spinner"></span>Loading…</div></div>
+  </div>
+</div>
+
+<script>
+const AUTH_URL = `${SUPABASE_URL}/functions/v1/admin-auth`
+const DB_URL   = `${SUPABASE_URL}/rest/v1`
+const TOKEN_KEY = 'ccp_admin_token'
+let currentFilter = 'pending'
+
+async function checkAuth() {
+  const tok = localStorage.getItem(TOKEN_KEY)
+  if (!tok) { window.location.href = 'admin.html'; return }
+  try {
+    const r = await fetch(AUTH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'me', token: tok })
+    })
+    const data = await r.json()
+    if (data.success) {
+      document.getElementById('topbarUser').textContent = data.name || ''
+      document.getElementById('authScreen').classList.add('hidden')
+      document.getElementById('app').classList.remove('hidden')
+      loadPosts()
+    } else {
+      localStorage.removeItem(TOKEN_KEY)
+      window.location.href = 'admin.html'
+    }
+  } catch(e) {
+    window.location.href = 'admin.html'
+  }
+}
+
+async function dbGet(params) {
+  const qs = new URLSearchParams(params).toString()
+  const r = await fetch(`${DB_URL}/reddit_digest?${qs}`, {
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+  })
+  return r.json()
+}
+
+async function dbPatch(id, body) {
+  await fetch(`${DB_URL}/reddit_digest?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(body)
+  })
+}
+
+async function loadPosts() {
+  document.getElementById('content').innerHTML = '<div class="loading"><span class="spinner"></span>Loading…</div>'
+  const params = {
+    select: '*',
+    order: 'relevance_score.desc,fetched_at.desc',
+    limit: 50
+  }
+  if (currentFilter !== 'all') params['status'] = `eq.${currentFilter}`
+  try {
+    const data = await dbGet(params)
+    if (!Array.isArray(data) || data.length === 0) {
+      document.getElementById('content').innerHTML = '<div class="empty-state">No posts found. Run the agent or check back later.</div>'
+      return
+    }
+    document.getElementById('content').innerHTML = data.map(renderCard).join('')
+  } catch(e) {
+    document.getElementById('content').innerHTML = `<div class="empty-state">Error loading posts: ${e.message}</div>`
+  }
+}
+
+function fmtPostDate(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  const now = Date.now()
+  const diffH = Math.round((now - d.getTime()) / 3600000)
+  if (diffH < 1) return 'just now'
+  if (diffH < 24) return `${diffH}h ago`
+  if (diffH < 48) return 'yesterday'
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function renderCard(p) {
+  const intentColour = { discussion:'#eff6ff', complaint:'#fef3c7', 'advice-seeking':'#f0fdf4', informational:'#f3f4f6' }[p.intent] || '#f3f4f6'
+  const statusBadge = p.status !== 'pending' ? `<span class="badge badge-status">${esc(p.status)}</span>` : ''
+  const postDate = fmtPostDate(p.post_created_at)
+  return `<div class="reddit-card" id="rcard-${p.id}">
+    <div class="reddit-card-header">
+      <div>
+        <div class="reddit-card-title"><a href="${esc(p.post_url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${esc(p.post_title)}</a></div>
+        <div class="reddit-card-meta">
+          <span style="font-weight:600;color:var(--green-dark)">r/${esc(p.subreddit)}</span>
+          <span>↑ ${p.post_score}</span>
+          <span>${p.comment_count} comments</span>
+          ${postDate ? `<span style="color:var(--text-muted)">${postDate}</span>` : ''}
+          <span class="badge badge-relevance">Relevance ${p.relevance_score}/10</span>
+          <span class="badge badge-intent" style="background:${intentColour}">${esc(p.intent || '')}</span>
+          ${statusBadge}
+        </div>
+      </div>
+    </div>
+    ${p.post_body ? `<div style="font-size:12.5px;color:var(--text-muted);margin-bottom:12px;line-height:1.5;border-left:3px solid var(--border);padding-left:10px">${esc(p.post_body.slice(0,200))}${p.post_body.length>200?'…':''}</div>` : ''}
+    <div class="reply-label">Option A — Pure value (no mention)</div>
+    <div class="reply-box">${esc(p.reply_a||'')}<button class="copy-btn" onclick="copyReply(this,'${encodeURIComponent(p.reply_a||'')}')">Copy</button></div>
+    <div class="reply-label">Option B — Soft mention</div>
+    <div class="reply-box">${esc(p.reply_b||'')}<button class="copy-btn" onclick="copyReply(this,'${encodeURIComponent(p.reply_b||'')}')">Copy</button></div>
+    <div class="reply-label">Option C — Direct mention</div>
+    <div class="reply-box">${esc(p.reply_c||'')}<button class="copy-btn" onclick="copyReply(this,'${encodeURIComponent(p.reply_c||'')}')">Copy</button></div>
+    <div class="card-actions">
+      <button class="action-btn used" onclick="setStatus(${p.id},'used')">✓ Mark Used</button>
+      <button class="action-btn save" onclick="setStatus(${p.id},'saved')">★ Save</button>
+      <button class="action-btn skip" onclick="setStatus(${p.id},'skipped')">✕ Skip</button>
+      ${p.status!=='pending'?`<button class="action-btn" onclick="setStatus(${p.id},'pending')">↩ Reset</button>`:''}
+    </div>
+  </div>`
+}
+
+async function setStatus(id, status) {
+  await dbPatch(id, { status })
+  const card = document.getElementById(`rcard-${id}`)
+  if (card && currentFilter !== 'all') {
+    card.style.opacity = '0.4'
+    setTimeout(() => loadPosts(), 400)
+  } else if (card) {
+    card.querySelector('.badge-status') && (card.querySelector('.badge-status').textContent = status)
+  }
+}
+
+function setFilter(filter, btn) {
+  currentFilter = filter
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn))
+  loadPosts()
+}
+
+async function runFetch() {
+  const btn = document.getElementById('runBtn')
+  btn.disabled = true
+  btn.textContent = '⏳ Running…'
+  try {
+    const r = await fetch(`${SUPABASE_URL}/functions/v1/fetch-reddit-posts`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+      body: '{}'
+    })
+    const data = await r.json()
+    btn.textContent = data.success ? `✓ Done (${data.inserted} new)` : '✗ Error'
+    if (data.success) setTimeout(() => loadPosts(), 800)
+  } catch(e) {
+    btn.textContent = '✗ Error'
+  }
+  setTimeout(() => { btn.disabled = false; btn.textContent = '▶ Run Now' }, 3000)
+}
+
+function copyReply(btn, encoded) {
+  navigator.clipboard.writeText(decodeURIComponent(encoded))
+  btn.textContent = 'Copied!'
+  setTimeout(() => btn.textContent = 'Copy', 1500)
+}
+
+function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+checkAuth()
+</script>
+</body>
+</html>

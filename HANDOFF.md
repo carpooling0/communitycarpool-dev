@@ -214,7 +214,23 @@ Another agent (Cursor) made these changes. Assessment:
 
 ---
 
-## 13. Pending Items (not yet built)
+## 13. Dev-Only Features (do NOT deploy to prod)
+
+**Everything under the "Agents" category is dev-only.** This includes the frontend page, the edge function, the DB table, the cron jobs, and the AWS Bedrock secrets. None of this should ever be deployed to prod until explicitly decided.
+
+The `deploy-prod.sh` script automatically stubs `agents.html` with a blank placeholder before pushing to prod and restores the real file after. No manual action needed — but do not bypass this.
+
+| Feature | Dev pieces | Notes |
+|---|---|---|
+| **agents.html** | Frontend page | Standalone page (not inside admin.html). Linked from admin sidebar under "Agents > Reddit Agent". `deploy-prod.sh` replaces it with a blank stub on prod push. |
+| **Reddit Agent** | `fetch-reddit-posts` edge function (v3), `reddit_digest` DB table, 2x daily cron jobs (04:00 + 10:00 UTC) | Monitors 30 subreddits, sends posts to Claude Haiku on AWS Bedrock for relevance scoring and reply drafting. Results reviewed manually in `agents.html`. |
+| **Subreddits monitored** | Configured in `fetch-reddit-posts/index.ts` | 30 subreddits across: carpooling/commuting, sustainability, urban/transport, UAE/Gulf (dubai, DubaiExpats, abudhabi, sharjah), India (Kerala, mumbai, bangalore, hyderabad, delhi, Chennai, pune, india), expat/frugal. |
+| **AWS Bedrock** | `AWS_BEDROCK_ACCESS_KEY_ID`, `AWS_BEDROCK_SECRET_ACCESS_KEY`, `AWS_BEDROCK_REGION=eu-west-1` | Set in dev Supabase secrets only. Model: `anthropic.claude-3-haiku-20240307-v1:0`. Separate from future SES credentials. |
+| **admin.html Agents nav** | "Agents" section in sidebar (admin-only) | Links to `agents.html` in a new tab. The nav section itself is in admin.html on both prod and dev — but in prod it just opens the blank stub page. |
+
+---
+
+## 14. Pending Items (not yet built)
 
 ### A. Admin Dashboard — Analytics "last synced" label
 
