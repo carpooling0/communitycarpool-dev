@@ -1,6 +1,6 @@
 # Community Carpool — Agent Handoff Document
 
-**Last updated:** 2026-04-15 (session 2)  
+**Last updated:** 2026-04-26  
 **Project:** Community Carpool (communitycarpool.org)  
 **Purpose:** Complete context for a new agent to continue work without needing prior conversation history.
 
@@ -154,7 +154,7 @@ All confirmed active on **both prod and dev** as of 2026-04-15.
 ## 8. Admin Panel
 
 - URL: `https://communitycarpool.org/admin.html`
-- Auth: email/password → 8-hour session token stored in `localStorage` as `ccp_admin_token`
+- Auth: email/password → 7-day session token stored in `localStorage` as `ccp_admin_token` *(extended from 8h on 2026-04-20 / 2026-04-21; existing sessions only update on next login)*
 - `admin-auth`: login/me/logout/forgot_password/reset_password
 - `admin-api`: all dashboard actions — metrics, tickets, deletions, users, blacklist, audit, team management, orgs, referral links
 
@@ -214,7 +214,20 @@ Another agent (Cursor) made these changes. Assessment:
 
 ---
 
-## 13. Dev-Only Features (do NOT deploy to prod)
+## 13. What Was Learned in Session 2026-04-24
+
+1. **Prod dashboard snapshot (user-provided from `admin.html`)** — `673` total users, `706` active journeys (`716` total), `1157` total matches, `66.3%` match rate, `238` zero-match active submissions, `3` notification backlog, `86.4%` one-way interest, `1.4%` conversion rate, `2d` avg response time.
+2. **Reminder bottleneck is cadence, not lack of demand** — Read-only prod query against `send-interest-reminders` logic showed `97` matches in `interest_expressed`, but only `13` reminders eligible to send right now (`12` unique people; one user has 2 eligible matches). Breakdown: `57` blocked by the current 6-day repeat interval, `23` too recent (<3 days), `3` bounced, `1` inactive journey. This explains why the reminder audience feels “too low” despite high one-way interest.
+3. **Live prod reminder config (read-only verified on 2026-04-24)** — `interest_reminder_enabled=true`, `interest_reminder_days=3`, `interest_reminder_interval_days=6`, `interest_reminder_max=4`, `testing_mode=false`.
+4. **Eligible reminder audience on 2026-04-24** — All `13` currently eligible reminders were first reminders (`interest_reminders_sent` empty), not follow-ups. So the current low send count is not because matches hit max reminders; it is mostly because most matches are still in the wait window.
+5. **How to manually trigger reminder function** — Preview/test: `GET /functions/v1/send-interest-reminders?test_to=email&test_num=1|2`. Real send: `POST /functions/v1/send-interest-reminders` with `Authorization: Bearer <prod anon key>` and `{}` body. Real send only targets matches already in `status='interest_expressed'` where one side said yes and the other side has not replied.
+6. **Querying prod Supabase from local/Codex** — Prefer `curl -sS` against Supabase REST with `apikey` + `Authorization: Bearer <service_role>` headers for read-only inspection. In this macOS environment, Python `urllib` failed with `SSL: CERTIFICATE_VERIFY_FAILED` against Supabase HTTPS. Do **not** work around this by disabling SSL verification; just use `curl`.
+7. **Codex terminal session gotcha** — Exports set in a separate macOS Terminal window are **not** visible to Codex. If an agent needs env vars/secrets, set them in the attached Codex app terminal or store them in a local non-committed file and point the agent to it.
+8. **Security note** — If `service_role` is ever exported directly into the attached terminal, it is visible in thread terminal scrollback. Do not put it in repo files or HANDOFF. Clear the terminal/session afterward or rotate the key if needed.
+
+---
+
+## 14. Dev-Only Features (do NOT deploy to prod)
 
 **Everything under the "Agents" category is dev-only.** This includes the frontend page, the edge function, the DB table, the cron jobs, and the AWS Bedrock secrets. None of this should ever be deployed to prod until explicitly decided.
 
@@ -230,7 +243,7 @@ The `deploy-prod.sh` script automatically stubs `agents.html` with a blank place
 
 ---
 
-## 14. Pending Items (not yet built)
+## 15. Pending Items (not yet built)
 
 ### A. Admin Dashboard — Analytics "last synced" label
 
@@ -251,10 +264,47 @@ The `deploy-prod.sh` script automatically stubs `agents.html` with a blank place
 
 ---
 
-## 14. How to Start a New Session
+### C. Future Email Queue (not built yet)
+
+**Need:** When email daily quota is exhausted, unsent emails currently do **not** go into a true queue. They are only retried later if a future cron run happens to re-select them.
+
+**Recommendation for later:** Build a dedicated `email_queue` table instead of overloading `email_events`.
+
+| Table | Purpose |
+|---|---|
+| `email_queue` | Stores pending emails that still need to be sent |
+| `email_events` | Audit log of send attempts / sends / failures / skips |
+
+**Suggested `email_queue` fields:** `id`, `email_type`, `user_id`, `match_id`, `submission_id`, `recipient_email`, `subject`, `payload`, `status`, `retry_at`, `attempt_count`, `created_at`, `sent_at`
+
+**Expected behavior later:**
+1. When an email should be sent, insert into `email_queue`
+2. If quota is available, send now and mark `sent`
+3. If quota is exhausted, leave row as `pending`
+4. Next cron run picks oldest eligible `pending` rows
+5. If match becomes mutual / failed / unsubscribed before send, mark row `cancelled`
+
+---
+
+### D. Future Journey Status Change (approved for later revisit, not built yet)
+
+**Requested later change:**
+
+1. Change all currently `expired` journeys back to `active`
+2. Change the inactive/archival timeout from `90 days` to `180 days`
+
+**Notes:**
+- This was explicitly requested on 2026-04-26 but deferred for a later session
+- Do not implement silently; revisit before applying to prod/dev
+- This likely touches both data backfill and the cron / expiry logic
+
+---
+
+## 16. How to Start a New Session
 
 1. Check memory: `/Users/ny/.claude/projects/-Users-ny-Downloads-Carpooling-CodeBase/memory/MEMORY.md`
 2. Check this handoff: `/Users/ny/Downloads/Carpooling CodeBase/HANDOFF.md`
 3. Verify any edge function before editing: use `get_edge_function` MCP to check deployed version
 4. Always deploy to **both** envs after any edge function change
 5. Never commit or push frontend without running deploy scripts
+6. For read-only prod data inspection, prefer `curl -sS` + Supabase REST + `service_role` headers; do not use Python HTTPS in this environment unless the SSL cert issue is resolved

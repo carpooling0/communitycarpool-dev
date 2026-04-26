@@ -99,20 +99,45 @@ function buildReminderEmail(
   reminderNum: number
 ): string {
   const matchesUrl = `${SITE_URL}/matches.html?token=${token}&journey=${submissionId}`
-  const isFollowUp = reminderNum > 1
   const trees      = calcTrees(distanceKm)
+  const variant =
+    reminderNum <= 0 ? 'immediate' :
+    reminderNum === 1 ? 'first' :
+    reminderNum === 2 ? 'second' :
+    reminderNum === 3 ? 'third' : 'final'
 
-  const preheader = isFollowUp
-    ? `Don't miss this — someone on your route is still hoping to connect.`
-    : `Someone on your route wants to share the commute — and the running costs.`
+  const preheader =
+    variant === 'immediate'
+      ? `Someone just said YES to your carpool match and is waiting for you.`
+      : variant === 'first'
+      ? `Someone said YES a few days ago and is still waiting for your response.`
+      : variant === 'second'
+      ? `Your match is still waiting — reply now if this route works for you.`
+      : variant === 'third'
+      ? `Your match is still waiting. Reply now if this route works for you.`
+      : `Last reminder — someone is still waiting for your response.`
 
-  // Emoji inline-left, smaller; "You Have" not "You've"
-  const heroHeading = isFollowUp
-    ? `&#9200; Your Carpool Match Is Still Waiting&#8230;`
-    : `&#127881; You Have a Carpool Match, ${recipientName}!`
-  const heroSubtext = isFollowUp
-    ? `You received a match request a few days ago and have not responded yet. Your potential carpool partner is still hoping to connect — don't let this one slip away!`
-    : `Someone is interested in sharing your commute. One tap could change your daily routine — and what it costs you to get to work.`
+  const heroHeading =
+    variant === 'immediate'
+      ? `Someone Just Said YES to Your Match!`
+      : variant === 'first'
+      ? `Someone Said YES — Still Waiting`
+      : variant === 'second'
+      ? `Your Match Is Still Waiting`
+      : variant === 'third'
+      ? `Your Match Is Still Waiting`
+      : `Last Reminder: Your Match Is Waiting`
+
+  const heroSubtext =
+    variant === 'immediate'
+      ? `Great news. Someone just said YES to carpooling with you. They are ready to connect — tap below to respond.`
+      : variant === 'first'
+      ? `Someone said YES to carpooling with you a few days ago and is still waiting for your response. If this route works for you, tap below and reply now.`
+      : variant === 'second'
+      ? `Your match is still waiting for your response. If this route works for you, tap below and reply before this match goes cold.`
+      : variant === 'third'
+      ? `Your match is still waiting for your response. If this route works for you, tap below and reply now.`
+      : `This is your last reminder. Someone has been waiting for your response. If you want to connect, reply now before this match becomes stale.`
 
   // Compact impact tiles — InitCap labels, no body text on fuel, "annually" on trees
   const impactBlock = `
@@ -193,7 +218,7 @@ function buildReminderEmail(
       <!-- CTA — brand button #10B981, no "Takes less than a minute" -->
       <div style="text-align:center;margin-bottom:14px;">
         <a href="${matchesUrl}" style="display:inline-block;background:#10B981;color:#FFFFFF;padding:16px 40px;border-radius:8px;text-decoration:none;font-weight:700;font-size:17px;letter-spacing:0.01em;font-family:Montserrat,Inter,sans-serif;">
-          View My Match &nbsp;&#x2192;
+          Respond to My Match &nbsp;&#x2192;
         </a>
       </div>
 
@@ -225,30 +250,106 @@ Deno.serve(async (req) => {
     const url     = new URL(req.url)
     const testTo  = url.searchParams.get('test_to')
     const testNum = parseInt(url.searchParams.get('test_num') || '1')
+    const testToken = url.searchParams.get('test_token')
+    const testJourney = parseInt(url.searchParams.get('test_journey') || '0')
 
-    // Preview/test mode: ?test_to=email&test_num=1 (or 2)
+    // Preview/test mode: ?test_to=email&test_num=0..4
     if (testTo) {
       const resendKey = Deno.env.get('RESEND_API_KEY')
       const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || ''
+      let previewToken = testToken || 'preview-token-000'
+      let previewJourney = Number.isFinite(testJourney) ? testJourney : 0
+
+      if (!testToken || !testJourney) {
+        const expiryDays = parseInt(await getConfig('match_token_expiry_days')) || 120
+        const tokenCutoff = new Date()
+        tokenCutoff.setDate(tokenCutoff.getDate() - expiryDays)
+
+        const { data: requestedUser } = await supabase.from('users')
+          .select('user_id, match_page_token, token_created_at')
+          .eq('email', testTo.toLowerCase())
+          .maybeSingle()
+
+        if (
+          requestedUser?.user_id &&
+          requestedUser.match_page_token &&
+          requestedUser.token_created_at &&
+          new Date(requestedUser.token_created_at) > tokenCutoff
+        ) {
+          const { data: requestedSub } = await supabase.from('submissions')
+            .select('submission_id')
+            .eq('user_id', requestedUser.user_id)
+            .eq('journey_status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+          if (requestedSub?.submission_id) {
+            previewToken = requestedUser.match_page_token
+            previewJourney = requestedSub.submission_id
+          }
+        }
+
+        if (previewToken === 'preview-token-000' || previewJourney === 0) {
+          const { data: recentSubs } = await supabase.from('submissions')
+            .select('submission_id, user_id')
+            .eq('journey_status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(20)
+
+          const userIds = [...new Set((recentSubs || []).map((s: any) => s.user_id))]
+          if (userIds.length > 0) {
+            const { data: recentUsers } = await supabase.from('users')
+              .select('user_id, match_page_token, token_created_at')
+              .in('user_id', userIds)
+            const validUser = (recentUsers || []).find((u: any) =>
+              u.match_page_token &&
+              u.token_created_at &&
+              new Date(u.token_created_at) > tokenCutoff
+            )
+            if (validUser) {
+              const sub = (recentSubs || []).find((s: any) => s.user_id === validUser.user_id)
+              if (sub?.submission_id) {
+                previewToken = validUser.match_page_token
+                previewJourney = sub.submission_id
+              }
+            }
+          }
+        }
+      }
+
       const html = buildReminderEmail(
         'Alex',
         'Dubai Marina',
         'Dubai International Financial Centre (DIFC)',
         22,
-        'preview-token-000',
-        0,
+        previewToken,
+        previewJourney,
         testNum
       )
-      const subject = testNum > 1
-        ? `Your Carpool Match Is Still Waiting &#9200;`
-        : `You Have a Carpool Match! &#127881;`
+      const subject =
+        testNum <= 0
+          ? `Someone Just Said YES to Your Match!`
+          : testNum === 1
+          ? `Someone Said YES — Still Waiting`
+          : testNum === 2
+          ? `Your Match Is Still Waiting`
+          : testNum === 3
+          ? `Your Match Is Still Waiting`
+          : `Last Reminder: Your Match Is Waiting`
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ from: `Community Carpool <${fromEmail}>`, to: [testTo], subject, html })
       })
       const body = await res.json()
-      return new Response(JSON.stringify({ preview: true, reminder_num: testNum, to: testTo, resend: body }), {
+      return new Response(JSON.stringify({
+        preview: true,
+        reminder_num: testNum,
+        to: testTo,
+        preview_token: previewToken,
+        preview_journey: previewJourney,
+        resend: body
+      }), {
         headers: { 'Content-Type': 'application/json' }, status: res.ok ? 200 : 500
       })
     }
@@ -259,11 +360,12 @@ Deno.serve(async (req) => {
       })
     }
 
-    const testingMode       = (await getConfig('testing_mode')) !== 'false'
-    const firstReminderDays = parseInt(await getConfig('interest_reminder_days'))           || 3
-    const intervalDays      = parseInt(await getConfig('interest_reminder_interval_days'))  || 4
-    const maxReminders      = parseInt(await getConfig('interest_reminder_max'))            || 2
-    const dailyLimit        = parseInt(await getConfig('resend_daily_limit'))               || 90
+    const testingMode = (await getConfig('testing_mode')) !== 'false'
+    // Dev rollout target: immediate, then day 3 / 7 / 11 / 15
+    const firstReminderDays = 3
+    const intervalDays = 4
+    const maxReminders = 4
+    const dailyLimit = parseInt(await getConfig('resend_daily_limit')) || 90
 
     const now = new Date()
     const firstCutoff = new Date(now)
@@ -354,9 +456,14 @@ Deno.serve(async (req) => {
           pendingSub.distance_km || 0, pendingUser.match_page_token,
           pendingSub.submission_id, reminderNum
         )
-        const subject = reminderNum > 1
-          ? `Your Carpool Match Is Still Waiting`
-          : `You Have a Carpool Match!`
+      const subject =
+          reminderNum === 1
+            ? `Someone Said YES — Still Waiting`
+            : reminderNum === 2
+            ? `Your Match Is Still Waiting`
+            : reminderNum === 3
+            ? `Your Match Is Still Waiting`
+            : `Last Reminder: Your Match Is Waiting`
 
         await sendEmail(pendingUser.email, subject, html)
 

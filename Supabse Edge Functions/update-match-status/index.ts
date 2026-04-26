@@ -52,6 +52,52 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
   throw new Error('No email provider configured. Set RESEND_API_KEY or AWS SES secrets.')
 }
 
+function buildImmediateInterestEmail(
+  recipientName: string,
+  fromLocation: string,
+  toLocation: string,
+  myToken: string,
+  mySubmissionId: number
+): string {
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+  <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,system-ui,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:32px 20px;">
+    <div style="text-align:center;margin-bottom:24px;">
+      <a href="${SITE_URL}" style="text-decoration:none;">
+        <img src="${SITE_URL}/logo-email.png" alt="Community Carpool" style="height:56px;width:auto;display:block;margin:0 auto;" />
+      </a>
+    </div>
+    <div style="background:white;border-radius:16px;padding:28px 28px 24px;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+      <div style="text-align:center;margin-bottom:20px;">
+        <h2 style="color:#111827;font-size:24px;margin:0 0 8px;">Someone Just Said YES to Your Match!</h2>
+        <p style="color:#4b5563;margin:0;font-size:15px;line-height:1.6;">Hi ${recipientName}. Someone just said YES to carpooling with you and is waiting for your response.</p>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:18px;">
+        <div style="font-weight:700;color:#111827;margin-bottom:10px;font-size:14px;">Your route</div>
+        <div style="font-size:14px;color:#374151;margin-bottom:4px;"><span style="color:#16a34a;">●</span>&nbsp;${fromLocation}</div>
+        <div style="font-size:12px;color:#9ca3af;margin:0 0 4px 8px;">↓</div>
+        <div style="font-size:14px;color:#374151;"><span style="color:#dc2626;">●</span>&nbsp;${toLocation}</div>
+      </div>
+      <p style="color:#6b7280;font-size:13px;line-height:1.6;margin:0 0 18px;background:#f9fafb;border-radius:8px;padding:10px 12px;">
+        <strong>Privacy First.</strong> Contact details are only shared once both of you say yes.
+      </p>
+      <div style="text-align:center;">
+        <a href="${SITE_URL}/matches.html?token=${myToken}&journey=${mySubmissionId}" style="display:inline-block;background:#10b981;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;">Respond to My Match →</a>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:22px;color:#9ca3af;font-size:12px;">
+      <p style="margin:0 0 6px;">
+        <a href="${SITE_URL}/docs/" style="color:#6b7280;text-decoration:none;">Help &amp; FAQ</a> &nbsp;&middot;&nbsp;
+        <a href="${SITE_URL}/terms.html" style="color:#6b7280;text-decoration:none;">Terms</a> &nbsp;&middot;&nbsp;
+        <a href="${SITE_URL}/privacy.html" style="color:#6b7280;text-decoration:none;">Privacy Policy</a> &nbsp;&middot;&nbsp;
+        <a href="${SITE_URL}/unsubscribe.html?token=${myToken}" style="color:#6b7280;text-decoration:none;">Unsubscribe</a> &nbsp;&middot;&nbsp;
+        <a href="${SITE_URL}/support.html" style="color:#6b7280;text-decoration:none;">Feedback</a>
+      </p>
+      <p style="margin:0;">Community Carpool &middot; communitycarpool.org</p>
+    </div>
+  </div></body></html>`
+}
+
 // ── Build mutual match email HTML for one recipient ──
 function buildMutualEmail(recipientName: string, otherName: string, otherEmail: string, otherFrom: string, otherTo: string, myToken: string, mySubmissionId: number): string {
   const shareUrl = SITE_URL
@@ -65,7 +111,7 @@ function buildMutualEmail(recipientName: string, otherName: string, otherEmail: 
   <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
     <div style="text-align:center;margin-bottom:32px;">
       <a href="${SITE_URL}" style="text-decoration:none;">
-        <img src="${SITE_URL}/logo_with_slogan.png" alt="Community Carpool" style="height:64px;width:auto;display:block;margin:0 auto;" />
+        <img src="${SITE_URL}/logo-email.png" alt="Community Carpool" style="height:64px;width:auto;display:block;margin:0 auto;" />
       </a>
     </div>
     <div style="background:white;border-radius:16px;padding:32px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
@@ -128,8 +174,8 @@ Deno.serve(async (req) => {
 
     const { data: match } = await supabase.from('matches').select(`
       match_id, status, sub_a_id, sub_b_id, interest_a, interest_b,
-      sub_a:submissions!sub_a_id (submission_id, user_id, journey_num, from_location, to_location, journey_status, users(name, email, match_page_token, email_whitelist, email_bounced)),
-      sub_b:submissions!sub_b_id (submission_id, user_id, journey_num, from_location, to_location, journey_status, users(name, email, match_page_token, email_whitelist, email_bounced))
+      sub_a:submissions!sub_a_id (submission_id, user_id, journey_num, from_location, to_location, journey_status, users(name, email, match_page_token, email_whitelist, email_bounced, unsubscribed_matches, deletion_requested_at)),
+      sub_b:submissions!sub_b_id (submission_id, user_id, journey_num, from_location, to_location, journey_status, users(name, email, match_page_token, email_whitelist, email_bounced, unsubscribed_matches, deletion_requested_at))
     `).eq('match_id', matchId).single()
 
     if (!match) return new Response(JSON.stringify({ success: false, error: 'Match not found' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 })
@@ -137,6 +183,7 @@ Deno.serve(async (req) => {
     const isSubA = match.sub_a.submission_id === submissionId
     const mySub = isSubA ? match.sub_a : match.sub_b
     const otherSub = isSubA ? match.sub_b : match.sub_a
+    const myExistingInterest = isSubA ? match.interest_a : match.interest_b
 
     if (mySub.user_id !== user.user_id) return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 })
 
@@ -179,6 +226,54 @@ Deno.serve(async (req) => {
       user_id: user.user_id, submission_id: submissionId, match_id: matchId,
       metadata: { interest, other_submission_id: otherSub.submission_id }
     })
+
+    const shouldSendImmediateYesNudge =
+      interest === 'yes' &&
+      myExistingInterest !== 'yes' &&
+      !otherInterest &&
+      otherSub.journey_status === 'active'
+
+    if (shouldSendImmediateYesNudge) {
+      ;(async () => {
+        try {
+          const { data: cfg } = await supabase.from('config').select('value').eq('key', 'testing_mode').single()
+          const testingMode = cfg?.value !== 'false'
+          const otherUser = otherSub.users
+          const whitelisted = otherUser.email_whitelist === true
+
+          if (
+            !otherUser.email_bounced &&
+            !otherUser.unsubscribed_matches &&
+            !otherUser.deletion_requested_at &&
+            (!testingMode || whitelisted)
+          ) {
+            const html = buildImmediateInterestEmail(
+              otherUser.name,
+              otherSub.from_location,
+              otherSub.to_location,
+              otherUser.match_page_token,
+              otherSub.submission_id
+            )
+            await sendEmail(otherUser.email, 'Someone Just Said YES to Your Match!', html)
+            await supabase.from('events').insert({
+              event_type: 'interest_yes_nudge_sent',
+              user_id: otherSub.user_id,
+              submission_id: otherSub.submission_id,
+              match_id: matchId,
+              metadata: { recipient: otherUser.email, triggered_by_submission_id: submissionId }
+            })
+          }
+        } catch (emailErr: any) {
+          console.error('Immediate YES email failed:', emailErr.message)
+          await supabase.from('events').insert({
+            event_type: 'interest_yes_nudge_failed',
+            submission_id: otherSub.submission_id,
+            match_id: matchId,
+            metadata: { error: emailErr.message, triggered_by_submission_id: submissionId }
+          })
+        }
+      })()
+    }
 
     // Capture isMutual BEFORE overwriting newStatus — response must reflect the final DB state
     const isMutual = newStatus === 'mutual_confirmed'
