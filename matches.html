@@ -1204,8 +1204,15 @@ ${url}`)
       }
 
       // Count mutual matches across all journeys
+      const totalMatches = journeys.reduce((acc, j) => acc + j.matches.length, 0)
       const mutualCount = journeys.reduce((acc, j) => 
         acc + j.matches.filter(m => m.isMutual).length, 0)
+      const showMutualSummary = journeys.length > 1 || totalMatches > 1
+      const mutualSummary = journeys.flatMap(journey =>
+        journey.matches
+          .filter(match => match.isMutual)
+          .map(match => `<div>Journey #${journey.journeyNum} &middot; Match #${match.matchId}</div>`)
+      ).join('')
 
       main.innerHTML = `
         ${mutualCount > 0 ? `
@@ -1213,7 +1220,13 @@ ${url}`)
             <div class="banner-icon">🎉</div>
             <div>
               <h3>You have ${mutualCount} mutual match${mutualCount > 1 ? 'es' : ''}!</h3>
-              <p>Both you and your match expressed interest. Contact details are revealed below.</p>
+              <p>Both you and your matches expressed interest. Contact details are revealed below.</p>
+              ${showMutualSummary ? `
+                <div style="margin-top:8px;">
+                  <div><strong>Mutual matches:</strong></div>
+                  ${mutualSummary}
+                </div>
+              ` : ''}
             </div>
           </div>
         ` : ''}
