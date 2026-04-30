@@ -275,6 +275,7 @@
 
   .f-submit {
     width: 100%; padding: 14px;
+    margin-top: auto;
     background: var(--bg); color: var(--green);
     font-size: 15px; font-weight: 700; font-family: inherit;
     border: 2px solid var(--ink);
@@ -293,7 +294,7 @@
   .wf-badge { display: none; }
 
   /* ── SUCCESS STATE ── */
-  #form-content { display: flex; flex-direction: column; flex: 1; transition: opacity .3s ease; justify-content: space-between; }
+  #form-content { display: flex; flex-direction: column; flex: 1; transition: opacity .3s ease; justify-content: flex-start; gap: 8px; }
   #form-content .f-box { flex: 0 0 auto; }
   .f-terms { padding-top: 0; }
   #success-content { display: none; flex-direction: column; gap: 16px; flex: 1; transition: opacity .3s ease; }
@@ -376,6 +377,9 @@
       overflow-y: visible !important;
       padding: 28px 20px 32px;
     }
+    /* Remove space-between so gaps don't grow with screen height */
+    #form-content { justify-content: flex-start; gap: 12px; }
+    #form-content .f-box { margin-bottom: 0; }
 
     /* Show floating CTA */
     .mobile-cta { display: block; }
