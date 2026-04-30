@@ -118,7 +118,7 @@
      SHARED STYLES
   ══════════════════════════════ */
   .tag {
-    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    font-size: 14px; font-weight: 700; letter-spacing: 2px;
     text-transform: uppercase; color: var(--green);
     display: block; margin-bottom: 10px;
   }
@@ -167,7 +167,7 @@
 
   /* ── PRESS ── */
   .press { padding: 22px 0; background: var(--white); overflow: hidden; }
-  .press-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green); padding: 0 48px; margin-bottom: 16px; display: block; }
+  .press-label { font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green); padding: 0 48px; margin-bottom: 16px; display: block; }
   .press-marquee-wrap { overflow: hidden; position: relative; width: 100%; }
   .press-marquee-wrap::before,
   .press-marquee-wrap::after {
@@ -180,9 +180,9 @@
   @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
   .press-logo-link { display: flex; align-items: center; flex-shrink: 0; opacity: .85; transition: opacity .2s; }
   .press-logo-link:hover { opacity: 1; }
-  .press-logo-link img { height: 32px; width: auto; max-width: 140px; object-fit: contain; }
-  .press-logo-link.zawya img { height: 52px; }
-  .press-logo-link.dpg img { height: 88px; }
+  .press-logo-link img { height: 48px; width: auto; max-width: 160px; object-fit: contain; }
+  .press-logo-link.zawya img { height: 68px; }
+  .press-logo-link.dpg img { height: 220px; }
   .press-logo-link.on-dark { background: #D40000; padding: 6px 14px; border-radius: 6px; }
 
   /* ── VALUE PROPS ── */
@@ -275,7 +275,6 @@
 
   .f-submit {
     width: 100%; padding: 14px;
-    margin-top: auto;
     background: var(--bg); color: var(--green);
     font-size: 15px; font-weight: 700; font-family: inherit;
     border: 2px solid var(--ink);
@@ -294,7 +293,7 @@
   .wf-badge { display: none; }
 
   /* ── SUCCESS STATE ── */
-  #form-content { display: flex; flex-direction: column; flex: 1; transition: opacity .3s ease; justify-content: flex-start; gap: 8px; }
+  #form-content { display: flex; flex-direction: column; flex: 1; transition: opacity .3s ease; justify-content: space-between; }
   #form-content .f-box { flex: 0 0 auto; }
   .f-terms { padding-top: 0; }
   #success-content { display: none; flex-direction: column; gap: 16px; flex: 1; transition: opacity .3s ease; }
@@ -377,9 +376,6 @@
       overflow-y: visible !important;
       padding: 28px 20px 32px;
     }
-    /* Remove space-between so gaps don't grow with screen height */
-    #form-content { justify-content: flex-start; gap: 12px; }
-    #form-content .f-box { margin-bottom: 0; }
 
     /* Show floating CTA */
     .mobile-cta { display: block; }
