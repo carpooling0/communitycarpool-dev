@@ -297,29 +297,22 @@
   #form-content .f-box { flex: 0 0 auto; }
   .f-terms { padding-top: 0; margin-top: 2px; }
   .f-submit { margin-top: 16px; }
-  #success-content { display: none; flex-direction: column; gap: 16px; flex: 1; transition: opacity .3s ease; }
+  #success-content { display: none; flex-direction: column; flex: 1; transition: opacity .3s ease; }
   #success-content.visible { display: flex; }
 
-  .success-check {
-    width: 56px; height: 56px; border-radius: 50%;
-    background: var(--bg); border: 2px solid var(--ink);
-    box-shadow: 3px 3px 0 var(--ink);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px; margin-bottom: 4px;
-  }
-  .success-heading { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: #fff; }
-  .success-sub { font-size: 13px; color: rgba(255,255,255,.65); line-height: 1.55; }
-  .success-share-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.4); letter-spacing: 1px; text-transform: uppercase; margin-top: 8px; }
-  .success-share { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
-  .success-share-btn {
-    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
-    border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600;
-    color: rgba(255,255,255,.85); cursor: pointer; font-family: inherit;
-    transition: background .15s;
-  }
-  .success-share-btn:hover { background: rgba(255,255,255,.18); }
-  .success-collapse-hint { font-size: 11px; color: rgba(255,255,255,.3); margin-top: auto; text-align: center; }
-  .success-countdown { font-weight: 700; color: rgba(255,255,255,.5); }
+  /* ── CONFIRMATION CARD ── */
+  .conf-header { text-align: center; margin-bottom: 8px; }
+  .conf-title { font-size: 17px; font-weight: 700; color: #1a365d; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .conf-icon { width: 26px; height: 26px; background: #22c55e; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .conf-sub { font-size: 13px; color: #4a5568; margin-top: 4px; }
+  .impact-box { background: #f0f9ff; padding: 14px 16px; text-align: center; }
+  .impact-label { font-size: 11px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .impact-value { font-size: 34px; font-weight: 800; color: #1e293b; line-height: 1; margin-bottom: 4px; }
+  .impact-unit { font-size: 18px; color: #64748b; font-weight: 600; }
+  .impact-sub { font-size: 14px; color: #475569; margin-top: 6px; }
+  .ss-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .ss-btn { width: 32px; height: 32px; border-radius: 8px; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .15s, box-shadow .15s; flex-shrink: 0; }
+  .ss-btn:hover { transform: scale(1.1); box-shadow: 0 3px 8px rgba(0,0,0,.18); }
 
   /* ── FLOATING MOBILE CTA ── */
   .mobile-cta {
@@ -375,7 +368,7 @@
       width: 100% !important;
       height: auto !important;
       overflow-y: visible !important;
-      padding: 28px 20px 32px;
+      padding: 28px 20px 100px;
     }
 
     /* Show floating CTA */
@@ -385,7 +378,8 @@
     h2 { white-space: normal; font-size: 24px; }
     .hero { padding: 28px 20px 0; }
     .press, .value-props, .how-it-works, .founder, .stats-section { padding: 32px 20px; }
-    .hero-image { height: 240px; margin-left: -20px; width: calc(100% + 40px); }
+    .hero-image { height: 300px; margin-left: -20px; width: calc(100% + 40px); }
+    .hero-slide img { object-position: center 50% !important; }
     .props-grid { grid-template-columns: 1fr; }
     .stats-grid { grid-template-columns: 1fr 1fr; }
     .share-section { padding: 24px 20px; }
@@ -703,20 +697,8 @@
       <button class="f-submit" id="submit-btn">Find Carpool Partner →</button>
     </div>
 
-    <!-- SUCCESS STATE (hidden until submit) -->
-    <div id="success-content">
-      <div class="success-check">✓</div>
-      <div class="success-heading">You're registered!</div>
-      <p class="success-sub">We'll email you as soon as we find someone on a similar route. No app, no checking — we do the work.</p>
-      <div class="success-share-label">Know someone? Share the platform</div>
-      <div class="success-share">
-        <button class="success-share-btn">f &nbsp;Facebook</button>
-        <button class="success-share-btn">𝕏 &nbsp;X</button>
-        <button class="success-share-btn">💬 SMS</button>
-        <button class="success-share-btn">🟢 WhatsApp</button>
-        <button class="success-share-btn">in &nbsp;LinkedIn</button>
-      </div>
-    </div>
+    <!-- SUCCESS STATE (hidden until submit — populated by JS) -->
+    <div id="success-content"></div>
 
   </div><!-- /.right-sticky -->
   </div><!-- /.right -->
@@ -727,16 +709,83 @@
     let fromLocationText = '', toLocationText = '';
 
     // ── Success transition ────────────────────────────────────────────────────
-    function showSuccess() {
+    function showSuccess(data) {
       const fc = document.getElementById('form-content');
       fc.style.opacity = '0';
       setTimeout(function() {
         fc.style.display = 'none';
+
+        let km = 3;
+        if (data.actualDist && parseInt(data.actualDist) > 0) {
+          km = parseInt(data.actualDist);
+        } else {
+          const step = parseInt(data.distanceVal || data.distance);
+          if (step === 1) km = 1;
+          else if (step === 2) km = 2;
+          else if (step === 3) km = 4;
+          else if (step === 4) km = 6.5;
+        }
+        const annualKg = Math.round(km * 2 * 5 * 52 * 0.18);
+        const trees = Math.round(annualKg / 21);
+        const annualKgStr = annualKg.toLocaleString();
+
         const s = document.getElementById('success-content');
+        s.innerHTML = `
+          <div style="background:white;border-radius:16px 16px 0 0;border:2px solid #ecfdf5;border-bottom:none;padding:14px 16px 10px;">
+            <div class="conf-header">
+              <div class="conf-title">
+                <div class="conf-icon"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+                You are in the Pool!
+              </div>
+              <div class="conf-sub">You have successfully recorded Journey #${data.journeyNum}</div>
+            </div>
+          </div>
+          <div class="impact-box" style="border-left:2px solid #ecfdf5;border-right:2px solid #ecfdf5;">
+            <div class="impact-label">YOUR ANNUAL IMPACT</div>
+            <div class="impact-value">${annualKgStr} <span class="impact-unit">kg</span></div>
+            <div class="impact-sub">CO&#x2082; Savings</div>
+            <div style="font-size:12px;color:#64748b;margin-top:3px;">Equivalent to planting ${trees} trees</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px;">(Based on ${km} km one-way commute)</div>
+          </div>
+          <div style="background:white;border-radius:0 0 16px 16px;border:2px solid #ecfdf5;border-top:none;padding:14px 16px 16px;">
+            <div style="text-align:center;margin-bottom:12px;">
+              <div style="font-size:11px;color:#64748b;font-weight:500;margin-bottom:8px;">Get matched faster by sharing!</div>
+              <div class="ss-row">
+                <button class="ss-btn" style="background:#25d366" onclick="shareTo('whatsapp')" title="WhatsApp"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.562 4.14 1.542 5.874L0 24l6.294-1.542A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.374l-.36-.214-3.732.914.93-3.617-.234-.373A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg></button>
+                <button class="ss-btn" style="background:#1877F2" onclick="shareTo('facebook')" title="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></button>
+                <button class="ss-btn" style="background:#000" onclick="shareTo('twitter')" title="X / Twitter"><svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.91-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></button>
+                <button class="ss-btn" style="background:#0A66C2" onclick="shareTo('linkedin')" title="LinkedIn"><svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></button>
+                <button class="ss-btn" style="background:#34c759" onclick="shareTo('sms')" title="SMS"><svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg></button>
+              </div>
+            </div>
+            <div style="font-size:12px;color:#94a3b8;text-align:center;line-height:1.9;">
+              <a href="/support.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Support</a> &nbsp;&middot;&nbsp;
+              <a href="/docs/" target="_blank" style="color:#94a3b8;text-decoration:none;">Help &amp; FAQ</a> &nbsp;&middot;&nbsp;
+              <a href="/terms.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Terms</a> &nbsp;&middot;&nbsp;
+              <a href="/privacy.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Privacy Policy</a>
+            </div>
+          </div>
+        `;
+
         s.classList.add('visible');
         s.style.opacity = '0';
         setTimeout(function() { s.style.opacity = '1'; }, 20);
       }, 300);
+    }
+
+    // ── Share ─────────────────────────────────────────────────────────────────
+    function shareTo(platform) {
+      const url = 'https://communitycarpool.org';
+      const msgFull = encodeURIComponent('Hey! I just signed up on CommunityCarpool.org to find carpooling partners for my commute.\n\nIt matches neighbors going the same route — completely FREE, No Cookies, No App, and you only connect when both sides are interested. Everything over email.\n\nTakes 30 seconds!\n' + url);
+      const msgTwitter = encodeURIComponent('Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, email-only. The more locals sign up, the better the matches! ' + url);
+      const links = {
+        whatsapp: 'https://wa.me/?text=' + msgFull,
+        facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url),
+        twitter:  'https://x.com/intent/tweet?text=' + msgTwitter,
+        linkedin: 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(url),
+        sms:      'sms:?body=' + msgFull
+      };
+      const a = document.createElement('a'); a.href = links[platform]; a.target = '_blank'; a.rel = 'noopener noreferrer'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
 
     // ── Error display ─────────────────────────────────────────────────────────
@@ -789,7 +838,7 @@
         });
         const data = await res.json();
         if (data.success) {
-          showSuccess();
+          showSuccess({ journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal });
         } else {
           showError(data.error || 'Something went wrong. Please try again.');
           btn.textContent = 'Find Carpool Partner →';
