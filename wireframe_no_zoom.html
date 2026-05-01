@@ -593,7 +593,7 @@
         </div>
         <div class="stat-card">
           <span class="stat-num">Private</span>
-          <div class="stat-label">Closed network for Corporates &amp; Schools — <a href="#" style="color:var(--green);font-weight:600;">contact us</a></div>
+          <div class="stat-label">Closed network for Corporates &amp; Schools — Contact Us through <a href="/support.html" style="color:var(--green);font-weight:600;">Support</a></div>
         </div>
       </div>
     </section>
@@ -988,8 +988,15 @@
           clearInterval(heroTimer);
           showHeroSlide(heroIdx - 1);
           heroTimer = setInterval(advanceHero, 4000);
-        } else {
-          showPanel(Math.max(current - 1, 0));
+        } else if (current > 0) {
+          const prevPanel = current - 1;
+          if (prevPanel === 0) {
+            // Entering panel 1 from above — land on last slide so reverse-scroll goes 3→2→1
+            clearInterval(heroTimer);
+            showHeroSlide(heroSlides.length - 1);
+            heroTimer = setInterval(advanceHero, 4000);
+          }
+          showPanel(prevPanel);
         }
         wheelCooldown = true;
         setTimeout(function() { wheelCooldown = false; }, 900);
