@@ -2,14 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Wireframe — Community Carpool Landing Page</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="format-detection" content="telephone=no"/>
+<title>Community Carpool — Landing</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="config.js"></script>
 <style>
-  html { overflow: hidden; height: 100%; }
-  html, body { overflow-x: hidden; }
-  body { height: 100%; overflow: hidden; }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
@@ -22,13 +20,29 @@
     --white: #ffffff;
   }
 
-  body { font-family: 'Inter', sans-serif; background: #ddd9d1; }
+  html {
+    overflow: hidden;
+    height: 100%;
+    /* Prevent Safari from auto-adjusting font sizes on HTTPS */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  html, body { overflow-x: hidden; }
+  body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: #ddd9d1;
+    /* Match font rendering between file:// and https:// in Safari */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 
   /* ── NAV ── */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-    height: 100px; background: rgba(245,240,232,.97);
-    backdrop-filter: blur(10px);
+    height: 100px; background: #f5f0e8;
     border-bottom: 1px solid var(--border);
     display: flex; align-items: center;
     justify-content: space-between;
@@ -167,7 +181,7 @@
 
   /* ── PRESS ── */
   .press { padding: 22px 0; background: var(--white); overflow: hidden; }
-  .press-label { font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green); padding: 0 48px; margin-bottom: 16px; display: block; }
+  .press-label { font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green); padding: 0 48px; margin-bottom: 2px; display: block; }
   .press-marquee-wrap { overflow: hidden; position: relative; width: 100%; }
   .press-marquee-wrap::before,
   .press-marquee-wrap::after {
@@ -204,14 +218,14 @@
   .founder { padding: 20px 48px; }
   .quote-card { background: var(--green); border-radius: 20px; padding: 24px 32px; border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
   .quote-text { font-family: 'Playfair Display', serif; font-size: 22px; font-style: italic; font-weight: 700; color: #fff; line-height: 1.5; margin-bottom: 20px; }
-  .quote-attr { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.65); }
+  .quote-attr { font-size: 14px; font-weight: 600; color: rgba(255,255,255,.65); }
 
   /* ── STATS ── */
   .stats-section { padding: 20px 48px; background: var(--white); }
   .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
   .stat-card { background: var(--bg); border-radius: 16px; padding: 24px; border: 1.5px solid #e0dbd2; text-align: center; }
   .stat-num { font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 800; color: var(--green); display: block; }
-  .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .stat-label { font-size: 14px; color: var(--muted); margin-top: 4px; }
 
   /* ── SHARE SECTION (Panel 3) ── */
   .share-section { padding: 24px 48px 20px; flex: 1; display: flex; flex-direction: column; }
@@ -233,7 +247,7 @@
   .share-card-btn:active { transform: translateY(2px); border-bottom-width: 1px; }
   .share-card-btn svg { flex-shrink: 0; color: var(--green); width: 16px; height: 16px; }
   .legal-links { display: flex; gap: 20px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid var(--border); margin-top: auto; }
-  .legal-links a { font-size: 13px; color: var(--muted); text-decoration: none; font-weight: 500; }
+  .legal-links a { font-size: 16px; color: var(--muted); text-decoration: none; font-weight: 500; }
   .legal-links a:hover { color: var(--green); }
 
   /* ══════════════════════════════
@@ -265,12 +279,12 @@
   .f-slider { width: 100%; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: #e0e0e0; outline: none; cursor: pointer; }
   .f-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--green); border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.2); cursor: pointer; }
   .f-dist-labels { display: flex; justify-content: space-between; margin-top: 4px; }
-  .f-dist-labels span { font-size: 13px; color: #999; }
+  .f-dist-labels span { font-size: 15px; color: #999; }
 
   /* terms */
   .f-terms { display: flex; align-items: flex-start; gap: 8px; margin: 5px 0; }
   .f-checkbox { width: 16px; height: 16px; margin-top: 1px; flex-shrink: 0; accent-color: var(--ink); cursor: pointer; }
-  .f-terms-label { font-size: 13px; color: rgba(255,255,255,.85); line-height: 1.5; }
+  .f-terms-label { font-size: 14px; color: rgba(255,255,255,.85); line-height: 1.5; }
   .f-terms-label a { color: #a8d4b8; text-decoration: underline; font-weight: 600; }
 
   .f-submit {
@@ -579,7 +593,7 @@
         </div>
         <div class="stat-card">
           <span class="stat-num">Private</span>
-          <div class="stat-label">Closed network for Corporates &amp; Schools — <a href="#" style="color:var(--green);font-weight:600;">contact us</a></div>
+          <div class="stat-label">Closed network for Corporates &amp; Schools<br>— Contact Us through <a href="/support.html" style="color:var(--green);font-weight:600;">Support</a></div>
         </div>
       </div>
     </section>
@@ -974,8 +988,15 @@
           clearInterval(heroTimer);
           showHeroSlide(heroIdx - 1);
           heroTimer = setInterval(advanceHero, 4000);
-        } else {
-          showPanel(Math.max(current - 1, 0));
+        } else if (current > 0) {
+          const prevPanel = current - 1;
+          if (prevPanel === 0) {
+            // Entering panel 1 from above — land on last slide so reverse-scroll goes 3→2→1
+            clearInterval(heroTimer);
+            showHeroSlide(heroSlides.length - 1);
+            heroTimer = setInterval(advanceHero, 4000);
+          }
+          showPanel(prevPanel);
         }
         wheelCooldown = true;
         setTimeout(function() { wheelCooldown = false; }, 900);
