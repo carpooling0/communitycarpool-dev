@@ -722,6 +722,36 @@
     // ── State ────────────────────────────────────────────────────────────────
     let fromLatLng = '', toLatLng = '';
     let fromLocationText = '', toLocationText = '';
+    let fromCountry = null;
+    let userCountry = 'ae';
+    let orgCode = null;
+    let termsVersion = null;
+
+    const DISTANCE_MAP = { '1': '1 - 3 km', '2': '3 - 5 km', '3': '5 - 8 km', '4': '8 - 10 km' };
+
+    // ── UTM / ref param capture ───────────────────────────────────────────────
+    (() => {
+      const p = new URLSearchParams(window.location.search);
+      [['ref','cc_ref'],['utm_source','cc_utm_source'],['utm_medium','cc_utm_medium'],['utm_campaign','cc_utm_campaign']].forEach(([k, sk]) => {
+        const v = p.get(k); if (v) sessionStorage.setItem(sk, v);
+      });
+      const client = p.get('client');
+      if (client) orgCode = client.toLowerCase();
+    })();
+
+    // ── Terms version fetch ───────────────────────────────────────────────────
+    async function fetchTermsVersion() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/config?select=value&key=eq.required_terms_version`,
+          { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } });
+        const data = await res.json();
+        if (data?.[0]?.value) termsVersion = data[0].value;
+      } catch (e) { /* silent fail */ }
+    }
+    const termsVersionReady = fetchTermsVersion();
+
+    // ── Warm-up submit-journey ────────────────────────────────────────────────
+    fetch(`${SUPABASE_URL}/functions/v1/submit-journey`, { mode: 'no-cors' }).catch(() => {});
 
     // ── Success transition ────────────────────────────────────────────────────
     function showSuccess(data) {
@@ -832,6 +862,8 @@
       btn.textContent = 'Registering…';
       btn.disabled = true;
 
+      await termsVersionReady;
+
       try {
         const res = await fetch(SUPABASE_URL + '/functions/v1/submit-journey', {
           method: 'POST',
@@ -847,7 +879,14 @@
             fromLatLng,
             toLocation: toLocationText,
             toLatLng,
+            distance: DISTANCE_MAP[distVal],
             distanceValue: distVal,
+            country: fromCountry || userCountry.toUpperCase() || 'AE',
+            orgCode: orgCode || undefined,
+            refCode: sessionStorage.getItem('cc_ref') || undefined,
+            utmSource: sessionStorage.getItem('cc_utm_source') || undefined,
+            utmMedium: sessionStorage.getItem('cc_utm_medium') || undefined,
+            utmCampaign: sessionStorage.getItem('cc_utm_campaign') || undefined,
             termsAgreed: true
           })
         });
@@ -869,7 +908,7 @@
     // ── Google Places autocomplete ────────────────────────────────────────────
     function initAutocomplete() {
       const opts = {
-        fields: ['formatted_address', 'name', 'geometry'],
+        fields: ['formatted_address', 'name', 'geometry', 'address_components'],
         types: ['geocode', 'establishment']
       };
 
@@ -882,6 +921,8 @@
         } else {
           fromLatLng = '';
         }
+        const countryComp = p.address_components?.find(c => c.types.includes('country'));
+        fromCountry = countryComp?.short_name?.toUpperCase() || null;
       });
       document.getElementById('from-input').addEventListener('input', () => { fromLatLng = ''; fromLocationText = ''; });
 
