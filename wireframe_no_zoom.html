@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="format-detection" content="telephone=no"/>
+<title>Community Carpool — Landing</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f0e8;
+    --green: #1B5C3A;
+    --ink: #1a1a1a;
+    --body: #3d3d3d;
+    --muted: #777;
+    --border: rgba(27,92,58,.12);
+    --white: #ffffff;
+  }
+
+  html {
+    overflow: hidden;
+    height: 100%;
+    /* Prevent Safari from auto-adjusting font sizes on HTTPS */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  html, body { overflow-x: hidden; }
+  body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: #ddd9d1;
+    /* Match font rendering between file:// and https:// in Safari */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    height: 100px; background: #f5f0e8;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 0 36px;
+  }
+  .nav-logo img { height: 80px; }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a { font-size: 14px; color: var(--muted); text-decoration: none; font-weight: 500; }
+  .nav-links a:hover { color: var(--green); }
+
+  /* ── SHELL ── */
+  body { padding-top: 100px; }
+  .shell { display: flex; height: calc(100vh - 100px); width: 100%; }
+
+  /* ── LEFT 75% — panel switcher ── */
+  .left {
+    flex: 0 0 75%; min-width: 0;
+    height: calc(100vh - 100px);
+    overflow: hidden;
+    background: var(--bg);
+    position: relative;
+  }
+
+  /* ── SNAP PANELS — absolute fade ── */
+  .snap-panel {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .45s ease, transform .45s ease;
+    transform: translateY(16px);
+  }
+  .snap-panel.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+  }
+
+  /* ── PANEL DOTS (left edge) ── */
+  .panel-dots {
+    position: fixed;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 10px;
+    z-index: 150;
+  }
+  .panel-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(27,92,58,.25);
+    border: none; cursor: pointer; padding: 0;
+    transition: background .2s, transform .2s;
+  }
+  .panel-dot.active { background: var(--green); transform: scale(1.4); }
+
+  /* ── NEXT PANEL ARROW ── */
+  .panel-next {
+    position: absolute; bottom: 18px; left: 50%;
+    transform: translateX(-50%);
+    background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    color: var(--green); opacity: .5; transition: opacity .2s;
+    font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    font-family: 'Inter', sans-serif;
+  }
+  .panel-next:hover { opacity: 1; }
+  .panel-next svg { width: 20px; height: 20px; animation: bounce-down 1.6s infinite; }
+  @keyframes bounce-down { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+
+  /* ── RIGHT 25% — fixed panel ── */
+  .right {
+    position: fixed;
+    top: 100px; right: 0;
+    width: 25%;
+    height: calc(100vh - 100px);
+    background: var(--green);
+    overflow-y: auto;
+    padding: 18px 16px 6px;
+    display: flex; flex-direction: column;
+    z-index: 100;
+  }
+  .right-sticky { display: contents; }
+
+  /* ══════════════════════════════
+     SHARED STYLES
+  ══════════════════════════════ */
+  .tag {
+    font-size: 14px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--green);
+    display: block; margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 46px; font-weight: 800; color: var(--green);
+    line-height: 1.06; margin-bottom: 14px;
+    white-space: nowrap;
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px; font-weight: 700; color: var(--green);
+    line-height: 1.15; margin-bottom: 14px;
+    white-space: nowrap;
+  }
+  h3 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--green); margin-bottom: 6px; }
+  p { font-size: 16px; color: var(--body); line-height: 1.65; }
+  .small { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .section-divider { height: 1px; background: var(--border); }
+
+  /* ── HERO ── */
+  .hero { padding: 36px 48px 0; }
+  .hero-sub { font-size: 17px; color: var(--body); line-height: 1.6; margin-bottom: 20px; }
+  .hero-pills { display: flex; gap: 10px; margin-bottom: 0; flex-wrap: wrap; }
+  .pill { background: var(--white); border: 1.5px solid #c8dcc0; border-radius: 50px; padding: 7px 18px; font-size: 14px; font-weight: 600; color: var(--green); }
+  .pill em { font-style: italic; }
+
+  .hero-image {
+    margin-top: 32px;
+    margin-left: -48px;
+    width: calc(100% + 96px);
+    height: 420px;
+    position: relative; overflow: hidden; background: #c8c0b0;
+  }
+  .hero-slide {
+    position: absolute; inset: 0;
+    opacity: 0; transition: opacity .7s ease;
+    pointer-events: none;
+  }
+  .hero-slide.active { opacity: 1; pointer-events: auto; }
+  .hero-slide img { width: 100%; height: 100%; object-fit: cover; object-position: center 70%; display: block; }
+  .hero-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #d8d0c4; color: #999; font-size: 14px; font-weight: 500; letter-spacing: .5px; }
+  .hero-img-dots { position: absolute; bottom: 18px; right: 16px; display: flex; gap: 6px; z-index: 2; }
+  .hero-img-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); border: none; cursor: pointer; padding: 0; transition: background .2s, transform .2s; }
+  .hero-img-dot.active { background: #fff; transform: scale(1.3); }
+
+  /* ── PRESS ── */
+  .press { padding: 22px 0; background: var(--white); overflow: hidden; }
+  .press-label { font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green); padding: 0 48px; margin-bottom: 16px; display: block; }
+  .press-marquee-wrap { overflow: hidden; position: relative; width: 100%; }
+  .press-marquee-wrap::before,
+  .press-marquee-wrap::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 60px; z-index: 2;
+  }
+  .press-marquee-wrap::before { left: 0; background: linear-gradient(to right, #fff, transparent); }
+  .press-marquee-wrap::after  { right: 0; background: linear-gradient(to left, #fff, transparent); }
+  .press-marquee { display: flex; gap: 72px; align-items: center; width: max-content; animation: marquee 36s linear infinite; padding: 8px 0; }
+  .press-marquee-wrap:hover .press-marquee { animation-play-state: paused; }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .press-logo-link { display: flex; align-items: center; flex-shrink: 0; opacity: .85; transition: opacity .2s; }
+  .press-logo-link:hover { opacity: 1; }
+  .press-logo-link img { height: 48px; width: auto; max-width: 160px; object-fit: contain; }
+  .press-logo-link.zawya img { height: 68px; }
+  .press-logo-link.dpg img { height: 220px; }
+  .press-logo-link.on-dark { background: #D40000; padding: 6px 14px; border-radius: 6px; }
+
+  /* ── VALUE PROPS ── */
+  .value-props { padding: 36px 48px; }
+  .props-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .prop-card { background: var(--white); border-radius: 16px; padding: 24px; border: 1.5px solid #e0dbd2; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+  .prop-card h3 { font-size: 18px; margin-bottom: 8px; }
+  .prop-card p { font-size: 15px; color: #555; line-height: 1.6; }
+
+  /* ── HOW IT WORKS ── */
+  .how-it-works { padding: 36px 48px; background: var(--white); }
+  .steps { display: flex; flex-direction: column; gap: 24px; margin-top: 16px; }
+  .step { display: flex; gap: 20px; align-items: flex-start; }
+  .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; flex-shrink: 0; border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+  .step-body h3 { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .step-body p { font-size: 14px; color: var(--muted); }
+
+  /* ── FOUNDER QUOTE ── */
+  .founder { padding: 20px 48px; }
+  .quote-card { background: var(--green); border-radius: 20px; padding: 24px 32px; border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
+  .quote-text { font-family: 'Playfair Display', serif; font-size: 22px; font-style: italic; font-weight: 700; color: #fff; line-height: 1.5; margin-bottom: 20px; }
+  .quote-attr { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.65); }
+
+  /* ── STATS ── */
+  .stats-section { padding: 20px 48px; background: var(--white); }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+  .stat-card { background: var(--bg); border-radius: 16px; padding: 24px; border: 1.5px solid #e0dbd2; text-align: center; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 800; color: var(--green); display: block; }
+  .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* ── SHARE SECTION (Panel 3) ── */
+  .share-section { padding: 24px 48px 20px; flex: 1; display: flex; flex-direction: column; }
+  .share-section h2 { margin-bottom: 6px; white-space: normal; }
+  .share-section > p { margin-bottom: 20px; }
+  .share-row {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;
+  }
+  .share-card-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--white); color: var(--ink);
+    border: 1.5px solid var(--ink); border-bottom: 3px solid var(--ink);
+    border-radius: 50px; padding: 10px 18px;
+    font-size: 14px; font-weight: 600; font-family: inherit;
+    cursor: pointer; white-space: nowrap;
+    transition: transform .3s cubic-bezier(0.34,1.56,0.64,1), border-bottom-width .15s;
+  }
+  .share-card-btn:hover { transform: translateY(-3px); border-bottom-width: 5px; }
+  .share-card-btn:active { transform: translateY(2px); border-bottom-width: 1px; }
+  .share-card-btn svg { flex-shrink: 0; color: var(--green); width: 16px; height: 16px; }
+  .legal-links { display: flex; gap: 20px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid var(--border); margin-top: auto; }
+  .legal-links a { font-size: 13px; color: var(--muted); text-decoration: none; font-weight: 500; }
+  .legal-links a:hover { color: var(--green); }
+
+  /* ══════════════════════════════
+     RIGHT FORM PANEL
+  ══════════════════════════════ */
+  .form-heading { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 8px; line-height: 1.15; }
+
+  .form-card { background: var(--white); border-radius: 16px; padding: 16px 14px; box-shadow: 0 8px 32px rgba(0,0,0,.2); display: flex; flex-direction: column; }
+
+  .f-section-title { font-size: 16px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+  .f-section-title svg { width: 18px; height: 18px; color: var(--green); flex-shrink: 0; }
+
+  .f-group { margin-bottom: 10px; }
+  .f-group:last-of-type { margin-bottom: 0; }
+  .f-label { font-size: 14px; font-weight: 600; color: var(--ink); display: block; margin-bottom: 5px; }
+  .f-req { color: #dc2626; margin-left: 1px; }
+  .f-input { width: 100%; padding: 10px 12px; font-size: 15px; font-family: inherit; border: 1.5px solid #e0e0e0; border-radius: 10px; background: #f9f9f9; color: var(--ink); }
+  .f-input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(27,92,58,.1); background: #fff; }
+  .f-input::placeholder { color: #b0b0b0; font-size: 14px; }
+
+  .f-privacy { font-size: 14px; color: #7a5c1a; background: #fef9ec; border-left: 3px solid #f5c842; border-radius: 0 8px 8px 0; padding: 8px 10px; margin-top: 6px; line-height: 1.5; }
+  .f-privacy strong { color: var(--ink); }
+
+  .f-helper { font-size: 15px; color: var(--muted); margin-bottom: 6px; }
+
+  .f-divider { height: 1px; background: #eee; margin: 8px 0; }
+
+  /* distance slider */
+  .f-slider { width: 100%; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: #e0e0e0; outline: none; cursor: pointer; }
+  .f-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--green); border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.2); cursor: pointer; }
+  .f-dist-labels { display: flex; justify-content: space-between; margin-top: 4px; }
+  .f-dist-labels span { font-size: 13px; color: #999; }
+
+  /* terms */
+  .f-terms { display: flex; align-items: flex-start; gap: 8px; margin: 5px 0; }
+  .f-checkbox { width: 16px; height: 16px; margin-top: 1px; flex-shrink: 0; accent-color: var(--ink); cursor: pointer; }
+  .f-terms-label { font-size: 13px; color: rgba(255,255,255,.85); line-height: 1.5; }
+  .f-terms-label a { color: #a8d4b8; text-decoration: underline; font-weight: 600; }
+
+  .f-submit {
+    width: 100%; padding: 14px;
+    background: var(--bg); color: var(--green);
+    font-size: 15px; font-weight: 700; font-family: inherit;
+    border: 2px solid var(--ink);
+    border-bottom: 6px solid var(--ink);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform .4s cubic-bezier(0.34,1.56,0.64,1), border-bottom-width .15s ease;
+    letter-spacing: .2px;
+  }
+  .f-submit:hover { transform: translateY(-5px); border-bottom-width: 10px; }
+  .f-submit:active { transform: translateY(4px); border-bottom-width: 1px; transition: transform .08s, border-bottom-width .08s; }
+
+  .f-box { background: var(--white); border: 2px solid #ecfdf5; border-radius: 16px; padding: 16px 16px; margin-bottom: 8px; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+
+  /* wireframe badge — hidden in landing.html */
+  .wf-badge { display: none; }
+
+  /* ── SUCCESS STATE ── */
+  #form-content { display: flex; flex-direction: column; flex: 1; transition: opacity .3s ease; justify-content: flex-start; gap: 8px; }
+  #form-content .f-box { flex: 0 0 auto; }
+  .f-terms { padding-top: 0; margin-top: 2px; }
+  .f-submit { margin-top: 16px; }
+  #success-content { display: none; flex-direction: column; flex: 1; transition: opacity .3s ease; }
+  #success-content.visible { display: flex; }
+
+  /* ── CONFIRMATION CARD ── */
+  .conf-header { text-align: center; margin-bottom: 10px; }
+  .conf-title { font-size: 21px; font-weight: 700; color: #1a365d; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .conf-icon { width: 32px; height: 32px; background: #22c55e; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .conf-sub { font-size: 15px; color: #4a5568; margin-top: 6px; }
+  .impact-box { background: #f0f9ff; padding: 28px 20px; text-align: center; }
+  .impact-label { font-size: 13px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .impact-value { font-size: 48px; font-weight: 800; color: #1e293b; line-height: 1; margin-bottom: 6px; }
+  .impact-unit { font-size: 24px; color: #64748b; font-weight: 600; }
+  .impact-sub { font-size: 17px; color: #475569; margin-top: 8px; }
+  .ss-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .ss-btn { width: 42px; height: 42px; border-radius: 10px; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .15s, box-shadow .15s; flex-shrink: 0; }
+  .ss-btn:hover { transform: scale(1.1); box-shadow: 0 3px 8px rgba(0,0,0,.18); }
+
+  /* ── FLOATING MOBILE CTA ── */
+  .mobile-cta {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 500;
+    background: var(--green);
+    color: var(--bg);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px; font-weight: 700;
+    padding: 14px 28px;
+    border: 2px solid var(--ink);
+    border-bottom: 5px solid var(--ink);
+    border-radius: 50px;
+    cursor: pointer;
+    white-space: nowrap;
+    letter-spacing: .2px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.18);
+    transition: opacity .3s ease;
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 900px) {
+    html, body { overflow: auto !important; height: auto !important; }
+    body { padding-top: 70px; }
+    nav { height: 70px; padding: 0 16px; }
+    .nav-links { display: none; }
+
+    .shell { flex-direction: column; height: auto; overflow: visible; }
+    .left { flex: none; width: 100%; height: auto; overflow: visible; }
+
+    /* Show all panels stacked — disable the opacity switcher */
+    .snap-panel {
+      position: static !important;
+      opacity: 1 !important;
+      pointer-events: all !important;
+      transform: none !important;
+      height: auto !important;
+      overflow: visible !important;
+    }
+
+    /* Hide desktop-only nav elements */
+    .panel-dots { display: none; }
+    .panel-next { display: none; }
+    .wf-badge { display: none; }
+
+    /* Right panel — static, full width */
+    .right {
+      position: static !important;
+      width: 100% !important;
+      height: auto !important;
+      overflow-y: visible !important;
+      padding: 28px 20px 100px;
+    }
+
+    /* Show floating CTA */
+    .mobile-cta { display: block; }
+
+    h1 { font-size: 30px; white-space: normal; }
+    h2 { white-space: normal; font-size: 24px; }
+    .hero { padding: 28px 20px 0; }
+    .press, .value-props, .how-it-works, .founder, .stats-section { padding: 32px 20px; }
+    .hero-image { height: 300px; margin-left: -20px; width: calc(100% + 40px); }
+    .hero-slide img { object-position: center 50% !important; }
+    .props-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .share-section { padding: 24px 20px; }
+    footer { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wf-badge">Wireframe</div>
+
+<!-- Floating mobile CTA -->
+<button class="mobile-cta" id="mobile-cta">Find Carpool Partner →</button>
+
+<!-- Panel navigation dots -->
+<div class="panel-dots" id="panel-dots">
+  <button class="panel-dot active" data-panel="0"></button>
+  <button class="panel-dot" data-panel="1"></button>
+  <button class="panel-dot" data-panel="2"></button>
+</div>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-logo" href="#"><img src="logo-slogan.png" alt="Community Carpool — Share rides. Cut emissions."/></a>
+</nav>
+
+<div class="shell">
+
+  <!-- ════════════════════════════════
+       LEFT 75%
+  ═════════════════════════════════ -->
+  <div class="left">
+
+  <!-- ── PANEL 1: Hero + Press ── -->
+  <div class="snap-panel snap-panel-1">
+
+    <!-- 1. HERO -->
+    <section class="hero">
+      <h1>The better way to commute.</h1>
+      <p class="hero-sub">Match with people on similar routes.<br>Contact shared only after a match.</p>
+      <div class="hero-pills">
+        <span class="pill">No <em>Fees</em></span>
+        <span class="pill">No <em>App</em></span>
+        <span class="pill">No <em>Cookies</em></span>
+      </div>
+
+      <div class="hero-image" id="hero-carousel">
+        <!-- Slide 1 -->
+        <div class="hero-slide active">
+          <img src="Hero_Images_Landing_Page/Dubai Skyline.png" alt="Dubai commute"/>
+        </div>
+        <!-- Slide 2 -->
+        <div class="hero-slide">
+          <img src="Hero_Images_Landing_Page/School.jpg" alt="School carpool" style="object-position: center 40%;"/>
+        </div>
+        <!-- Slide 3 -->
+        <div class="hero-slide">
+          <img src="Hero_Images_Landing_Page/Make 21_9 dimensions..jpg" alt="Carpool commute" style="object-position: center 30%;"/>
+        </div>
+        <div class="hero-img-dots" id="hero-dots">
+          <button class="hero-img-dot active" data-slide="0"></button>
+          <button class="hero-img-dot" data-slide="1"></button>
+          <button class="hero-img-dot" data-slide="2"></button>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 2. PRESS -->
+    <section class="press">
+      <span class="press-label">Featured In</span>
+      <div class="press-marquee-wrap">
+        <div class="press-marquee" id="marquee">
+          <!-- Set 1 -->
+          <a class="press-logo-link" href="https://gulfnews.com/uae/how-a-dubai-teenager-is-tackling-traffic-and-climate-change-with-a-no-app-free-carpool-idea-this-world-earth-day-1.500515514" target="_blank" rel="noopener"><img src="press-logos/Gulf News.svg" alt="Gulf News"/></a>
+          <a class="press-logo-link" href="https://www.khaleejtimes.com/uae/education/dubai-parents-solutions-school-runs-carpooling-limos" target="_blank" rel="noopener"><img src="press-logos/Khaleej Times.svg" alt="Khaleej Times"/></a>
+          <a class="press-logo-link zawya" href="https://www.zawya.com/en/press-release/companies-news/earth-day-damac-launches-carpool-initiative-for-3500-employees-to-promote-smarter-more-sustainable-commuting-a58lwj3l" target="_blank" rel="noopener"><img src="press-logos/Zawya.svg" alt="Zawya"/></a>
+          <a class="press-logo-link" href="https://www.damacproperties.com/de/d-hub/press-releases/earth-day-damac-launches-carpool-initiative-for-3500-employees" target="_blank" rel="noopener"><img src="press-logos/DAMAC.svg" alt="DAMAC"/></a>
+          <a class="press-logo-link" href="https://www.youtube.com/watch?v=QCMjS780UEg" target="_blank" rel="noopener"><img src="press-logos/Dubai_Eye.svg" alt="Dubai Eye"/></a>
+          <a class="press-logo-link" href="https://www.youtube.com/watch?v=2ydXA7gnAv4" target="_blank" rel="noopener"><img src="press-logos/Mira_businessfm-logo.svg" alt="Mira Business FM"/></a>
+          <a class="press-logo-link" href="https://teachmiddleeastmag.com/could-carpooling-actually-fix-the-school-run-one-platform-thinks-so/" target="_blank" rel="noopener"><img src="press-logos/Teach MiddleEast Mag.png" alt="Teach Middle East Mag"/></a>
+          <a class="press-logo-link" href="https://emiratesreporter.com/city/earth-day-damac-accelerates-sustainable-commuting-with-carpool-plan-for-employees/" target="_blank" rel="noopener"><img src="press-logos/Emirates_Reporter-2.png" alt="Emirates Reporter"/></a>
+          <a class="press-logo-link" href="https://www.go-green.ae/earth-day-damac-launches-carpool-initiative-for-3500-employees-to-promote-smarter-more-sustainable-commuting/" target="_blank" rel="noopener"><img src="press-logos/Go Green.png" alt="Go Green"/></a>
+          <a class="press-logo-link dpg" href="https://dubaipropertyguide.io/earth-day-damac-launches-carpool-initiative-for-3500-employees-to-promote-smarter-more-sustainable-commuting/" target="_blank" rel="noopener"><img src="press-logos/Dubai Property Guide.png" alt="Dubai Property Guide"/></a>
+          <!-- Set 2 — seamless loop duplicate -->
+          <a class="press-logo-link" href="https://gulfnews.com/uae/how-a-dubai-teenager-is-tackling-traffic-and-climate-change-with-a-no-app-free-carpool-idea-this-world-earth-day-1.500515514" target="_blank" rel="noopener"><img src="press-logos/Gulf News.svg" alt="Gulf News"/></a>
+          <a class="press-logo-link" href="https://www.khaleejtimes.com/uae/education/dubai-parents-solutions-school-runs-carpooling-limos" target="_blank" rel="noopener"><img src="press-logos/Khaleej Times.svg" alt="Khaleej Times"/></a>
+          <a class="press-logo-link zawya" href="https://www.zawya.com/en/press-release/companies-news/earth-day-damac-launches-carpool-initiative-for-3500-employees-to-promote-smarter-more-sustainable-commuting-a58lwj3l" target="_blank" rel="noopener"><img src="press-logos/Zawya.svg" alt="Zawya"/></a>
+          <a class="press-logo-link" href="https://www.damacproperties.com/de/d-hub/press-releases/earth-day-damac-launches-carpool-initiative-for-3500-employees" target="_blank" rel="noopener"><img src="press-logos/DAMAC.svg" alt="DAMAC"/></a>
+          <a class="press-logo-link" href="https://www.youtube.com/watch?v=QCMjS780UEg" target="_blank" rel="noopener"><img src="press-logos/Dubai_Eye.svg" alt="Dubai Eye"/></a>
+          <a class="press-logo-link" href="https://www.youtube.com/watch?v=2ydXA7gnAv4" target="_blank" rel="noopener"><img src="press-logos/Mira_businessfm-logo.svg" alt="Mira Business FM"/></a>
+          <a class="press-logo-link" href="https://teachmiddleeastmag.com/could-carpooling-actually-fix-the-school-run-one-platform-thinks-so/" target="_blank" rel="noopener"><img src="press-logos/Teach MiddleEast Mag.png" alt="Teach Middle East Mag"/></a>
+          <a class="press-logo-link" href="https://emiratesreporter.com/city/earth-day-damac-accelerates-sustainable-commuting-with-carpool-plan-for-employees/" target="_blank" rel="noopener"><img src="press-logos/Emirates_Reporter-2.png" alt="Emirates Reporter"/></a>
+          <a class="press-logo-link" href="https://www.go-green.ae/earth-day-damac-launches-carpool-initiative-for-3500-employees-to-promote-smarter-more-sustainable-commuting/" target="_blank" rel="noopener"><img src="press-logos/Go Green.png" alt="Go Green"/></a>
+          <a class="press-logo-link dpg" href="https://dubaipropertyguide.io/earth-day-damac-launches-carpool-initiative-for-3500-employees-to-promote-smarter-more-sustainable-commuting/" target="_blank" rel="noopener"><img src="press-logos/Dubai Property Guide.png" alt="Dubai Property Guide"/></a>
+        </div>
+      </div>
+    </section>
+
+    <button class="panel-next" data-next="1">
+      <span>Next</span>
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+  </div><!-- /.snap-panel-1 -->
+
+  <!-- ── PANEL 2: Value Props + How It Works ── -->
+  <div class="snap-panel snap-panel-2">
+
+    <!-- 3. VALUE PROPS -->
+    <section class="value-props">
+      <span class="tag">Why it works</span>
+      <h2>Built for people, not profit.</h2>
+      <div class="props-grid">
+        <div class="prop-card">
+          <h3>Privacy by Design</h3>
+          <p>Your full name and email are never shown to another user unless there is a mutual match. Both parties must say yes.</p>
+        </div>
+        <div class="prop-card">
+          <h3>Zero Friction</h3>
+          <p>No app. No account to create. No payment details. Just a 30-second sign-up on any browser — the platform does the rest.</p>
+        </div>
+        <div class="prop-card">
+          <h3>Community First</h3>
+          <p>Private pools for schools, offices, and neighbourhoods. Organisations get a private link so families are matched only within their own community.</p>
+        </div>
+        <div class="prop-card">
+          <h3>Cut Emissions</h3>
+          <p>The platform calculates your carbon footprint savings based on your current commute. See your environmental impact in real time.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 4. HOW IT WORKS -->
+    <section class="how-it-works">
+      <span class="tag">Zero Friction</span>
+      <h2>Three simple steps.</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Enter your home and destination</h3>
+            <p>Area or community only — no apartment numbers needed.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Get matched with neighbours going the same way</h3>
+            <p>We email you when someone on your route registers.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Connect only when both people say 'Yes'</h3>
+            <p>Your name and email stay hidden until both users actively choose to connect.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <button class="panel-next" data-next="2">
+      <span>Next</span>
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+  </div><!-- /.snap-panel-2 -->
+
+  <!-- ── PANEL 3: Quote + Stats + Footer ── -->
+  <div class="snap-panel snap-panel-3">
+
+    <!-- 5. FOUNDER QUOTE -->
+    <section class="founder">
+      <span class="tag">Why We Built This</span>
+      <div class="quote-card">
+        <div class="quote-text">"When we remove the barriers to sharing a ride, we do not just cut emissions and costs; we start acting like a community again."</div>
+        <div class="quote-attr">Community Carpool</div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 6. STATS -->
+    <section class="stats-section">
+      <span class="tag">It's Working</span>
+      <h2>A community already moving.</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-num">Global</span>
+          <div class="stat-label">Platform — many communities already connected</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">1 min</span>
+          <div class="stat-label">To sign up</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">Private</span>
+          <div class="stat-label">Closed network for Corporates &amp; Schools — <a href="#" style="color:var(--green);font-weight:600;">contact us</a></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- SHARE SECTION -->
+    <section class="share-section">
+      <span class="tag">Spread the word</span>
+      <h2>Know someone who should carpool?</h2>
+      <p style="font-size:16px;color:var(--body);margin-bottom:28px;">Every share brings one more person closer to a match. It takes 2 seconds.</p>
+      <div class="share-row">
+        <button class="share-card-btn" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https://communitycarpool.org','_blank')">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          Facebook
+        </button>
+        <button class="share-card-btn" onclick="window.open('https://x.com/intent/tweet?url=https://communitycarpool.org&text=Find+a+carpool+partner+near+you','_blank')">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X / Twitter
+        </button>
+        <button class="share-card-btn" onclick="window.open('sms:?body=Join+Community+Carpool%3A+https://communitycarpool.org')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          SMS
+        </button>
+        <button class="share-card-btn" onclick="window.open('https://wa.me/?text=Find+a+carpool+partner%3A+https://communitycarpool.org','_blank')">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+          WhatsApp
+        </button>
+        <button class="share-card-btn" onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=https://communitycarpool.org','_blank')">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          LinkedIn
+        </button>
+      </div>
+      <div class="legal-links">
+        <a href="#">Support</a>
+        <a href="#">Help &amp; FAQ</a>
+        <a href="#">Terms</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Feedback</a>
+      </div>
+    </section>
+
+  </div><!-- /.snap-panel-3 -->
+
+  </div><!-- /.left -->
+
+  <!-- ════════════════════════════════
+       RIGHT 25% — STICKY FORM
+  ═════════════════════════════════ -->
+  <div class="right" id="right-panel">
+  <div class="right-sticky">
+
+    <!-- FORM STATE -->
+    <div id="form-content">
+      <div class="form-heading">Register your journey</div>
+
+      <!-- Box 1: Personal details -->
+      <div class="f-box">
+        <div class="f-section-title">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          Your Details
+        </div>
+        <div class="f-group">
+          <label class="f-label">First Name <span class="f-req">*</span></label>
+          <input id="first-name-input" class="f-input" type="text" placeholder="Your first name"/>
+        </div>
+        <div class="f-group" style="margin-top:22px;">
+          <label class="f-label">Email <span class="f-req">*</span></label>
+          <input id="email-input" class="f-input" type="email" placeholder="you@example.com"/>
+        </div>
+      </div>
+
+      <!-- Box 2: Journey details -->
+      <div class="f-box">
+        <div class="f-section-title">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          From <span class="f-req">*</span>
+        </div>
+        <div class="f-group">
+          <input id="from-input" class="f-input" type="text" placeholder="Search Area / Community or Point of Interest"/>
+          <p class="f-privacy">Enter only your area / community (e.g., JVC District 11) or Point of Interest (e.g., Raffles School). <strong>Do not include Apartment or villa numbers.</strong></p>
+        </div>
+
+        <div class="f-section-title" style="margin-top:40px;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          To <span class="f-req">*</span>
+        </div>
+        <div class="f-group">
+          <input id="to-input" class="f-input" type="text" placeholder="Search Area / Community or Point of Interest"/>
+        </div>
+
+        <div class="f-section-title" style="margin-top:40px;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+          Matching Distance
+        </div>
+        <p class="f-helper">How far from your route can a potential match be?</p>
+        <input id="distance-slider" type="range" class="f-slider" min="1" max="4" value="2"/>
+        <div class="f-dist-labels">
+          <span>1–3 km</span>
+          <span>3–5 km</span>
+          <span>5–8 km</span>
+          <span>8–10 km</span>
+        </div>
+      </div>
+
+      <!-- Terms & Submit -->
+      <div class="f-terms">
+        <input type="checkbox" class="f-checkbox" id="terms"/>
+        <label class="f-terms-label" for="terms">
+          I agree to the <a href="#">Terms &amp; Conditions</a> and <a href="#">Privacy Policy</a>.
+        </label>
+      </div>
+
+      <div id="f-error" style="display:none;font-size:12px;color:#fca5a5;background:rgba(220,38,38,.15);border-radius:8px;padding:10px 12px;margin-top:4px;"></div>
+      <button class="f-submit" id="submit-btn">Find Carpool Partner →</button>
+    </div>
+
+    <!-- SUCCESS STATE (hidden until submit — populated by JS) -->
+    <div id="success-content"></div>
+
+  </div><!-- /.right-sticky -->
+  </div><!-- /.right -->
+
+  <script>
+    // ── State ────────────────────────────────────────────────────────────────
+    let fromLatLng = '', toLatLng = '';
+    let fromLocationText = '', toLocationText = '';
+
+    // ── Success transition ────────────────────────────────────────────────────
+    function showSuccess(data) {
+      const fc = document.getElementById('form-content');
+      fc.style.opacity = '0';
+      setTimeout(function() {
+        fc.style.display = 'none';
+
+        let km = 3;
+        if (data.actualDist && parseInt(data.actualDist) > 0) {
+          km = parseInt(data.actualDist);
+        } else {
+          const step = parseInt(data.distanceVal || data.distance);
+          if (step === 1) km = 1;
+          else if (step === 2) km = 2;
+          else if (step === 3) km = 4;
+          else if (step === 4) km = 6.5;
+        }
+        const annualKg = Math.round(km * 2 * 5 * 52 * 0.18);
+        const trees = Math.round(annualKg / 21);
+        const annualKgStr = annualKg.toLocaleString();
+
+        const s = document.getElementById('success-content');
+        s.innerHTML = `
+          <div style="background:white;border-radius:16px 16px 0 0;border:2px solid #ecfdf5;border-bottom:none;padding:24px 20px 20px;">
+            <div class="conf-header">
+              <div class="conf-title">
+                <div class="conf-icon"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+                You are in the Pool!
+              </div>
+              <div class="conf-sub">You have successfully recorded Journey #${data.journeyNum}</div>
+            </div>
+          </div>
+          <div class="impact-box" style="border-left:2px solid #ecfdf5;border-right:2px solid #ecfdf5;">
+            <div class="impact-label">YOUR ANNUAL IMPACT</div>
+            <div class="impact-value">${annualKgStr} <span class="impact-unit">kg</span></div>
+            <div class="impact-sub">CO&#x2082; Savings</div>
+            <div style="font-size:15px;color:#64748b;margin-top:6px;">Equivalent to planting ${trees} trees</div>
+            <div style="font-size:13px;color:#94a3b8;margin-top:4px;">(Based on ${km} km one-way commute)</div>
+          </div>
+          <div style="background:white;border-radius:0 0 16px 16px;border:2px solid #ecfdf5;border-top:none;padding:24px 20px 24px;">
+            <div style="text-align:center;margin-bottom:20px;">
+              <div style="font-size:14px;color:#64748b;font-weight:600;margin-bottom:14px;">Get matched faster by sharing!</div>
+              <div class="ss-row">
+                <button class="ss-btn" style="background:#25d366" onclick="shareTo('whatsapp')" title="WhatsApp"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.562 4.14 1.542 5.874L0 24l6.294-1.542A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.374l-.36-.214-3.732.914.93-3.617-.234-.373A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg></button>
+                <button class="ss-btn" style="background:#1877F2" onclick="shareTo('facebook')" title="Facebook"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></button>
+                <button class="ss-btn" style="background:#000" onclick="shareTo('twitter')" title="X / Twitter"><svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.91-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></button>
+                <button class="ss-btn" style="background:#0A66C2" onclick="shareTo('linkedin')" title="LinkedIn"><svg width="19" height="19" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></button>
+                <button class="ss-btn" style="background:#34c759" onclick="shareTo('sms')" title="SMS"><svg width="19" height="19" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg></button>
+              </div>
+            </div>
+            <div style="font-size:14px;color:#94a3b8;text-align:center;line-height:2.1;">
+              <a href="/support.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Support</a> &nbsp;&middot;&nbsp;
+              <a href="/docs/" target="_blank" style="color:#94a3b8;text-decoration:none;">Help &amp; FAQ</a> &nbsp;&middot;&nbsp;
+              <a href="/terms.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Terms</a> &nbsp;&middot;&nbsp;
+              <a href="/privacy.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Privacy Policy</a>
+            </div>
+          </div>
+        `;
+
+        s.classList.add('visible');
+        s.style.opacity = '0';
+        setTimeout(function() { s.style.opacity = '1'; }, 20);
+      }, 300);
+    }
+
+    // ── Share ─────────────────────────────────────────────────────────────────
+    function shareTo(platform) {
+      const url = 'https://communitycarpool.org';
+      const msgFull = encodeURIComponent('Hey! I just signed up on CommunityCarpool.org to find carpooling partners for my commute.\n\nIt matches neighbors going the same route — completely FREE, No Cookies, No App, and you only connect when both sides are interested. Everything over email.\n\nTakes 30 seconds!\n' + url);
+      const msgTwitter = encodeURIComponent('Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, email-only. The more locals sign up, the better the matches! ' + url);
+      const links = {
+        whatsapp: 'https://wa.me/?text=' + msgFull,
+        facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url),
+        twitter:  'https://x.com/intent/tweet?text=' + msgTwitter,
+        linkedin: 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(url),
+        sms:      'sms:?body=' + msgFull
+      };
+      const a = document.createElement('a'); a.href = links[platform]; a.target = '_blank'; a.rel = 'noopener noreferrer'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    // ── Error display ─────────────────────────────────────────────────────────
+    function showError(msg) {
+      const el = document.getElementById('f-error');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+    function clearError() {
+      const el = document.getElementById('f-error');
+      el.style.display = 'none';
+      el.textContent = '';
+    }
+
+    // ── Submit handler ────────────────────────────────────────────────────────
+    document.getElementById('submit-btn').addEventListener('click', async function() {
+      clearError();
+      const firstName = document.getElementById('first-name-input').value.trim();
+      const email     = document.getElementById('email-input').value.trim();
+      const distVal   = document.getElementById('distance-slider').value;
+      const terms     = document.getElementById('terms').checked;
+
+      if (!firstName || !email) { showError('Please enter your name and email.'); return; }
+      if (!fromLocationText || !fromLatLng) { showError('Please select your starting area from the suggestions.'); return; }
+      if (!toLocationText || !toLatLng) { showError('Please select your destination from the suggestions.'); return; }
+      if (!terms) { showError('Please agree to the Terms & Conditions to continue.'); return; }
+
+      const btn = this;
+      btn.textContent = 'Registering…';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/submit-journey', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            firstName,
+            email,
+            fromLocation: fromLocationText,
+            fromLatLng,
+            toLocation: toLocationText,
+            toLatLng,
+            distanceValue: distVal,
+            termsAgreed: true
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showSuccess({ journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal });
+        } else {
+          showError(data.error || 'Something went wrong. Please try again.');
+          btn.textContent = 'Find Carpool Partner →';
+          btn.disabled = false;
+        }
+      } catch (e) {
+        showError('Network error — please check your connection and try again.');
+        btn.textContent = 'Find Carpool Partner →';
+        btn.disabled = false;
+      }
+    });
+
+    // ── Google Places autocomplete ────────────────────────────────────────────
+    function initAutocomplete() {
+      const opts = {
+        fields: ['formatted_address', 'name', 'geometry'],
+        types: ['geocode', 'establishment']
+      };
+
+      const fromAC = new google.maps.places.Autocomplete(document.getElementById('from-input'), opts);
+      fromAC.addListener('place_changed', () => {
+        const p = fromAC.getPlace();
+        fromLocationText = p.name || p.formatted_address || '';
+        if (p.geometry?.location) {
+          fromLatLng = p.geometry.location.lat() + ',' + p.geometry.location.lng();
+        } else {
+          fromLatLng = '';
+        }
+      });
+      document.getElementById('from-input').addEventListener('input', () => { fromLatLng = ''; fromLocationText = ''; });
+
+      const toAC = new google.maps.places.Autocomplete(document.getElementById('to-input'), opts);
+      toAC.addListener('place_changed', () => {
+        const p = toAC.getPlace();
+        toLocationText = p.name || p.formatted_address || '';
+        if (p.geometry?.location) {
+          toLatLng = p.geometry.location.lat() + ',' + p.geometry.location.lng();
+        } else {
+          toLatLng = '';
+        }
+      });
+      document.getElementById('to-input').addEventListener('input', () => { toLatLng = ''; toLocationText = ''; });
+    }
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARzmbbhT0ki5-bZ-43pkkPyJNmOCTz4P0&libraries=places&loading=async&callback=initAutocomplete" async defer></script>
+  <script>
+    // ── Mobile setup ─────────────────────────────────────────────────────────
+    const mobileCta = document.getElementById('mobile-cta');
+    if (window.innerWidth <= 900) {
+      // Move form between panel 2 and panel 3
+      const right  = document.getElementById('right-panel');
+      const panel3 = document.querySelector('.snap-panel-3');
+      panel3.parentNode.insertBefore(right, panel3);
+
+      // Scroll to form on CTA click
+      mobileCta.addEventListener('click', function() {
+        right.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      // Hide CTA when form is visible, show when scrolled away
+      const observer = new IntersectionObserver(function(entries) {
+        mobileCta.style.opacity = entries[0].isIntersecting ? '0' : '1';
+        mobileCta.style.pointerEvents = entries[0].isIntersecting ? 'none' : 'auto';
+      }, { threshold: 0.1 });
+      observer.observe(right);
+    }
+
+    // ── Hero carousel ─────────────────────────────────────────────────────────
+    const heroSlides = document.querySelectorAll('#hero-carousel .hero-slide');
+    const heroDots   = document.querySelectorAll('#hero-dots .hero-img-dot');
+    let heroIdx = 0, heroTimer;
+
+    function showHeroSlide(idx) {
+      heroSlides.forEach((s, i) => s.classList.toggle('active', i === idx));
+      heroDots.forEach((d, i)   => d.classList.toggle('active', i === idx));
+      heroIdx = idx;
+    }
+    function advanceHero() { showHeroSlide((heroIdx + 1) % heroSlides.length); }
+    heroTimer = setInterval(advanceHero, 4000);
+    heroDots.forEach(d => d.addEventListener('click', function() {
+      clearInterval(heroTimer);
+      showHeroSlide(+this.dataset.slide);
+      heroTimer = setInterval(advanceHero, 4000);
+    }));
+
+    // ── Panel switcher ────────────────────────────────────────────────────────
+    const panels = document.querySelectorAll('.snap-panel');
+    const dots   = document.querySelectorAll('.panel-dot');
+    let current  = 0;
+
+    function showPanel(idx) {
+      panels.forEach((p, i) => p.classList.toggle('active', i === idx));
+      dots.forEach((d, i)   => d.classList.toggle('active', i === idx));
+      current = idx;
+    }
+
+    // Boot — show panel 1
+    showPanel(0);
+
+    // Dot clicks
+    dots.forEach(d => d.addEventListener('click', () => showPanel(+d.dataset.panel)));
+
+    // Next arrows
+    document.querySelectorAll('.panel-next').forEach(btn =>
+      btn.addEventListener('click', () => showPanel(+btn.dataset.next))
+    );
+
+    // Keyboard left/right arrows
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') showPanel(Math.min(current + 1, panels.length - 1));
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   showPanel(Math.max(current - 1, 0));
+    });
+
+    // Scroll: on panel 1 cycle hero images first, then advance panels
+    let wheelCooldown = false;
+    document.querySelector('.left').addEventListener('wheel', function(e) {
+      if (wheelCooldown) return;
+      const active = document.querySelector('.snap-panel.active');
+      const atBottom = active.scrollTop + active.clientHeight >= active.scrollHeight - 4;
+      const atTop    = active.scrollTop <= 0;
+      if (e.deltaY > 0 && atBottom) {
+        if (current === 0 && heroIdx < heroSlides.length - 1) {
+          clearInterval(heroTimer);
+          showHeroSlide(heroIdx + 1);
+          heroTimer = setInterval(advanceHero, 4000);
+        } else {
+          showPanel(Math.min(current + 1, panels.length - 1));
+        }
+        wheelCooldown = true;
+        setTimeout(function() { wheelCooldown = false; }, 900);
+      } else if (e.deltaY < 0 && atTop) {
+        if (current === 0 && heroIdx > 0) {
+          clearInterval(heroTimer);
+          showHeroSlide(heroIdx - 1);
+          heroTimer = setInterval(advanceHero, 4000);
+        } else {
+          showPanel(Math.max(current - 1, 0));
+        }
+        wheelCooldown = true;
+        setTimeout(function() { wheelCooldown = false; }, 900);
+      }
+    }, { passive: true });
+  </script>
+
+</div>
+
+</body>
+</html>
