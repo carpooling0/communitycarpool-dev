@@ -312,6 +312,19 @@
   #form-content .f-box { flex: 0 0 auto; }
   .f-terms { padding-top: 0; margin-top: 2px; }
   .f-submit { margin-top: 16px; }
+  /* Honeypot */
+  .hp-field { opacity:0; position:absolute; top:0; left:0; height:0; width:0; z-index:-1; pointer-events:none; }
+  /* Math modal */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:9000; align-items:center; justify-content:center; }
+  .modal-overlay.show { display:flex; }
+  .modal-box { background:#fff; border-radius:16px; padding:28px 24px; max-width:340px; width:90%; text-align:center; }
+  .modal-box h3 { font-size:17px; font-weight:700; color:#1a1a1a; margin-bottom:12px; }
+  .modal-box p { font-size:14px; color:#555; margin-bottom:16px; }
+  .modal-math-q { font-size:26px; font-weight:800; color:var(--green); margin-bottom:16px; }
+  .modal-input { width:100%; padding:10px; font-size:18px; text-align:center; border:1.5px solid #e0e0e0; border-radius:10px; font-family:inherit; }
+  .modal-input:focus { outline:none; border-color:var(--green); }
+  .modal-error { font-size:13px; color:#ef4444; margin-top:8px; display:none; }
+  .modal-btn { margin-top:16px; width:100%; padding:12px; background:var(--green); color:#fff; border:none; border-radius:50px; font-size:15px; font-weight:600; font-family:inherit; cursor:pointer; }
   #success-content { display: none; flex-direction: column; flex: 1; transition: opacity .3s ease; }
   #success-content.visible { display: flex; }
 
@@ -700,6 +713,12 @@
         </div>
       </div>
 
+      <!-- Honeypot - hidden from humans, visible to bots -->
+      <div class="hp-field" aria-hidden="true">
+        <label>Leave this empty</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off"/>
+      </div>
+
       <!-- Terms & Submit -->
       <div class="f-terms">
         <input type="checkbox" class="f-checkbox" id="terms"/>
@@ -725,7 +744,11 @@
     let fromCountry = null;
     let userCountry = 'ae';
     let orgCode = null;
+    let orgLocations = [];
+    let orgLogoUrl = null;
+    let orgCustomMessage = null;
     let termsVersion = null;
+    let mathAnswer = 0;
 
     const DISTANCE_MAP = { '1': '1 - 3 km', '2': '3 - 5 km', '3': '5 - 8 km', '4': '8 - 10 km' };
 
@@ -752,6 +775,87 @@
 
     // ── Warm-up submit-journey ────────────────────────────────────────────────
     fetch(`${SUPABASE_URL}/functions/v1/submit-journey`, { mode: 'no-cors' }).catch(() => {});
+
+    // ── Math modal (bot challenge) ────────────────────────────────────────────
+    function openMathModal() {
+      const n1 = Math.floor(Math.random() * 5) + 1;
+      const n2 = Math.floor(Math.random() * 5) + 1;
+      mathAnswer = n1 + n2;
+      document.getElementById('mathQ').textContent = n1 + ' + ' + n2;
+      document.getElementById('mathInput').value = '';
+      document.getElementById('mathError').style.display = 'none';
+      document.getElementById('mathModal').classList.add('show');
+      document.getElementById('mathInput').focus();
+    }
+    function closeMathModal() {
+      document.getElementById('mathModal').classList.remove('show');
+    }
+    function verifyMath() {
+      const ans = parseInt(document.getElementById('mathInput').value);
+      if (ans === mathAnswer) {
+        document.getElementById('website').value = '';
+        closeMathModal();
+        submitForm();
+      } else {
+        document.getElementById('mathError').style.display = 'block';
+      }
+    }
+
+    // ── Org mode ─────────────────────────────────────────────────────────────
+    async function initOrgMode() {
+      const params = new URLSearchParams(window.location.search);
+      const clientParam = params.get('client');
+      if (!clientParam) return;
+
+      orgCode = clientParam.toLowerCase();
+      let orgName = orgCode;
+
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/functions/v1/get-org-locations?org=${encodeURIComponent(orgCode)}`,
+          { headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+        );
+        const data = await res.json();
+        if (data.success) {
+          orgName = data.org.name || orgCode;
+          orgLogoUrl = data.org.logoUrl || null;
+          orgCustomMessage = data.org.customMessage || null;
+          orgLocations = data.locations || [];
+        }
+      } catch (e) {
+        orgLocations = [];
+      }
+
+      document.title = `${orgName} Carpool | Community Carpool`;
+
+      if (orgLocations.length > 0) {
+        const select = document.createElement('select');
+        select.id = 'to-input';
+        select.className = 'f-input';
+        select.style.cssText = "-webkit-appearance:none;appearance:none;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231B5C3A%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');background-repeat:no-repeat;background-position:right 0.7rem top 50%;background-size:0.65rem auto;padding-right:2.5rem;";
+
+        const placeholder = document.createElement('option');
+        placeholder.value = ''; placeholder.disabled = true; placeholder.selected = true;
+        placeholder.textContent = 'Select Destination';
+        select.appendChild(placeholder);
+
+        orgLocations.forEach(loc => {
+          const opt = document.createElement('option');
+          opt.value = loc.location_id;
+          opt.textContent = loc.location_name;
+          select.appendChild(opt);
+        });
+
+        select.addEventListener('change', (e) => {
+          const loc = orgLocations.find(l => String(l.location_id) === e.target.value);
+          if (loc) { toLocationText = loc.location_name; toLatLng = loc.location_latlng; }
+        });
+
+        const existingInput = document.getElementById('to-input');
+        existingInput.replaceWith(select);
+      }
+    }
+    const orgModeReady = initOrgMode();
 
     // ── Success transition ────────────────────────────────────────────────────
     function showSuccess(data) {
@@ -846,8 +950,14 @@
     }
 
     // ── Submit handler ────────────────────────────────────────────────────────
-    document.getElementById('submit-btn').addEventListener('click', async function() {
+    document.getElementById('submit-btn').addEventListener('click', function() {
       clearError();
+      const honeypot = document.getElementById('website').value;
+      if (honeypot) { openMathModal(); return; }
+      submitForm();
+    });
+
+    async function submitForm() {
       const firstName = document.getElementById('first-name-input').value.trim();
       const email     = document.getElementById('email-input').value.trim();
       const distVal   = document.getElementById('distance-slider').value;
@@ -858,7 +968,7 @@
       if (!toLocationText || !toLatLng) { showError('Please select your destination from the suggestions.'); return; }
       if (!terms) { showError('Please agree to the Terms & Conditions to continue.'); return; }
 
-      const btn = this;
+      const btn = document.getElementById('submit-btn');
       btn.textContent = 'Registering…';
       btn.disabled = true;
 
@@ -903,10 +1013,12 @@
         btn.textContent = 'Find Carpool Partner →';
         btn.disabled = false;
       }
-    });
+    }
 
     // ── Google Places autocomplete ────────────────────────────────────────────
-    function initAutocomplete() {
+    async function initAutocomplete() {
+      await orgModeReady;
+
       const opts = {
         fields: ['formatted_address', 'name', 'geometry', 'address_components'],
         types: ['geocode', 'establishment']
@@ -926,17 +1038,20 @@
       });
       document.getElementById('from-input').addEventListener('input', () => { fromLatLng = ''; fromLocationText = ''; });
 
-      const toAC = new google.maps.places.Autocomplete(document.getElementById('to-input'), opts);
-      toAC.addListener('place_changed', () => {
-        const p = toAC.getPlace();
-        toLocationText = p.name || p.formatted_address || '';
-        if (p.geometry?.location) {
-          toLatLng = p.geometry.location.lat() + ',' + p.geometry.location.lng();
-        } else {
-          toLatLng = '';
-        }
-      });
-      document.getElementById('to-input').addEventListener('input', () => { toLatLng = ''; toLocationText = ''; });
+      // Only attach Places autocomplete to To field if org-mode didn't replace it with a dropdown
+      if (orgLocations.length === 0) {
+        const toAC = new google.maps.places.Autocomplete(document.getElementById('to-input'), opts);
+        toAC.addListener('place_changed', () => {
+          const p = toAC.getPlace();
+          toLocationText = p.name || p.formatted_address || '';
+          if (p.geometry?.location) {
+            toLatLng = p.geometry.location.lat() + ',' + p.geometry.location.lng();
+          } else {
+            toLatLng = '';
+          }
+        });
+        document.getElementById('to-input').addEventListener('input', () => { toLatLng = ''; toLocationText = ''; });
+      }
     }
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARzmbbhT0ki5-bZ-43pkkPyJNmOCTz4P0&libraries=places&loading=async&callback=initAutocomplete" async defer></script>
@@ -1048,5 +1163,16 @@
 
 </div>
 
+<!-- Math modal (bot challenge) -->
+<div class="modal-overlay" id="mathModal">
+  <div class="modal-box">
+    <h3>Human Verification</h3>
+    <p>Please solve this simple math problem:</p>
+    <div class="modal-math-q"><span id="mathQ">2 + 3</span> = ?</div>
+    <input type="number" id="mathInput" class="modal-input" placeholder="Answer"/>
+    <div class="modal-error" id="mathError">Incorrect answer, try again.</div>
+    <button class="modal-btn" onclick="verifyMath()">Verify &amp; Submit</button>
+  </div>
+</div>
 </body>
 </html>
