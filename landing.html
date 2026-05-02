@@ -983,7 +983,12 @@
 
         select.addEventListener('change', (e) => {
           const loc = orgLocations.find(l => String(l.location_id) === e.target.value);
-          if (loc) { toLocationText = loc.location_name; toLatLng = loc.location_latlng; }
+          if (loc) {
+            toLocationText = loc.location_name;
+            toLatLng = loc.location_latlng;
+            toSelected = true;
+            setLocationStatus('to', 'success');
+          }
           updateProgress();
         });
 
