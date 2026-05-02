@@ -1397,7 +1397,7 @@
       if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   showPanel(Math.max(current - 1, 0));
     });
 
-    // Scroll: on panel 1 cycle hero images first, then advance panels
+    // Scroll: move between panels only — hero images cycle on timer independently
     let wheelCooldown = false;
     document.querySelector('.left').addEventListener('wheel', function(e) {
       if (wheelCooldown) return;
@@ -1405,30 +1405,11 @@
       const atBottom = active.scrollTop + active.clientHeight >= active.scrollHeight - 4;
       const atTop    = active.scrollTop <= 0;
       if (e.deltaY > 0 && atBottom) {
-        if (current === 0 && heroIdx < heroSlides.length - 1) {
-          clearInterval(heroTimer);
-          showHeroSlide(heroIdx + 1);
-          heroTimer = setInterval(advanceHero, 4000);
-        } else {
-          showPanel(Math.min(current + 1, panels.length - 1));
-        }
+        showPanel(Math.min(current + 1, panels.length - 1));
         wheelCooldown = true;
         setTimeout(function() { wheelCooldown = false; }, 900);
-      } else if (e.deltaY < 0 && atTop) {
-        if (current === 0 && heroIdx > 0) {
-          clearInterval(heroTimer);
-          showHeroSlide(heroIdx - 1);
-          heroTimer = setInterval(advanceHero, 4000);
-        } else if (current > 0) {
-          const prevPanel = current - 1;
-          if (prevPanel === 0) {
-            // Entering panel 1 from above — land on last slide so reverse-scroll goes 3→2→1
-            clearInterval(heroTimer);
-            showHeroSlide(heroSlides.length - 1);
-            heroTimer = setInterval(advanceHero, 4000);
-          }
-          showPanel(prevPanel);
-        }
+      } else if (e.deltaY < 0 && atTop && current > 0) {
+        showPanel(current - 1);
         wheelCooldown = true;
         setTimeout(function() { wheelCooldown = false; }, 900);
       }
