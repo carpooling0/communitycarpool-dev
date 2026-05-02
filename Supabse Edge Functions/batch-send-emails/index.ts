@@ -162,12 +162,7 @@ Deno.serve(async (req) => {
 
         if (!allJourneyRows) continue
 
-        const shareUrl = SITE_URL
-        const shareWA  = encodeURIComponent(`Hey! I just signed up on CommunityCarpool.org to find carpooling partners for my commute.\n\nIt matches neighbors going the same route \u2014 completely FREE, No Cookies, No App, and you only connect when both sides are interested. Everything over email.\n\nThe more people sign up in our area, the better the matches get. Takes 30 seconds!\n${shareUrl}`)
-        const shareTW  = encodeURIComponent(`Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, email-only. The more locals sign up, the better the matches! Check it out \uD83D\uDC47\n${shareUrl}`)
-        const shareFB  = encodeURIComponent(shareUrl)
-        const shareLI  = encodeURIComponent(shareUrl)
-        const shareSMS = shareWA  // Same message as WhatsApp
+        const shareBase = 'https://communitycarpool.org/share'
 
         const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
           <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,system-ui,sans-serif;">
@@ -186,11 +181,11 @@ Deno.serve(async (req) => {
               <p style="color:#374151;font-size:14px;font-weight:600;margin:0 0 4px;">Know someone who commutes the same way?</p>
               <p style="color:#6b7280;font-size:13px;margin:0 0 16px;">The more people in your area sign up, the better the matches get.</p>
               <table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>
-                <td style="padding:0 5px;"><a href="https://wa.me/?text=${shareWA}" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/whatsapp.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="WhatsApp" /></a></td>
-                <td style="padding:0 5px;"><a href="https://www.facebook.com/sharer/sharer.php?u=${shareFB}" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/facebook.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="Facebook" /></a></td>
-                <td style="padding:0 5px;"><a href="https://x.com/intent/tweet?text=${shareTW}" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/twitter.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="Twitter / X" /></a></td>
-                <td style="padding:0 5px;"><a href="https://www.linkedin.com/shareArticle?mini=true&url=${shareLI}&title=${encodeURIComponent('Free carpooling for your commute')}&summary=${encodeURIComponent('Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, everything over email.')}" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/linkedin.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="LinkedIn" /></a></td>
-                <td style="padding:0 5px;"><a href="sms:?body=${shareSMS}" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/sms.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="SMS" /></a></td>
+                <td style="padding:0 5px;"><a href="${shareBase}/whatsapp.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/whatsapp.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="WhatsApp" /></a></td>
+                <td style="padding:0 5px;"><a href="${shareBase}/facebook.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/facebook.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="Facebook" /></a></td>
+                <td style="padding:0 5px;"><a href="${shareBase}/x.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/twitter.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="Twitter / X" /></a></td>
+                <td style="padding:0 5px;"><a href="${shareBase}/linkedin.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/linkedin.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="LinkedIn" /></a></td>
+                <td style="padding:0 5px;"><a href="${shareBase}/sms.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/sms.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="SMS" /></a></td>
               </tr></table>
             </div>
             <div style="text-align:center;margin-top:24px;color:#9ca3af;font-size:13px;">
