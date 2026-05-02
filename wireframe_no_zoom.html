@@ -778,10 +778,10 @@
       });
       const client = p.get('client');
       if (client) orgCode = client.toLowerCase();
-      // Clean tracked params from URL
-      ['ref','utm_source','utm_medium','utm_campaign','utm_content','utm_term','client'].forEach(k => p.delete(k));
-      const clean = p.toString();
-      history.replaceState(null, '', clean ? '?' + clean : window.location.pathname);
+      // Clean UTM/ref params from URL — keep ?client= so org branding persists on refresh
+      ['ref','utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(k => p.delete(k));
+      const clean = window.location.pathname + (p.toString() ? '?' + p.toString() : '');
+      history.replaceState(null, '', clean);
     })();
 
     // ── Terms version fetch ───────────────────────────────────────────────────
@@ -1065,6 +1065,7 @@
 
     // ── Share ─────────────────────────────────────────────────────────────────
     function shareTo(platform) {
+      window.umami?.track('social_share', { platform, page: 'landing' });
       const ref = sessionStorage.getItem('cc_ref') || '007';
       const url = 'https://communitycarpool.org?ref=' + ref;
       const msgFull = encodeURIComponent('Hey! I just signed up on CommunityCarpool.org to find carpooling partners for my commute.\n\nIt matches neighbors going the same route — completely FREE, No Cookies, No App, and you only connect when both sides are interested. Everything over email.\n\nThe more people sign up in our area, the better the matches get. Takes 30 seconds!\n' + url);
