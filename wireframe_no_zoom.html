@@ -261,13 +261,20 @@
   .f-section-title { font-size: 16px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
   .f-section-title svg { width: 18px; height: 18px; color: var(--green); flex-shrink: 0; }
 
-  .f-group { margin-bottom: 10px; }
+  .f-group { margin-bottom: 10px; position: relative; }
   .f-group:last-of-type { margin-bottom: 0; }
   .f-label { font-size: 14px; font-weight: 600; color: var(--ink); display: block; margin-bottom: 5px; }
   .f-req { color: #dc2626; margin-left: 1px; }
-  .f-input { width: 100%; padding: 10px 12px; font-size: 15px; font-family: inherit; border: 1.5px solid #e0e0e0; border-radius: 10px; background: #f9f9f9; color: var(--ink); }
+  .f-input { width: 100%; padding: 10px 36px 10px 12px; font-size: 15px; font-family: inherit; border: 1.5px solid #e0e0e0; border-radius: 10px; background: #f9f9f9; color: var(--ink); }
   .f-input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(27,92,58,.1); background: #fff; }
   .f-input::placeholder { color: #b0b0b0; font-size: 14px; }
+  .f-input.filled { border-color: #16a34a; }
+  .loc-status { position: absolute; right: 10px; top: 11px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+  .loc-status svg { width: 20px; height: 20px; }
+  .loc-spinner { color: #9ca3af; animation: loc-spin 1s linear infinite; }
+  .loc-check { color: #16a34a; }
+  @keyframes loc-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .loc-hint { display: none; margin-top: 6px; font-size: 12px; color: #b45309; background: #fff7ed; border: 1px solid #fdba74; border-radius: 6px; padding: 6px 10px; line-height: 1.45; }
 
   .f-privacy { font-size: 14px; color: #7a5c1a; background: #fef9ec; border-left: 3px solid #f5c842; border-radius: 0 8px 8px 0; padding: 8px 10px; margin-top: 6px; line-height: 1.5; }
   .f-privacy strong { color: var(--ink); }
@@ -694,6 +701,8 @@
         </div>
         <div class="f-group">
           <input id="from-input" class="f-input" type="text" placeholder="Search Area / Community or Point of Interest"/>
+          <div class="loc-status" id="fromStatus"></div>
+          <div class="loc-hint" id="fromHint">Please pick a location from the dropdown list. A green ✔ will appear when selected.</div>
           <p class="f-privacy">Enter only your area / community (e.g., JVC District 11) or Point of Interest (e.g., Raffles School). <strong>Do not include Apartment or villa numbers.</strong></p>
         </div>
 
@@ -703,6 +712,8 @@
         </div>
         <div class="f-group">
           <input id="to-input" class="f-input" type="text" placeholder="Search Area / Community or Point of Interest"/>
+          <div class="loc-status" id="toStatus"></div>
+          <div class="loc-hint" id="toHint">Please pick a location from the dropdown list. A green ✔ will appear when selected.</div>
         </div>
 
         <div class="f-section-title" style="margin-top:40px;">
@@ -747,6 +758,7 @@
     // ── State ────────────────────────────────────────────────────────────────
     let fromLatLng = '', toLatLng = '';
     let fromLocationText = '', toLocationText = '';
+    let fromSelected = false, toSelected = false;
     let fromCountry = null;
     let userCountry = 'ae';
     let orgCode = null;
@@ -802,10 +814,40 @@
       const hasName  = document.getElementById('first-name-input').value.trim().length > 0;
       const emailVal = document.getElementById('email-input').value.trim();
       const hasEmail = validateEmail(emailVal);
-      const hasFrom  = !!(fromLocationText && fromLatLng);
-      const hasTo    = !!(toLocationText && toLatLng);
+      const hasFrom  = fromSelected || !!(fromLocationText && fromLatLng);
+      const hasTo    = toSelected   || !!(toLocationText && toLatLng);
       const hasTerms = document.getElementById('terms').checked;
       document.getElementById('submit-btn').disabled = !(hasName && hasEmail && hasFrom && hasTo && hasTerms);
+    }
+
+    function setLocationStatus(type, status) {
+      const el    = document.getElementById(type + 'Status');
+      const input = document.getElementById(type + '-input');
+      const hint  = document.getElementById(type + 'Hint');
+      if (status === 'loading') {
+        el.innerHTML = '<svg class="loc-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
+        input.classList.remove('filled');
+        if (hint) hint.style.display = 'none';
+      } else if (status === 'success') {
+        el.innerHTML = '<svg class="loc-check" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+        input.classList.add('filled');
+        if (hint) hint.style.display = 'none';
+      } else {
+        el.innerHTML = '';
+        input.classList.remove('filled');
+      }
+    }
+
+    function attachLocationBlurHint(type) {
+      const input = document.getElementById(type + '-input');
+      const hint  = document.getElementById(type + 'Hint');
+      input.addEventListener('blur', () => {
+        const sel = type === 'from' ? fromSelected : toSelected;
+        if (!sel && input.value.trim().length > 0 && hint) hint.style.display = 'block';
+      });
+      input.addEventListener('focus', () => {
+        if (hint) hint.style.display = 'none';
+      });
     }
 
     document.getElementById('first-name-input').addEventListener('input', updateProgress);
@@ -1147,14 +1189,18 @@
         }
         if (p.geometry?.location) {
           fromLatLng = p.geometry.location.lat() + ',' + p.geometry.location.lng();
-          updateProgress();
+          fromSelected = true;
+          setLocationStatus('from', 'success');
         } else {
-          // Geocode fallback when Places doesn't return geometry
+          setLocationStatus('from', 'loading');
           new google.maps.Geocoder().geocode({ address: fromLocationText }, (results, status) => {
             if (status === 'OK' && results[0]?.geometry) {
               fromLatLng = results[0].geometry.location.lat() + ',' + results[0].geometry.location.lng();
+              fromSelected = true;
+              setLocationStatus('from', 'success');
             } else {
               fromLatLng = '';
+              setLocationStatus('from', '');
             }
             updateProgress();
           });
@@ -1164,7 +1210,8 @@
         fromCountry = countryComp?.short_name?.toUpperCase() || null;
         updateProgress();
       });
-      document.getElementById('from-input').addEventListener('input', () => { fromLatLng = ''; fromLocationText = ''; updateProgress(); });
+      document.getElementById('from-input').addEventListener('input', () => { fromLatLng = ''; fromLocationText = ''; fromSelected = false; setLocationStatus('from', ''); updateProgress(); });
+      attachLocationBlurHint('from');
 
       // Only attach Places autocomplete to To field if org-mode didn't replace it with a dropdown
       if (orgLocations.length === 0) {
@@ -1179,13 +1226,18 @@
           }
           if (p.geometry?.location) {
             toLatLng = p.geometry.location.lat() + ',' + p.geometry.location.lng();
-            updateProgress();
+            toSelected = true;
+            setLocationStatus('to', 'success');
           } else {
+            setLocationStatus('to', 'loading');
             new google.maps.Geocoder().geocode({ address: toLocationText }, (results, status) => {
               if (status === 'OK' && results[0]?.geometry) {
                 toLatLng = results[0].geometry.location.lat() + ',' + results[0].geometry.location.lng();
+                toSelected = true;
+                setLocationStatus('to', 'success');
               } else {
                 toLatLng = '';
+                setLocationStatus('to', '');
               }
               updateProgress();
             });
@@ -1193,7 +1245,8 @@
           }
           updateProgress();
         });
-        document.getElementById('to-input').addEventListener('input', () => { toLatLng = ''; toLocationText = ''; updateProgress(); });
+        document.getElementById('to-input').addEventListener('input', () => { toLatLng = ''; toLocationText = ''; toSelected = false; setLocationStatus('to', ''); updateProgress(); });
+        attachLocationBlurHint('to');
       }
     }
   </script>
