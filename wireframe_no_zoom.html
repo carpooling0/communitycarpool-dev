@@ -761,11 +761,15 @@
     // ── UTM / ref param capture ───────────────────────────────────────────────
     (() => {
       const p = new URLSearchParams(window.location.search);
-      [['ref','cc_ref'],['utm_source','cc_utm_source'],['utm_medium','cc_utm_medium'],['utm_campaign','cc_utm_campaign']].forEach(([k, sk]) => {
+      [['ref','cc_ref'],['utm_source','cc_utm_source'],['utm_medium','cc_utm_medium'],['utm_campaign','cc_utm_campaign'],['utm_content','cc_utm_content'],['utm_term','cc_utm_term']].forEach(([k, sk]) => {
         const v = p.get(k); if (v) sessionStorage.setItem(sk, v);
       });
       const client = p.get('client');
       if (client) orgCode = client.toLowerCase();
+      // Clean tracked params from URL
+      ['ref','utm_source','utm_medium','utm_campaign','utm_content','utm_term','client'].forEach(k => p.delete(k));
+      const clean = p.toString();
+      history.replaceState(null, '', clean ? '?' + clean : window.location.pathname);
     })();
 
     // ── Terms version fetch ───────────────────────────────────────────────────
@@ -1014,14 +1018,15 @@
 
     // ── Share ─────────────────────────────────────────────────────────────────
     function shareTo(platform) {
-      const url = 'https://communitycarpool.org';
-      const msgFull = encodeURIComponent('Hey! I just signed up on CommunityCarpool.org to find carpooling partners for my commute.\n\nIt matches neighbors going the same route — completely FREE, No Cookies, No App, and you only connect when both sides are interested. Everything over email.\n\nTakes 30 seconds!\n' + url);
-      const msgTwitter = encodeURIComponent('Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, email-only. The more locals sign up, the better the matches! ' + url);
+      const ref = sessionStorage.getItem('cc_ref') || '007';
+      const url = 'https://communitycarpool.org?ref=' + ref;
+      const msgFull = encodeURIComponent('Hey! I just signed up on CommunityCarpool.org to find carpooling partners for my commute.\n\nIt matches neighbors going the same route — completely FREE, No Cookies, No App, and you only connect when both sides are interested. Everything over email.\n\nThe more people sign up in our area, the better the matches get. Takes 30 seconds!\n' + url);
+      const msgTwitter = encodeURIComponent('Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, email-only. The more locals sign up, the better the matches! Check it out 👇\n' + url);
       const links = {
         whatsapp: 'https://wa.me/?text=' + msgFull,
         facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url),
         twitter:  'https://x.com/intent/tweet?text=' + msgTwitter,
-        linkedin: 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(url),
+        linkedin: 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent('Free carpooling for your commute') + '&summary=' + encodeURIComponent('Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, everything over email.'),
         sms:      'sms:?body=' + msgFull
       };
       const a = document.createElement('a'); a.href = links[platform]; a.target = '_blank'; a.rel = 'noopener noreferrer'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -1142,8 +1147,18 @@
         }
         if (p.geometry?.location) {
           fromLatLng = p.geometry.location.lat() + ',' + p.geometry.location.lng();
+          updateProgress();
         } else {
-          fromLatLng = '';
+          // Geocode fallback when Places doesn't return geometry
+          new google.maps.Geocoder().geocode({ address: fromLocationText }, (results, status) => {
+            if (status === 'OK' && results[0]?.geometry) {
+              fromLatLng = results[0].geometry.location.lat() + ',' + results[0].geometry.location.lng();
+            } else {
+              fromLatLng = '';
+            }
+            updateProgress();
+          });
+          return;
         }
         const countryComp = p.address_components?.find(c => c.types.includes('country'));
         fromCountry = countryComp?.short_name?.toUpperCase() || null;
@@ -1164,8 +1179,17 @@
           }
           if (p.geometry?.location) {
             toLatLng = p.geometry.location.lat() + ',' + p.geometry.location.lng();
+            updateProgress();
           } else {
-            toLatLng = '';
+            new google.maps.Geocoder().geocode({ address: toLocationText }, (results, status) => {
+              if (status === 'OK' && results[0]?.geometry) {
+                toLatLng = results[0].geometry.location.lat() + ',' + results[0].geometry.location.lng();
+              } else {
+                toLatLng = '';
+              }
+              updateProgress();
+            });
+            return;
           }
           updateProgress();
         });
