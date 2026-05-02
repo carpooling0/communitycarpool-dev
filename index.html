@@ -1,1864 +1,1480 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Community Carpool | Share Rides. Cut Emissions.</title>
-    <meta name="description" content="Match with people on similar routes to carpool voluntarily." />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Community Carpool" />
-    <meta property="og:title" content="Community Carpool | Find Your Carpool Match" />
-    <meta property="og:description" content="Match with people on similar routes. Contact shared only after a match." />
-    <meta property="og:url" content="https://communitycarpool.org/" />
-    <meta property="og:image" content="https://communitycarpool.org/og-image.jpg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:type" content="image/jpeg" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Community Carpool | Find Your Carpool Match" />
-    <meta name="twitter:description" content="Match with people on similar routes. Contact shared only after a match." />
-    <meta name="twitter:image" content="https://communitycarpool.org/og-image.jpg" />
-    <link rel="canonical" href="https://communitycarpool.org/">
-    <link rel="icon" href="favicon.png" type="image/png">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
-    <link rel="preload" as="image" href="logo.webp" type="image/webp">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
-    <style>
-        :root {
-            --primary: #16a34a;
-            --primary-light: #22c55e;
-            --primary-dark: #15803d;
-            --bg: #fafafa;
-            --card: #ffffff;
-            --border: #e5e7eb;
-            --text: #111827;
-            --text-secondary: #6b7280;
-            --text-muted: #9ca3af;
-            --error: #dc2626;
-            --success: #16a34a;
-            --radius: 12px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.5;
-            min-height: 100vh;
-        }
-
-        /* Page */
-        .page {
-            padding: 24px 16px 60px;
-            max-width: 480px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 12px;
-        }
-
-        .logo {
-            max-width: 100%;
-            width: 250px;
-            margin-bottom: 8px;
-        }
-
-        .tagline {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--primary-dark);
-            margin-bottom: 8px;
-            font-style: italic;
-        }
-
-        .description {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        /* Form */
-        .form-card {
-            background: transparent;
-            padding: 0;
-            box-shadow: none;
-        }
-
-        .form-section-box {
-            background: #ffffff;
-            border: 2px solid #ecfdf5;
-            border-radius: 24px;
-            padding: 24px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            position: relative;
-        }
-
-        .section {
-            margin-bottom: 24px;
-        }
-
-        .section:last-of-type {
-            margin-bottom: 0;
-        }
-
-        .section-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-icon {
-            width: 20px;
-            height: 20px;
-            color: var(--primary);
-        }
-
-        /* Inputs */
-        .input-group {
-            margin-bottom: 14px;
-        }
-
-        .input-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 6px;
-        }
-
-        .label .req {
-            color: var(--error);
-            margin-left: 2px;
-        }
-
-        .input {
-            width: 100%;
-            padding: 12px 14px;
-            font-size: 16px;
-            font-family: inherit;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--bg);
-            transition: all 0.2s;
-        }
-
-        .input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-        }
-
-        .input.error {
-            border-color: var(--error);
-        }
-
-        .input.success {
-            border-color: var(--success);
-        }
-
-        .error-msg {
-            color: var(--error);
-            font-size: 13px;
-            margin-top: 6px;
-            display: none;
-        }
-
-        .error-msg.show {
-            display: block;
-        }
-
-        .helper {
-            font-size: 15px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
-        .privacy-note {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 8px;
-            padding: 10px;
-            background: #fef3c7;
-            border-radius: 6px;
-            border-left: 3px solid #f59e0b;
-        }
-
-        /* Location */
-        .location-wrapper {
-            position: relative;
-        }
-
-        .location-status {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-        }
-
-        .location-status svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .loc-spinner {
-            color: var(--text-muted);
-            animation: spinAnim 1s linear infinite;
-        }
-
-        .loc-check {
-            color: var(--success);
-        }
-
-        @keyframes spinAnim {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .place-input {
-            width: 100%;
-            padding: 12px 40px 12px 14px;
-            font-size: 16px;
-            font-family: inherit;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--bg);
-            transition: all 0.2s;
-        }
-
-        .place-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-        }
-
-        .place-input.filled {
-            border-color: var(--success);
-        }
-
-        /* Google Places dropdown */
-        .pac-container {
-            max-height: 200px !important;
-            overflow-y: auto !important;
-            z-index: 10000 !important;
-            background: white !important;
-            border-radius: 8px !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
-            margin-top: 4px !important;
-        }
-
-        .pac-item {
-            padding: 10px 14px !important;
-            font-size: 14px !important;
-            cursor: pointer !important;
-        }
-
-        .pac-item:hover {
-            background: #f0fdf4 !important;
-        }
-
-        /* Slider */
-        .distance-slider-wrapper {
-            margin-top: 25px;
-            padding: 0 10px;
-        }
-
-        .distance-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 12px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .distance-slider {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: #e5e7eb;
-            outline: none;
-            margin: 0;
-        }
-
-        .distance-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-            margin-top: -7px;
-            /* Align thumb with track */
-        }
-
-        .distance-slider::-webkit-slider-runnable-track {
-            height: 6px;
-            border-radius: 3px;
-            background: #e5e7eb;
-        }
-
-        /* Ticks */
-        .slider-ticks {
-            display: flex;
-            justify-content: space-between;
-            margin-top: -16px;
-            /* Position over track */
-            pointer-events: none;
-            padding: 0 10px;
-            /* Offset for thumb width */
-        }
-
-        .tick {
-            width: 2px;
-            height: 6px;
-            background: #cbd5e1;
-            z-index: 0;
-        }
-
-        .tick.active {
-            background: var(--primary);
-        }
-
-        .distance-value {
-            text-align: center;
-            font-weight: 600;
-            color: var(--primary);
-            margin-top: 16px;
-            font-size: 15px;
-        }
-
-        .distance-skip {
-            text-align: center;
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        /* Submit */
-        .submit-btn {
-            width: 100%;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            font-family: inherit;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: all 0.2s;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .submit-btn:not(:disabled):hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spinAnim 0.8s linear infinite;
-            display: none;
-        }
-
-        .submit-btn.loading .btn-text {
-            display: none;
-        }
-
-        .submit-btn.loading .btn-spinner {
-            display: block;
-        }
-
-        /* Success */
-        .success-screen {
-            display: none;
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .success-screen.show {
-            display: block;
-        }
-
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px;
-        }
-
-        .success-icon svg {
-            width: 40px;
-            height: 40px;
-            color: white;
-        }
-
-        .success-title {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .success-text {
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-            line-height: 1.6;
-        }
-
-        .share-section {
-            background: #fef3c7;
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .share-title {
-            font-weight: 600;
-            color: #92400e;
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
-
-        .ss-row { display:flex; align-items:center; justify-content:center; gap:10px; }
-        .ss-btn { width:36px; height:36px; border-radius:9px; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .15s,box-shadow .15s; flex-shrink:0; }
-        .ss-btn:hover { transform:scale(1.1); box-shadow:0 3px 8px rgba(0,0,0,.18); }
-
-        .share-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .share-btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .share-btn.whatsapp {
-            background: #25D366;
-            color: white;
-        }
-
-        .share-btn.copy {
-            background: var(--bg);
-            border: 1px solid var(--border);
-        }
-
-        .another-btn {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        /* Confirmation Screen Specifics */
-        .conf-header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .conf-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #1a365d;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .conf-icon {
-            width: 32px;
-            height: 32px;
-            background: #22c55e;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .conf-sub {
-            font-size: 16px;
-            color: #4a5568;
-        }
-
-        .impact-box {
-            background: #f0f9ff;
-            /* Light blue */
-            padding: 30px 20px;
-            text-align: center;
-            margin-bottom: 24px;
-            margin-left: -24px;
-            margin-right: -24px;
-        }
-
-        .impact-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #3b82f6;
-            /* Blue text */
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .impact-value {
-            font-size: 48px;
-            font-weight: 800;
-            color: #1e293b;
-            line-height: 1;
-            margin-bottom: 8px;
-        }
-
-        .impact-unit {
-            font-size: 24px;
-            color: #64748b;
-            font-weight: 600;
-        }
-
-        .impact-sub {
-            font-size: 16px;
-            color: #475569;
-            margin-top: 8px;
-        }
-
-        .calc-link {
-            display: inline-block;
-            margin: 0 auto 30px;
-            color: #0f172a;
-            text-decoration: none;
-            font-size: 15px;
-            border-bottom: 1px dotted #94a3b8;
-            padding-bottom: 2px;
-            position: relative;
-        }
-
-        .calc-link::before,
-        .calc-link::after {
-            content: "•";
-            color: #3b82f6;
-            margin: 0 6px;
-        }
-
-        .share-yellow-box {
-            background: #fef9c3;
-            border-radius: 10px;
-            padding: 12px 16px;
-            text-align: center;
-            margin-bottom: 16px;
-        }
-
-        .share-yellow-title {
-            color: #92400e;
-            font-weight: 700;
-            margin-top: 8px;
-            margin-bottom: 0;
-            font-size: 14px;
-        }
-
-        .share-green-btn {
-            background: #22c55e;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            transition: opacity 0.2s;
-        }
-
-        .share-green-btn:hover {
-            opacity: 0.9;
-        }
-
-        .footer-link {
-            color: #22c55e;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 20px;
-            font-size: 15px;
-            color: var(--text-muted);
-        }
-
-        .footer a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        /* Responsive */
-        @media (max-width: 400px) {
-            .page {
-                padding: 16px 12px 40px;
-            }
-
-            .logo {
-                width: 180px;
-            }
-
-            .tagline {
-                font-size: 18px;
-            }
-
-            .form-card {
-                padding: 20px 16px;
-            }
-        }
-
-        /* Terms Checkbox */
-        .terms-wrapper {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-top: 20px;
-            margin-bottom: 4px;
-        }
-
-        .terms-checkbox {
-            width: 20px;
-            height: 20px;
-            margin-top: 2px;
-            accent-color: var(--primary);
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .terms-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        .terms-link {
-            background: none;
-            border: none;
-            padding: 0;
-            font: inherit;
-            color: var(--primary);
-            text-decoration: underline;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .terms-link:hover {
-            color: var(--primary-dark);
-        }
-
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0,0,0,0);
-            white-space: nowrap;
-            border: 0;
-        }
-
-        /* Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            backdrop-filter: blur(4px);
-        }
-
-        .modal-overlay.show {
-            display: flex;
-        }
-
-        .modal {
-            background: white;
-            border-radius: 16px;
-            max-width: 560px;
-            width: 100%;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: modalSlideIn 0.3s ease;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .modal-close {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: var(--bg);
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-        }
-
-        .modal-close:hover {
-            background: var(--border);
-            color: var(--text);
-        }
-
-        .modal-body {
-            padding: 24px;
-            overflow-y: auto;
-            font-size: 14px;
-            line-height: 1.7;
-            color: var(--text-secondary);
-        }
-
-        .modal-body h3 {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text);
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-
-        .modal-body h3:first-child {
-            margin-top: 0;
-        }
-
-        .modal-body p {
-            margin-bottom: 12px;
-        }
-
-        .modal-body ol,
-        .modal-body ul {
-            margin-bottom: 12px;
-            padding-left: 24px;
-        }
-
-        .modal-body li {
-            margin-bottom: 8px;
-        }
-
-        .modal-footer {
-            padding: 16px 24px;
-            border-top: 1px solid var(--border);
-            text-align: right;
-        }
-
-        .modal-btn {
-            padding: 10px 24px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .modal-btn:hover {
-            background: var(--primary-dark);
-        }
-
-        /* Honeypot - hidden from humans, visible to bots */
-        .hp-field {
-            opacity: 0;
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 0;
-            width: 0;
-            z-index: -1;
-        }
-    </style>
-    <script src="config.js"></script>
-  <script src="umami.js"></script>
-<script type="application/ld+json">
-[
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Community Carpool",
-    "url": "https://communitycarpool.org",
-    "logo": "https://communitycarpool.org/og-image.jpg",
-    "description": "A free platform that matches UAE residents on similar commute routes for voluntary carpooling.",
-    "sameAs": []
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Community Carpool",
-    "url": "https://communitycarpool.org"
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="format-detection" content="telephone=no"/>
+<title>Community Carpool | Share Rides. Cut Emissions.</title>
+<meta name="description" content="Match with people on similar routes to carpool voluntarily." />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Community Carpool" />
+<meta property="og:title" content="Community Carpool | Find Your Carpool Match" />
+<meta property="og:description" content="Match with people on similar routes. Contact shared only after a match." />
+<meta property="og:url" content="https://communitycarpool.org/" />
+<meta property="og:image" content="https://communitycarpool.org/og-image.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Community Carpool | Find Your Carpool Match" />
+<meta name="twitter:description" content="Match with people on similar routes. Contact shared only after a match." />
+<meta name="twitter:image" content="https://communitycarpool.org/og-image.jpg" />
+<link rel="canonical" href="https://communitycarpool.org/">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<script src="umami.js" defer></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f0e8;
+    --green: #1B5C3A;
+    --ink: #1a1a1a;
+    --body: #3d3d3d;
+    --muted: #777;
+    --border: rgba(27,92,58,.12);
+    --white: #ffffff;
   }
-]
-</script>
+
+  html {
+    overflow: hidden;
+    height: 100%;
+    /* Prevent Safari from auto-adjusting font sizes on HTTPS */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  html, body { overflow-x: hidden; }
+  body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: #ddd9d1;
+    /* Match font rendering between file:// and https:// in Safari */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    height: 100px; background: #f5f0e8;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 0 36px;
+  }
+  .nav-logo img { height: 80px; }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a { font-size: 14px; color: var(--muted); text-decoration: none; font-weight: 500; }
+  .nav-links a:hover { color: var(--green); }
+
+  /* ── SHELL ── */
+  body { padding-top: 100px; }
+  .shell { display: flex; height: calc(100vh - 100px); width: 100%; }
+
+  /* ── LEFT 75% — panel switcher ── */
+  .left {
+    flex: 0 0 75%; min-width: 0;
+    height: calc(100vh - 100px);
+    overflow: hidden;
+    background: var(--bg);
+    position: relative;
+  }
+
+  /* ── SNAP PANELS — absolute fade ── */
+  .snap-panel {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .45s ease, transform .45s ease;
+    transform: translateY(16px);
+  }
+  .snap-panel.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+  }
+
+  /* ── PANEL DOTS (left edge) ── */
+  .panel-dots {
+    position: fixed;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 10px;
+    z-index: 150;
+  }
+  .panel-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(27,92,58,.25);
+    border: none; cursor: pointer; padding: 0;
+    transition: background .2s, transform .2s;
+  }
+  .panel-dot.active { background: var(--green); transform: scale(1.4); }
+
+  /* ── NEXT PANEL ARROW ── */
+  .panel-next {
+    position: absolute; bottom: 2px; left: 50%;
+    transform: translateX(-50%);
+    background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    color: var(--green); opacity: .5; transition: opacity .2s;
+    font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    font-family: 'Inter', sans-serif;
+  }
+  .panel-next:hover { opacity: 1; }
+  .panel-next svg { width: 20px; height: 20px; animation: bounce-down 1.6s infinite; }
+  @keyframes bounce-down { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+
+  /* ── RIGHT 25% — fixed panel ── */
+  .right {
+    position: fixed;
+    top: 100px; right: 0;
+    width: 25%;
+    height: calc(100vh - 100px);
+    background: var(--green);
+    overflow-y: auto;
+    padding: 18px 16px 6px;
+    display: flex; flex-direction: column;
+    z-index: 100;
+  }
+  .right-sticky { display: contents; }
+
+  /* ══════════════════════════════
+     SHARED STYLES
+  ══════════════════════════════ */
+  .tag {
+    font-size: 14px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--green);
+    display: block; margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 46px; font-weight: 800; color: var(--green);
+    line-height: 1.06; margin-bottom: 14px;
+    white-space: nowrap;
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px; font-weight: 700; color: var(--green);
+    line-height: 1.15; margin-bottom: 14px;
+    white-space: nowrap;
+  }
+  h3 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--green); margin-bottom: 6px; }
+  p { font-size: 16px; color: var(--body); line-height: 1.65; }
+  .small { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .section-divider { height: 1px; background: var(--border); }
+
+  /* ── HERO ── */
+  .hero { padding: 36px 48px 0; }
+  .hero-sub { font-size: 17px; color: var(--body); line-height: 1.6; margin-bottom: 20px; }
+  .hero-pills { display: flex; gap: 10px; margin-bottom: 0; flex-wrap: wrap; }
+  .pill { background: var(--white); border: 1.5px solid #c8dcc0; border-radius: 50px; padding: 7px 18px; font-size: 14px; font-weight: 600; color: var(--green); }
+  .pill em { font-style: italic; }
+
+  .hero-image {
+    margin-top: 32px;
+    margin-left: -48px;
+    width: calc(100% + 96px);
+    height: 420px;
+    position: relative; overflow: hidden; background: #c8c0b0;
+  }
+  .hero-slide {
+    position: absolute; inset: 0;
+    opacity: 0; transition: opacity .7s ease;
+    pointer-events: none;
+  }
+  .hero-slide.active { opacity: 1; pointer-events: auto; }
+  .hero-slide img { width: 100%; height: 100%; object-fit: cover; object-position: center 70%; display: block; }
+  .hero-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #d8d0c4; color: #999; font-size: 14px; font-weight: 500; letter-spacing: .5px; }
+  .hero-img-dots { position: absolute; bottom: 18px; right: 16px; display: flex; gap: 6px; z-index: 2; }
+  .hero-img-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); border: none; cursor: pointer; padding: 0; transition: background .2s, transform .2s; }
+  .hero-img-dot.active { background: #fff; transform: scale(1.3); }
+
+  /* ── PRESS ── */
+  .press { padding: 0; background: var(--white); overflow: hidden; }
+  .press-label { font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green); padding: 0 48px; margin-bottom: 0; margin-top: 22px; display: block; }
+  .press-marquee-wrap { overflow: hidden; position: relative; width: 100%; }
+  .press-marquee-wrap::before,
+  .press-marquee-wrap::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 60px; z-index: 2;
+  }
+  .press-marquee-wrap::before { left: 0; background: linear-gradient(to right, #fff, transparent); }
+  .press-marquee-wrap::after  { right: 0; background: linear-gradient(to left, #fff, transparent); }
+  .press-marquee { display: flex; gap: 72px; align-items: center; width: max-content; animation: marquee 36s linear infinite; padding: 6px 0 28px; }
+  .press-marquee-wrap:hover .press-marquee { animation-play-state: paused; }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .press-logo-link { display: flex; align-items: center; flex-shrink: 0; opacity: .85; transition: opacity .2s; }
+  .press-logo-link:hover { opacity: 1; }
+  .press-logo-link img { height: 48px; width: auto; max-width: 160px; object-fit: contain; }
+  .press-logo-link.gulf-news img { height: 60px; }
+  .press-logo-link.zawya img { height: 56px; }
+  .press-logo-link.dpg img { height: 60px; }
+  .press-logo-link.on-dark { background: #D40000; padding: 6px 14px; border-radius: 6px; }
+
+  /* ── VALUE PROPS ── */
+  .value-props { padding: 36px 48px; }
+  .props-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .prop-card { background: var(--white); border-radius: 16px; padding: 24px; border: 1.5px solid #e0dbd2; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+  .prop-card h3 { font-size: 18px; margin-bottom: 8px; }
+  .prop-card p { font-size: 15px; color: #555; line-height: 1.6; }
+
+  /* ── HOW IT WORKS ── */
+  .how-it-works { padding: 36px 48px; background: var(--white); }
+  .steps { display: flex; flex-direction: column; gap: 24px; margin-top: 16px; }
+  .step { display: flex; gap: 20px; align-items: flex-start; }
+  .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--green); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; flex-shrink: 0; border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+  .step-body h3 { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .step-body p { font-size: 14px; color: var(--muted); }
+
+  /* ── FOUNDER QUOTE ── */
+  .founder { padding: 20px 48px; }
+  .quote-card { background: var(--green); border-radius: 20px; padding: 24px 32px; border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
+  .quote-text { font-family: 'Playfair Display', serif; font-size: 22px; font-style: italic; font-weight: 700; color: #fff; line-height: 1.5; margin-bottom: 20px; }
+  .quote-attr { font-size: 14px; font-weight: 600; color: rgba(255,255,255,.65); }
+
+  /* ── STATS ── */
+  .stats-section { padding: 20px 48px; background: var(--white); }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+  .stat-card { background: var(--bg); border-radius: 16px; padding: 24px; border: 1.5px solid #e0dbd2; text-align: center; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 800; color: var(--green); display: block; }
+  .stat-label { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+  /* ── SHARE SECTION (Panel 3) ── */
+  .share-section { padding: 24px 48px 20px; flex: 1; display: flex; flex-direction: column; }
+  .share-section h2 { margin-bottom: 6px; white-space: normal; }
+  .share-section > p { margin-bottom: 20px; }
+  .share-row {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;
+  }
+  .share-card-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--white); color: var(--ink);
+    border: 1.5px solid var(--ink); border-bottom: 3px solid var(--ink);
+    border-radius: 50px; padding: 10px 18px;
+    font-size: 14px; font-weight: 600; font-family: inherit;
+    cursor: pointer; white-space: nowrap;
+    transition: transform .3s cubic-bezier(0.34,1.56,0.64,1), border-bottom-width .15s;
+  }
+  .share-card-btn:hover { transform: translateY(-3px); border-bottom-width: 5px; }
+  .share-card-btn:active { transform: translateY(2px); border-bottom-width: 1px; }
+  .share-card-btn svg { flex-shrink: 0; color: var(--green); width: 16px; height: 16px; }
+  .legal-links { display: flex; gap: 20px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid var(--border); margin-top: auto; }
+  .legal-links a { font-size: 16px; color: var(--muted); text-decoration: none; font-weight: 500; cursor: pointer; }
+  .legal-links a:hover { color: var(--green); }
+  /* Feedback modal */
+  .feedback-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 16px; }
+  .feedback-overlay.hidden { display: none; }
+  .feedback-modal { background: white; border-radius: 16px; padding: 28px 24px 24px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .feedback-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .feedback-modal-header span { font-size: 14px; font-weight: 600; color: #64748b; }
+  .feedback-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
+  .feedback-title { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+  .feedback-subtitle { font-size: 14px; color: #64748b; margin-bottom: 22px; }
+  .star-row { display: flex; align-items: center; gap: 8px; margin-bottom: 22px; }
+  .star-row .stars { display: flex; gap: 6px; }
+  .star-btn { background: none; border: none; font-size: 30px; cursor: pointer; color: #d1d5db; transition: color 0.15s; padding: 0; line-height: 1; }
+  .star-btn.active { color: #f59e0b; }
+  .feedback-label { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+  .feedback-textarea { width: 100%; border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 90px; color: #1e293b; box-sizing: border-box; }
+  .feedback-textarea:focus { outline: none; border-color: #10b981; }
+  .feedback-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-submit-feedback { flex: 1; background: #10b981; color: white; border: none; border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .btn-submit-feedback:disabled { background: #9ca3af; cursor: not-allowed; }
+  .btn-skip-feedback { background: none; border: 2px solid #e2e8f0; border-radius: 10px; padding: 13px 18px; font-size: 15px; font-weight: 500; color: #64748b; cursor: pointer; }
+
+  /* ══════════════════════════════
+     RIGHT FORM PANEL
+  ══════════════════════════════ */
+  .form-heading { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 8px; line-height: 1.15; }
+
+  .form-card { background: var(--white); border-radius: 16px; padding: 16px 14px; box-shadow: 0 8px 32px rgba(0,0,0,.2); display: flex; flex-direction: column; }
+
+  .f-section-title { font-size: 16px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+  .f-section-title svg { width: 18px; height: 18px; color: var(--green); flex-shrink: 0; }
+
+  .f-group { margin-bottom: 10px; position: relative; }
+  .f-group:last-of-type { margin-bottom: 0; }
+  .f-label { font-size: 14px; font-weight: 600; color: var(--ink); display: block; margin-bottom: 5px; }
+  .f-req { color: #dc2626; margin-left: 1px; }
+  .f-input { width: 100%; padding: 10px 36px 10px 12px; font-size: 15px; font-family: inherit; border: 1.5px solid #e0e0e0; border-radius: 10px; background: #f9f9f9; color: var(--ink); }
+  .f-input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(27,92,58,.1); background: #fff; }
+  .f-input::placeholder { color: #b0b0b0; font-size: 14px; }
+  .f-input.filled { border-color: #16a34a; }
+  .loc-status { position: absolute; right: 10px; top: 11px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+  .loc-status svg { width: 20px; height: 20px; }
+  .loc-spinner { color: #9ca3af; animation: loc-spin 1s linear infinite; }
+  .loc-check { color: #16a34a; }
+  @keyframes loc-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .loc-hint { display: none; margin-top: 6px; font-size: 12px; color: #b45309; background: #fff7ed; border: 1px solid #fdba74; border-radius: 6px; padding: 6px 10px; line-height: 1.45; }
+
+  .f-privacy { font-size: 14px; color: #7a5c1a; background: #fef9ec; border-left: 3px solid #f5c842; border-radius: 0 8px 8px 0; padding: 8px 10px; margin-top: 6px; line-height: 1.5; }
+  .f-privacy strong { color: var(--ink); }
+
+  .f-helper { font-size: 15px; color: var(--muted); margin-bottom: 6px; }
+
+  .f-divider { height: 1px; background: #eee; margin: 8px 0; }
+
+  /* distance slider */
+  .f-slider { width: 100%; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: #e0e0e0; outline: none; cursor: pointer; }
+  .f-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--green); border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.2); cursor: pointer; }
+  .f-dist-labels { display: flex; justify-content: space-between; margin-top: 4px; }
+  .f-dist-labels span { font-size: 15px; color: #999; }
+
+  /* terms */
+  .f-terms { display: flex; align-items: flex-start; gap: 8px; margin: 5px 0; }
+  .f-checkbox { width: 16px; height: 16px; margin-top: 1px; flex-shrink: 0; accent-color: var(--ink); cursor: pointer; }
+  .f-terms-label { font-size: 14px; color: rgba(255,255,255,.85); line-height: 1.5; }
+  .f-terms-label a { color: #a8d4b8; text-decoration: underline; font-weight: 600; }
+
+  .f-submit {
+    width: 100%; padding: 14px;
+    background: var(--bg); color: var(--green);
+    font-size: 15px; font-weight: 700; font-family: inherit;
+    border: 2px solid var(--ink);
+    border-bottom: 6px solid var(--ink);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform .4s cubic-bezier(0.34,1.56,0.64,1), border-bottom-width .15s ease;
+    letter-spacing: .2px;
+  }
+  .f-submit:hover:not(:disabled) { transform: translateY(-5px); border-bottom-width: 10px; }
+  .f-submit:active:not(:disabled) { transform: translateY(4px); border-bottom-width: 1px; transition: transform .08s, border-bottom-width .08s; }
+  .f-submit:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; border-bottom-width: 2px; }
+  .f-email-error { font-size: 12px; color: #fca5a5; margin-top: 4px; display: none; }
+
+  .f-box { background: var(--white); border: 2px solid #ecfdf5; border-radius: 16px; padding: 16px 16px; margin-bottom: 8px; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+
+  /* wireframe badge — hidden in landing.html */
+  .wf-badge { display: none; }
+
+  /* ── SUCCESS STATE ── */
+  #form-content { display: flex; flex-direction: column; flex: 1; transition: opacity .3s ease; justify-content: flex-start; gap: 8px; }
+  #form-content .f-box { flex: 0 0 auto; }
+  .f-terms { padding-top: 0; margin-top: 2px; }
+  .f-submit { margin-top: 16px; }
+  /* Honeypot */
+  .hp-field { opacity:0; position:absolute; top:0; left:0; height:0; width:0; z-index:-1; pointer-events:none; }
+  /* Math modal */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:9000; align-items:center; justify-content:center; }
+  .modal-overlay.show { display:flex; }
+  .modal-box { background:#fff; border-radius:16px; padding:28px 24px; max-width:340px; width:90%; text-align:center; }
+  .modal-box h3 { font-size:17px; font-weight:700; color:#1a1a1a; margin-bottom:12px; }
+  .modal-box p { font-size:14px; color:#555; margin-bottom:16px; }
+  .modal-math-q { font-size:26px; font-weight:800; color:var(--green); margin-bottom:16px; }
+  .modal-input { width:100%; padding:10px; font-size:18px; text-align:center; border:1.5px solid #e0e0e0; border-radius:10px; font-family:inherit; }
+  .modal-input:focus { outline:none; border-color:var(--green); }
+  .modal-error { font-size:13px; color:#ef4444; margin-top:8px; display:none; }
+  .modal-btn { margin-top:16px; width:100%; padding:12px; background:var(--green); color:#fff; border:none; border-radius:50px; font-size:15px; font-weight:600; font-family:inherit; cursor:pointer; }
+  #success-content { display: none; flex-direction: column; flex: 1; transition: opacity .3s ease; }
+  #success-content.visible { display: flex; }
+
+  /* ── CONFIRMATION CARD ── */
+  .conf-header { text-align: center; margin-bottom: 10px; }
+  .conf-title { font-size: 21px; font-weight: 700; color: #1a365d; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .conf-icon { width: 32px; height: 32px; background: #22c55e; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .conf-sub { font-size: 15px; color: #4a5568; margin-top: 6px; }
+  .impact-box { background: #f0f9ff; padding: 28px 20px; text-align: center; }
+  .impact-label { font-size: 13px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .impact-value { font-size: 48px; font-weight: 800; color: #1e293b; line-height: 1; margin-bottom: 6px; }
+  .impact-unit { font-size: 24px; color: #64748b; font-weight: 600; }
+  .impact-sub { font-size: 17px; color: #475569; margin-top: 8px; }
+  .ss-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .ss-btn { width: 42px; height: 42px; border-radius: 10px; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .15s, box-shadow .15s; flex-shrink: 0; }
+  .ss-btn:hover { transform: scale(1.1); box-shadow: 0 3px 8px rgba(0,0,0,.18); }
+
+  /* ── FLOATING MOBILE CTA ── */
+  .mobile-cta {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 500;
+    background: var(--green);
+    color: var(--bg);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px; font-weight: 700;
+    padding: 14px 28px;
+    border: 2px solid var(--ink);
+    border-bottom: 5px solid var(--ink);
+    border-radius: 50px;
+    cursor: pointer;
+    white-space: nowrap;
+    letter-spacing: .2px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.18);
+    transition: opacity .3s ease;
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 900px) {
+    html, body { overflow: auto !important; height: auto !important; }
+    body { padding-top: 70px; }
+    nav { height: 70px; padding: 0 16px; overflow: visible; }
+    .nav-logo img { height: 56px; }
+    .nav-links { display: none; }
+
+    .shell { flex-direction: column; height: auto; overflow: visible; }
+    .left { flex: none; width: 100%; height: auto; overflow: visible; }
+
+    /* Show all panels stacked — disable the opacity switcher */
+    .snap-panel {
+      position: static !important;
+      opacity: 1 !important;
+      pointer-events: all !important;
+      transform: none !important;
+      height: auto !important;
+      overflow: visible !important;
+    }
+
+    /* Hide desktop-only nav elements */
+    .panel-dots { display: none; }
+    .panel-next { display: none; }
+    .wf-badge { display: none; }
+
+    /* Right panel — static, full width */
+    .right {
+      position: static !important;
+      width: 100% !important;
+      height: auto !important;
+      overflow-y: visible !important;
+      padding: 28px 20px 100px;
+    }
+
+    /* Show floating CTA */
+    .mobile-cta { display: block; }
+
+    h1 { font-size: 30px; white-space: normal; }
+    h2 { white-space: normal; font-size: 24px; }
+    .hero { padding: 28px 20px 0; }
+    .press, .value-props, .how-it-works, .founder, .stats-section { padding: 32px 20px; }
+    .hero-image { height: 300px; margin-left: -20px; width: calc(100% + 40px); }
+    .hero-slide img { object-position: center 50% !important; }
+    .props-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .share-section { padding: 24px 20px 100px; }
+    footer { padding: 32px 20px; }
+  }
+</style>
 </head>
-
 <body>
-    <!-- Main Page -->
-    <div class="page">
-        <main>
-        <header class="header">
-            <picture><source srcset="logo_with_slogan.webp" type="image/webp"><img src="logo-slogan.png" alt="Community Carpool — Share rides. Cut emissions." class="logo" fetchpriority="high"></picture>
-            <p class="description">
-                Match with people on similar routes.<br>
-                Contact shared only after a match.
-            </p>
-        </header>
 
-        <!-- Form -->
-        <form id="form" class="form-card">
-            <!-- Section 1: Personal Details -->
-            <div class="form-section-box">
-                <div class="section">
-                    <h2 class="section-title">
-                        <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span>Your Details</span>
-                    </h2>
-                    <div class="input-group">
-                        <label for="firstName" class="label"><span>First Name</span><span class="req">*</span></label>
-                        <input type="text" id="firstName" class="input" placeholder="Your first name" />
-                    </div>
-                    <div class="input-group">
-                        <label for="email" class="label"><span>Email</span><span class="req">*</span></label>
-                        <input type="email" id="email" class="input" placeholder="you@example.com" />
-                        <p id="emailError" class="error-msg">Please enter a valid email</p>
-                    </div>
-                    <!-- Honeypot field - hidden from humans -->
-                    <div class="hp-field" aria-hidden="true">
-                        <label>Leave this empty</label>
-                        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
-                    </div>
-                </div>
-            </div>
+<div class="wf-badge">Wireframe</div>
 
-            <!-- Section 2: Journey Details -->
-            <div class="form-section-box">
+<!-- Floating mobile CTA -->
+<button class="mobile-cta" id="mobile-cta">Find Carpool Partner →</button>
 
-                <!-- From -->
-                <div class="section">
-                    <h2 class="section-title">
-                        <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>From</span><span class="req">*</span>
-                    </h2>
-                    <div class="input-group">
-                        <div class="location-wrapper">
-                            <label for="fromInput" class="sr-only">From location</label>
-                            <input type="text" id="fromInput" class="place-input"
-                                placeholder="Search Area / Community or Point of Interest" autocomplete="off" />
-                            <div class="location-status" id="fromStatus"></div>
-                        </div>
-                        <div id="fromHint" style="display:none;margin-top:6px;font-size:12.5px;color:#b45309;background:#fff7ed;border:1px solid #fdba74;border-radius:6px;padding:7px 10px;line-height:1.45;">
-                            Please pick a location from the dropdown list. A green ✔ will appear when selected.
-                        </div>
-                        <div class="privacy-note">
-                            Enter only your area / community (e.g., JVC District 11) or Point of Interest (e.g.,
-                            Raffles
-                            School). <strong>Do not include Apartment or villa numbers.</strong>
-                        </div>
-                    </div>
-                </div>
+<!-- Panel navigation dots -->
+<div class="panel-dots" id="panel-dots">
+  <button class="panel-dot active" data-panel="0"></button>
+  <button class="panel-dot" data-panel="1"></button>
+  <button class="panel-dot" data-panel="2"></button>
+</div>
 
-                <!-- To -->
-                <div class="section">
-                    <h2 class="section-title">
-                        <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>To</span><span class="req">*</span>
-                    </h2>
-                    <div class="input-group">
-                        <div class="location-wrapper">
-                            <label for="toInput" class="sr-only">To location</label>
-                            <input type="text" id="toInput" class="place-input"
-                                placeholder="Search Area / Community or Point of Interest" autocomplete="off" />
-                            <div class="location-status" id="toStatus"></div>
-                        </div>
-                        <div id="toHint" style="display:none;margin-top:6px;font-size:12.5px;color:#b45309;background:#fff7ed;border:1px solid #fdba74;border-radius:6px;padding:7px 10px;line-height:1.45;">
-                            Please pick a location from the dropdown list. A green ✔ will appear when selected.
-                        </div>
-                    </div>
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-logo" href="#"><img src="logo-slogan.png" alt="Community Carpool — Share rides. Cut emissions."/></a>
+</nav>
 
-                </div>
+<div class="shell">
 
-                <!-- Distance (Optional) -->
-                <div class="section">
-                    <h2 class="section-title">
-                        <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <!-- Map Icon -->
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                        </svg>
-                        <span>Matching Distance</span>
-                    </h2>
-                    <p class="helper">How far from your route can a potential match be?</p>
-                    <div class="distance-slider-wrapper">
-                        <!-- Custom Ticks Background -->
-                        <!--                    <div class="slider-ticks">-->
-                        <!--                        <div class="tick active"></div>-->
-                        <!--                        <div class="tick"></div>-->
-                        <!--                        <div class="tick"></div>-->
-                        <!--                        <div class="tick"></div>-->
-                        <!--                    </div>-->
-                        <label for="distanceSlider" class="sr-only">Maximum match distance</label>
-                        <input type="range" id="distanceSlider" class="distance-slider" min="1" max="4" step="1"
-                            value="2" />
-                        <div class="distance-labels" style="margin-top: 8px;">
-                            <span>1-3 km</span>
-                            <span style="margin-left: -5px;">3-5 km</span>
-                            <span style="margin-right: -5px;">5-8 km</span>
-                            <span>8-10 km</span>
-                        </div>
-                    </div>
-                </div>
-            </div> <!-- End of Section 2 -->
+  <!-- ════════════════════════════════
+       LEFT 75%
+  ═════════════════════════════════ -->
+  <div class="left">
 
-            <!-- Terms & Conditions -->
-            <div class="terms-wrapper">
-                <input type="checkbox" id="termsCheckbox" class="terms-checkbox" />
-                <label for="termsCheckbox" class="terms-label">
-                    I agree to the <a href="terms.html" target="_blank" class="terms-link">Terms &amp; Conditions</a> and <a href="privacy.html" target="_blank" class="terms-link">Privacy Policy</a>.
-                </label>
-            </div>
+  <!-- ── PANEL 1: Hero + Press ── -->
+  <div class="snap-panel snap-panel-1">
 
-            <div id="locationPickError" style="display:none;margin:0 0 12px;padding:12px 14px;background:#fff7ed;border:1px solid #fdba74;border-radius:8px;font-size:13.5px;color:#92400e;line-height:1.5;text-align:left;">
-                Please pick an entry from the dropdown list for both &ldquo;From&rdquo; and &ldquo;To&rdquo; fields.<br>
-                Once you start typing your community name, the dropdown list will display approximate location options.<br>
-                A green tick <span style="color:#16a34a;font-weight:600;">✔</span> should appear in both the &ldquo;From&rdquo; and &ldquo;To&rdquo; fields.
-            </div>
+    <!-- 1. HERO -->
+    <section class="hero">
+      <h1>The better way to commute.</h1>
+      <p class="hero-sub">Match with people on similar routes.<br>Contact shared only after a match.</p>
+      <div class="hero-pills">
+        <span class="pill">No <em>Fees</em></span>
+        <span class="pill">No <em>App</em></span>
+        <span class="pill">No <em>Cookies</em></span>
+      </div>
 
-            <button type="submit" id="submitBtn" class="submit-btn" disabled>
-                <span class="btn-text">Register My Journey</span>
-                <span class="btn-spinner"></span>
-            </button>
-        </form>
+      <div class="hero-image" id="hero-carousel">
+        <!-- Slide 1 -->
+        <div class="hero-slide active">
+          <img src="Hero_Images_Landing_Page/Dubai Skyline.png" alt="Dubai commute"/>
+        </div>
+        <!-- Slide 2 -->
+        <div class="hero-slide">
+          <img src="Hero_Images_Landing_Page/School.jpg" alt="School carpool" style="object-position: center 40%;"/>
+        </div>
+        <!-- Slide 3 -->
+        <div class="hero-slide">
+          <img src="Hero_Images_Landing_Page/Make 21_9 dimensions..jpg" alt="Carpool commute" style="object-position: center 30%;"/>
+        </div>
+        <div class="hero-img-dots" id="hero-dots">
+          <button class="hero-img-dot active" data-slide="0"></button>
+          <button class="hero-img-dot" data-slide="1"></button>
+          <button class="hero-img-dot" data-slide="2"></button>
+        </div>
+      </div>
+    </section>
 
+    <div class="section-divider"></div>
 
-        <!-- Math Challenge Modal (Bot Protection) -->
-        <div class="modal-overlay" id="mathModal">
-            <div class="modal" style="max-width: 400px;">
-                <div class="modal-header">
-                    <h2 class="modal-title">Human Verification</h2>
-                    <button class="modal-close" onclick="closeMathModal()">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="modal-body" style="text-align: center;">
-                    <p>Please solve this simple math problem to prove you are human:</p>
-                    <div style="font-size: 24px; font-weight: bold; margin: 20px 0;">
-                        <span id="mathQ">2 + 3</span> = ?
-                    </div>
-                    <input type="number" id="mathInput" class="input"
-                        style="text-align: center; max-width: 120px; margin: 0 auto 20px;" placeholder="Answer" />
-                    <p id="mathError" class="error-msg" style="margin-bottom: 0;">Incorrect answer</p>
-                </div>
-                <div class="modal-footer" style="justify-content: center;">
-                    <button class="modal-btn" onclick="verifyMath()" style="width: 100%;">Verify & Submit</button>
-                </div>
-            </div>
+    <!-- 2. PRESS -->
+    <section class="press">
+      <span class="press-label">Featured In</span>
+      <div class="press-marquee-wrap">
+        <div class="press-marquee" id="marquee">
+          <!-- Set 1 -->
+          <a class="press-logo-link gulf-news" href="https://gulfnews.com/uae/how-a-dubai-teenager-is-tackling-traffic-and-climate-change-with-a-no-app-free-carpool-idea-this-world-earth-day-1.500515514" target="_blank" rel="noopener"><img src="press-logos/Gulf News.svg" alt="Gulf News"/></a>
+          <a class="press-logo-link" href="https://www.khaleejtimes.com/uae/education/dubai-parents-solutions-school-runs-carpooling-limos" target="_blank" rel="noopener"><img src="press-logos/Khaleej Times.svg" alt="Khaleej Times"/></a>
+          <a class="press-logo-link zawya" href="https://www.zawya.com/en/press-release/companies-news/earth-day-damac-launches-carpool-initiative-for-3500-employees-to-promote-smarter-more-sustainable-commuting-a58lwj3l" target="_blank" rel="noopener"><img src="press-logos/Zawya.svg" alt="Zawya"/></a>
+          <a class="press-logo-link" href="https://www.damacproperties.com/de/d-hub/press-releases/earth-day-damac-launches-carpool-initiative-for-3500-employees" target="_blank" rel="noopener"><img src="press-logos/DAMAC.svg" alt="DAMAC"/></a>
+          <a class="press-logo-link" href="https://www.youtube.com/watch?v=QCMjS780UEg" target="_blank" rel="noopener"><img src="press-logos/Dubai_Eye.svg" alt="Dubai Eye"/></a>
+          <a class="press-logo-link" href="https://www.youtube.com/watch?v=2ydXA7gnAv4" target="_blank" rel="noopener"><img src="press-logos/Mira_businessfm-logo.svg" alt="Mira Business FM"/></a>
+          <a class="press-logo-link" href="https://teachmiddleeastmag.com/could-carpooling-actually-fix-the-school-run-one-platform-thinks-so/" target="_blank" rel="noopener"><img src="press-logos/Teach MiddleEast Mag.png" alt="Teach Middle East Mag"/></a>
+          <a class="press-logo-link" href="https://emiratesreporter.com/city/earth-day-damac-accelerates-sustainable-commuting-with-carpool-plan-for-employees/" target="_blank" rel="noopener"><img src="press-logos/Emirates_Reporter-2.png" alt="Emirates Reporter"/></a>
+          <a class="press-logo-link" href="https://www.go-green.ae/earth-day-damac-launches-carpool-initiative-for-3500-employees-to-promote-smarter-more-sustainable-commuting/" target="_blank" rel="noopener"><img src="press-logos/Go Green.png" alt="Go Green"/></a>
+          <a class="press-logo-link dpg" href="https://dubaipropertyguide.io/earth-day-damac-launches-carpool-initiative-for-3500-employees-to-promote-smarter-more-sustainable-commuting/" target="_blank" rel="noopener"><img src="press-logos/Dubai Property Guide.png" alt="Dubai Property Guide"/></a>
+          <a class="press-logo-link" href="https://thegulfpulse.com/teen-builds-dubai-carpool-platform/" target="_blank" rel="noopener"><img src="press-logos/Gulf Pulse.svg" alt="The Gulf Pulse"/></a>
+          <!-- Set 2 — seamless loop duplicate -->
+          <a class="press-logo-link gulf-news" href="https://gulfnews.com/uae/how-a-dubai-teenager-is-tackling-traffic-and-climate-change-with-a-no-app-free-carpool-idea-this-world-earth-day-1.500515514" target="_blank" rel="noopener"><img src="press-logos/Gulf News.svg" alt="Gulf News"/></a>
+          <a class="press-logo-link" href="https://www.khaleejtimes.com/uae/education/dubai-parents-solutions-school-runs-carpooling-limos" target="_blank" rel="noopener"><img src="press-logos/Khaleej Times.svg" alt="Khaleej Times"/></a>
+          <a class="press-logo-link zawya" href="https://www.zawya.com/en/press-release/companies-news/earth-day-damac-launches-carpool-initiative-for-3500-employees-to-promote-smarter-more-sustainable-commuting-a58lwj3l" target="_blank" rel="noopener"><img src="press-logos/Zawya.svg" alt="Zawya"/></a>
+          <a class="press-logo-link" href="https://www.damacproperties.com/de/d-hub/press-releases/earth-day-damac-launches-carpool-initiative-for-3500-employees" target="_blank" rel="noopener"><img src="press-logos/DAMAC.svg" alt="DAMAC"/></a>
+          <a class="press-logo-link" href="https://www.youtube.com/watch?v=QCMjS780UEg" target="_blank" rel="noopener"><img src="press-logos/Dubai_Eye.svg" alt="Dubai Eye"/></a>
+          <a class="press-logo-link" href="https://www.youtube.com/watch?v=2ydXA7gnAv4" target="_blank" rel="noopener"><img src="press-logos/Mira_businessfm-logo.svg" alt="Mira Business FM"/></a>
+          <a class="press-logo-link" href="https://teachmiddleeastmag.com/could-carpooling-actually-fix-the-school-run-one-platform-thinks-so/" target="_blank" rel="noopener"><img src="press-logos/Teach MiddleEast Mag.png" alt="Teach Middle East Mag"/></a>
+          <a class="press-logo-link" href="https://emiratesreporter.com/city/earth-day-damac-accelerates-sustainable-commuting-with-carpool-plan-for-employees/" target="_blank" rel="noopener"><img src="press-logos/Emirates_Reporter-2.png" alt="Emirates Reporter"/></a>
+          <a class="press-logo-link" href="https://www.go-green.ae/earth-day-damac-launches-carpool-initiative-for-3500-employees-to-promote-smarter-more-sustainable-commuting/" target="_blank" rel="noopener"><img src="press-logos/Go Green.png" alt="Go Green"/></a>
+          <a class="press-logo-link dpg" href="https://dubaipropertyguide.io/earth-day-damac-launches-carpool-initiative-for-3500-employees-to-promote-smarter-more-sustainable-commuting/" target="_blank" rel="noopener"><img src="press-logos/Dubai Property Guide.png" alt="Dubai Property Guide"/></a>
+          <a class="press-logo-link" href="https://thegulfpulse.com/teen-builds-dubai-carpool-platform/" target="_blank" rel="noopener"><img src="press-logos/Gulf Pulse.svg" alt="The Gulf Pulse"/></a>
+        </div>
+      </div>
+    </section>
+
+    <button class="panel-next" data-next="1">
+      <span>Next</span>
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+  </div><!-- /.snap-panel-1 -->
+
+  <!-- ── PANEL 2: Value Props + How It Works ── -->
+  <div class="snap-panel snap-panel-2">
+
+    <!-- 3. VALUE PROPS -->
+    <section class="value-props">
+      <span class="tag">Why it works</span>
+      <h2>Built for people, not profit.</h2>
+      <div class="props-grid">
+        <div class="prop-card">
+          <h3>Privacy by Design</h3>
+          <p>Your full name and email are never shown to another user unless there is a mutual match. Both parties must say yes.</p>
+        </div>
+        <div class="prop-card">
+          <h3>Zero Friction</h3>
+          <p>No app. No account to create. No payment details. Just a 30-second sign-up on any browser — the platform does the rest.</p>
+        </div>
+        <div class="prop-card">
+          <h3>Community First</h3>
+          <p>Private pools for schools, offices, and neighbourhoods. Organisations get a private link so families are matched only within their own community.</p>
+        </div>
+        <div class="prop-card">
+          <h3>Cut Emissions</h3>
+          <p>The platform calculates your carbon footprint savings based on your current commute. See your environmental impact in real time.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 4. HOW IT WORKS -->
+    <section class="how-it-works">
+      <span class="tag">Zero Friction</span>
+      <h2>Three simple steps.</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Enter your home and destination</h3>
+            <p>Area or community only — no apartment numbers needed.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Get matched with neighbours going the same way</h3>
+            <p>We email you when someone on your route registers.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Connect only when both people say 'Yes'</h3>
+            <p>Your name and email stay hidden until both users actively choose to connect.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <button class="panel-next" data-next="2">
+      <span>Next</span>
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+  </div><!-- /.snap-panel-2 -->
+
+  <!-- ── PANEL 3: Quote + Stats + Footer ── -->
+  <div class="snap-panel snap-panel-3">
+
+    <!-- 5. FOUNDER QUOTE -->
+    <section class="founder">
+      <span class="tag">Why We Built This</span>
+      <div class="quote-card">
+        <div class="quote-text">"When we remove the barriers to sharing a ride, we do not just cut emissions and costs; we start acting like a community again."</div>
+        <div class="quote-attr">Community Carpool</div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 6. STATS -->
+    <section class="stats-section">
+      <span class="tag">It's Working</span>
+      <h2>A community already moving.</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-num">Global</span>
+          <div class="stat-label">Platform — many communities already connected</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">1 min</span>
+          <div class="stat-label">To sign up</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">Private</span>
+          <div class="stat-label">Closed network for Corporates &amp; Schools<br>— Contact Us through <a href="/support.html" style="color:var(--green);font-weight:600;">Support</a></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- SHARE SECTION -->
+    <section class="share-section">
+      <span class="tag">Spread the word</span>
+      <h2>Know someone who should carpool?</h2>
+      <p style="font-size:16px;color:var(--body);margin-bottom:28px;">Every share brings one more person closer to a match. It takes 2 seconds.</p>
+      <div class="share-row">
+        <button class="share-card-btn" style="background:#1877F2;color:#fff;border-color:#1059c1;border-bottom-color:#0d47a1;box-shadow:3px 3px 0 #0d47a1" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https://communitycarpool.org','_blank')">
+          <svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          Facebook
+        </button>
+        <a class="share-card-btn" href="https://x.com/intent/tweet?url=https://communitycarpool.org&text=Find+a+carpool+partner+near+you" target="_blank" rel="noopener noreferrer" style="background:#000;color:#fff;border-color:#000;border-bottom-color:#000;box-shadow:3px 3px 0 #333;text-decoration:none;">
+          <svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X / Twitter
+        </a>
+        <a class="share-card-btn" href="sms:?body=Join+Community+Carpool%3A+https://communitycarpool.org" style="background:#34c759;color:#fff;border-color:#28a745;border-bottom-color:#1e7e34;box-shadow:3px 3px 0 #1e7e34;text-decoration:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          SMS
+        </a>
+        <a class="share-card-btn" href="https://wa.me/?text=Find+a+carpool+partner%3A+https://communitycarpool.org" target="_blank" rel="noopener noreferrer" style="background:#25D366;color:#fff;border-color:#1da851;border-bottom-color:#128C7E;box-shadow:3px 3px 0 #128C7E;text-decoration:none;">
+          <svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+          WhatsApp
+        </a>
+        <a class="share-card-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=https://communitycarpool.org" target="_blank" rel="noopener noreferrer" style="background:#0A66C2;color:#fff;border-color:#0855a5;border-bottom-color:#064082;box-shadow:3px 3px 0 #064082;text-decoration:none;">
+          <svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          LinkedIn
+        </a>
+      </div>
+      <div class="legal-links">
+        <a href="/support.html" target="_blank">Support</a>
+        <a href="/docs/" target="_blank">Help &amp; FAQ</a>
+        <a href="/terms.html" target="_blank">Terms</a>
+        <a href="/privacy.html" target="_blank">Privacy Policy</a>
+        <a href="#" onclick="openFeedbackModal(); return false;">Feedback</a>
+      </div>
+    </section>
+
+  </div><!-- /.snap-panel-3 -->
+
+  </div><!-- /.left -->
+
+  <!-- ════════════════════════════════
+       RIGHT 25% — STICKY FORM
+  ═════════════════════════════════ -->
+  <div class="right" id="right-panel">
+  <div class="right-sticky">
+
+    <!-- FORM STATE -->
+    <div id="form-content">
+      <div class="form-heading">Register your journey</div>
+
+      <!-- Box 1: Personal details -->
+      <div class="f-box">
+        <div class="f-section-title">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          Your Details
+        </div>
+        <div class="f-group">
+          <label class="f-label">First Name <span class="f-req">*</span></label>
+          <input id="first-name-input" class="f-input" type="text" placeholder="Your first name"/>
+        </div>
+        <div class="f-group" style="margin-top:22px;">
+          <label class="f-label">Email <span class="f-req">*</span></label>
+          <input id="email-input" class="f-input" type="email" placeholder="you@example.com"/>
+          <div class="f-email-error" id="email-error">Please enter a valid email address.</div>
+        </div>
+      </div>
+
+      <!-- Box 2: Journey details -->
+      <div class="f-box">
+        <div class="f-section-title">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          From <span class="f-req">*</span>
+        </div>
+        <div class="f-group">
+          <input id="from-input" class="f-input" type="text" placeholder="Search Area / Community or Point of Interest"/>
+          <div class="loc-status" id="fromStatus"></div>
+          <div class="loc-hint" id="fromHint">Please pick a location from the dropdown list. A green ✔ will appear when selected.</div>
+          <p class="f-privacy">Enter only your area / community (e.g., JVC District 11) or Point of Interest (e.g., Raffles School). <strong>Do not include Apartment or villa numbers.</strong></p>
         </div>
 
-        <!-- Success -->
-        <div class="success-screen" id="successScreen">
-            <div class="success-icon">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                </svg>
-            </div>
-            <h2 class="success-title">You're in the Pool!</h2>
-            <p class="success-text">
-                Check your email for your carbon footprint estimate and an edit link.<br>
-                We'll notify you when we find a match for your route.
-            </p>
-            <div class="share-section">
-                <div class="share-title">Get matched faster by sharing!</div>
-                <div class="ss-row">
-                    <button class="ss-btn" style="background:#25d366" onclick="shareTo('whatsapp','confirmation')" title="WhatsApp"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.562 4.14 1.542 5.874L0 24l6.294-1.542A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.374l-.36-.214-3.732.914.93-3.617-.234-.373A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg></button>
-                    <button class="ss-btn" style="background:#1877F2" onclick="shareTo('facebook','confirmation')" title="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></button>
-                    <button class="ss-btn" style="background:#000" onclick="shareTo('twitter','confirmation')" title="Twitter / X"><svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.91-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></button>
-                    <button class="ss-btn" style="background:#0A66C2" onclick="shareTo('linkedin','confirmation')" title="LinkedIn"><svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></button>
-                    <button class="ss-btn" style="background:#34c759" onclick="shareTo('sms','confirmation')" title="SMS"><svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg></button>
-                </div>
-            </div>
-            <div style="margin-top:16px;font-size:15px;color:#94a3b8;text-align:center;">
-                <a href="/support.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Support</a> &nbsp;&middot;&nbsp;
-                <a href="/docs/" target="_blank" style="color:#94a3b8;text-decoration:none;">Help &amp; FAQ</a> &nbsp;&middot;&nbsp;
-                <a href="/terms.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Terms</a> &nbsp;&middot;&nbsp;
-                <a href="/privacy.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Privacy Policy</a>
-            </div>
-            <button type="button" class="another-btn" onclick="location.reload()">Register Another Journey</button>
+        <div class="f-section-title" style="margin-top:40px;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          To <span class="f-req">*</span>
+        </div>
+        <div class="f-group">
+          <input id="to-input" class="f-input" type="text" placeholder="Search Area / Community or Point of Interest"/>
+          <div class="loc-status" id="toStatus"></div>
+          <div class="loc-hint" id="toHint">Please pick a location from the dropdown list. A green ✔ will appear when selected.</div>
         </div>
 
-        </main>
-        <footer class="footer">
-            <a href="/support.html" target="_blank">Support</a> &nbsp;·&nbsp;
-            <a href="/docs/" target="_blank">Help &amp; FAQ</a> &nbsp;·&nbsp;
-            <a href="/terms.html" target="_blank">Terms</a> &nbsp;·&nbsp;
-            <a href="/privacy.html" target="_blank">Privacy Policy</a> &nbsp;·&nbsp;
-            <a href="/support.html" target="_blank">Feedback</a>
-        </footer>
+        <div class="f-section-title" style="margin-top:40px;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+          Matching Distance
+        </div>
+        <p class="f-helper">How far from your route can a potential match be?</p>
+        <input id="distance-slider" type="range" class="f-slider" min="1" max="4" value="2"/>
+        <div class="f-dist-labels">
+          <span>1–3 km</span>
+          <span>3–5 km</span>
+          <span>5–8 km</span>
+          <span>8–10 km</span>
+        </div>
+      </div>
+
+      <!-- Honeypot - hidden from humans, visible to bots -->
+      <div class="hp-field" aria-hidden="true">
+        <label>Leave this empty</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off"/>
+      </div>
+
+      <!-- Terms & Submit -->
+      <div class="f-terms">
+        <input type="checkbox" class="f-checkbox" id="terms"/>
+        <label class="f-terms-label" for="terms">
+          I agree to the <a href="terms.html" target="_blank">Terms &amp; Conditions</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>.
+        </label>
+      </div>
+
+      <div id="f-error" style="display:none;font-size:12px;color:#fca5a5;background:rgba(220,38,38,.15);border-radius:8px;padding:10px 12px;margin-top:4px;"></div>
+      <button class="f-submit" id="submit-btn" disabled>Find Carpool Partner →</button>
     </div>
 
-    <script>
-        // ============================================
-        // CONFIG — credentials loaded from config.js
-        // ============================================
-        const SHARE_URL = 'https://communitycarpool.org/';
-        let termsVersion = null; // fetched from Supabase config table on load
+    <!-- SUCCESS STATE (hidden until submit — populated by JS) -->
+    <div id="success-content"></div>
 
-        // ============================================
-        // ORG / CLIENT MODE CONFIG
-        // ============================================
-        let orgCode = null;          // set from ?client=xxx URL param
-        let orgLocations = [];       // fetched from get-org-locations API; empty = use Google Places for To field
-        let orgLogoUrl = null;       // org logo URL from DB; null = no logo
-        let orgCustomMessage = null; // label shown under logo; from custom_message in DB
+  </div><!-- /.right-sticky -->
+  </div><!-- /.right -->
 
-        // ============================================
-        // SHARE LOGIC
-        // ============================================
-        async function shareNative() {
-            const shareData = {
-                title: 'Community Carpool',
-                text: 'Join me on Community Carpool to save money and cut emissions!',
-                url: SHARE_URL
-            };
+  <script>
+    // ── State ────────────────────────────────────────────────────────────────
+    let fromLatLng = '', toLatLng = '';
+    let fromLocationText = '', toLocationText = '';
+    let fromSelected = false, toSelected = false;
+    let fromCountry = null;
+    let userCountry = 'ae';
+    let orgCode = null;
+    let orgLocations = [];
+    let orgLogoUrl = null;
+    let orgCustomMessage = null;
+    let termsVersion = null;
+    let mathAnswer = 0;
 
-            if (navigator.share) {
-                try {
-                    await navigator.share(shareData);
-                } catch (err) {
-                    console.log('Share canceled');
-                }
+    const DISTANCE_MAP = { '1': '1 - 3 km', '2': '3 - 5 km', '3': '5 - 8 km', '4': '8 - 10 km' };
+
+    // ── UTM / ref param capture ───────────────────────────────────────────────
+    (() => {
+      const p = new URLSearchParams(window.location.search);
+      [['ref','cc_ref'],['utm_source','cc_utm_source'],['utm_medium','cc_utm_medium'],['utm_campaign','cc_utm_campaign'],['utm_content','cc_utm_content'],['utm_term','cc_utm_term']].forEach(([k, sk]) => {
+        const v = p.get(k); if (v) sessionStorage.setItem(sk, v);
+      });
+      const client = p.get('client');
+      if (client) orgCode = client.toLowerCase();
+      // Clean UTM/ref params from URL — keep ?client= so org branding persists on refresh
+      ['ref','utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(k => p.delete(k));
+      const clean = window.location.pathname + (p.toString() ? '?' + p.toString() : '');
+      history.replaceState(null, '', clean);
+    })();
+
+    // ── Terms version fetch ───────────────────────────────────────────────────
+    async function fetchTermsVersion() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/config?select=value&key=eq.required_terms_version`,
+          { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } });
+        const data = await res.json();
+        if (data?.[0]?.value) termsVersion = data[0].value;
+      } catch (e) { /* silent fail */ }
+    }
+    const termsVersionReady = fetchTermsVersion();
+
+    // ── Warm-up & analytics ───────────────────────────────────────────────────
+    fetch(`${SUPABASE_URL}/functions/v1/submit-journey`, { mode: 'no-cors' }).catch(() => {});
+    fetch(`${SUPABASE_URL}/functions/v1/track-event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ eventType: 'page_visited', metadata: {
+        client: new URLSearchParams(window.location.search).get('client') || null,
+        referrer: document.referrer || null,
+        page: 'landing'
+      }})
+    }).catch(() => {});
+
+    // ── Real-time validation ──────────────────────────────────────────────────
+    function validateEmail(v) { return v.includes('@') && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+    function updateProgress() {
+      const hasName  = document.getElementById('first-name-input').value.trim().length > 0;
+      const emailVal = document.getElementById('email-input').value.trim();
+      const hasEmail = validateEmail(emailVal);
+      const hasFrom  = fromSelected || !!(fromLocationText && fromLatLng);
+      const hasTo    = toSelected   || !!(toLocationText && toLatLng);
+      const hasTerms = document.getElementById('terms').checked;
+      document.getElementById('submit-btn').disabled = !(hasName && hasEmail && hasFrom && hasTo && hasTerms);
+    }
+
+    function setLocationStatus(type, status) {
+      const el    = document.getElementById(type + 'Status');
+      const input = document.getElementById(type + '-input');
+      const hint  = document.getElementById(type + 'Hint');
+      if (status === 'loading') {
+        el.innerHTML = '<svg class="loc-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
+        input.classList.remove('filled');
+        if (hint) hint.style.display = 'none';
+      } else if (status === 'success') {
+        el.innerHTML = '<svg class="loc-check" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+        input.classList.add('filled');
+        if (hint) hint.style.display = 'none';
+      } else {
+        el.innerHTML = '';
+        input.classList.remove('filled');
+      }
+    }
+
+    function attachLocationBlurHint(type) {
+      const input = document.getElementById(type + '-input');
+      const hint  = document.getElementById(type + 'Hint');
+      input.addEventListener('blur', () => {
+        const sel = type === 'from' ? fromSelected : toSelected;
+        if (!sel && input.value.trim().length > 0 && hint) hint.style.display = 'block';
+      });
+      input.addEventListener('focus', () => {
+        if (hint) hint.style.display = 'none';
+      });
+    }
+
+    document.getElementById('first-name-input').addEventListener('input', updateProgress);
+    document.getElementById('terms').addEventListener('change', updateProgress);
+
+    // form_started: fires once on first user interaction with any key form input
+    let formStartedFired = false;
+    function onFormStarted() {
+      if (formStartedFired) return;
+      formStartedFired = true;
+      fetch(`${SUPABASE_URL}/functions/v1/track-event`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ eventType: 'form_started', metadata: { page: 'landing' } })
+      }).catch(() => {});
+    }
+    ['first-name-input', 'email-input', 'from-input'].forEach(function(id) {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('focus', onFormStarted, { once: true });
+    });
+
+    const emailInput = document.getElementById('email-input');
+    emailInput.addEventListener('input', () => {
+      document.getElementById('email-error').style.display = 'none';
+      emailInput.classList.remove('error');
+      updateProgress();
+    });
+    emailInput.addEventListener('blur', () => {
+      const v = emailInput.value.trim();
+      if (v && !validateEmail(v)) {
+        document.getElementById('email-error').style.display = 'block';
+        emailInput.style.borderColor = '#ef4444';
+      } else {
+        document.getElementById('email-error').style.display = 'none';
+        emailInput.style.borderColor = '';
+      }
+      updateProgress();
+    });
+
+    // ── Math modal (bot challenge) ────────────────────────────────────────────
+    function openMathModal() {
+      const n1 = Math.floor(Math.random() * 5) + 1;
+      const n2 = Math.floor(Math.random() * 5) + 1;
+      mathAnswer = n1 + n2;
+      document.getElementById('mathQ').textContent = n1 + ' + ' + n2;
+      document.getElementById('mathInput').value = '';
+      document.getElementById('mathError').style.display = 'none';
+      document.getElementById('mathModal').classList.add('show');
+      document.getElementById('mathInput').focus();
+    }
+    function closeMathModal() {
+      document.getElementById('mathModal').classList.remove('show');
+    }
+    function verifyMath() {
+      const ans = parseInt(document.getElementById('mathInput').value);
+      if (ans === mathAnswer) {
+        document.getElementById('website').value = '';
+        closeMathModal();
+        submitForm();
+      } else {
+        document.getElementById('mathError').style.display = 'block';
+      }
+    }
+
+    // ── Org mode ─────────────────────────────────────────────────────────────
+    async function initOrgMode() {
+      const params = new URLSearchParams(window.location.search);
+      const clientParam = params.get('client');
+      if (!clientParam) return;
+
+      orgCode = clientParam.toLowerCase();
+      let orgName = orgCode;
+
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/functions/v1/get-org-locations?org=${encodeURIComponent(orgCode)}`,
+          { headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+        );
+        const data = await res.json();
+        if (data.success) {
+          orgName = data.org.name || orgCode;
+          orgLogoUrl = data.org.logoUrl || null;
+          orgCustomMessage = data.org.customMessage || null;
+          orgLocations = data.locations || [];
+        }
+      } catch (e) {
+        orgLocations = [];
+      }
+
+      document.title = `${orgName} Carpool | Community Carpool`;
+
+      // Org branding block (logo + custom message) — injected below the form heading
+      if (orgLogoUrl || orgCustomMessage) {
+        const heading = document.querySelector('.form-heading');
+        if (heading) {
+          const block = document.createElement('div');
+          block.style.cssText = 'margin-bottom:10px;text-align:center;';
+          if (orgLogoUrl) {
+            const img = document.createElement('img');
+            img.setAttribute('src', orgLogoUrl);
+            img.setAttribute('alt', orgName);
+            img.style.cssText = 'max-width:140px;height:auto;display:block;margin:0 auto 8px;';
+            img.onerror = () => img.remove();
+            block.appendChild(img);
+          }
+          if (orgCustomMessage) {
+            const label = document.createElement('p');
+            label.style.cssText = 'font-size:13px;color:rgba(255,255,255,.8);font-weight:600;margin:0;';
+            label.textContent = orgCustomMessage;
+            block.appendChild(label);
+          }
+          heading.after(block);
+        }
+      }
+
+      if (orgLocations.length > 0) {
+        const select = document.createElement('select');
+        select.id = 'to-input';
+        select.className = 'f-input';
+        select.style.cssText = "-webkit-appearance:none;appearance:none;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231B5C3A%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');background-repeat:no-repeat;background-position:right 0.7rem top 50%;background-size:0.65rem auto;padding-right:2.5rem;";
+
+        const placeholder = document.createElement('option');
+        placeholder.value = ''; placeholder.disabled = true; placeholder.selected = true;
+        placeholder.textContent = 'Select Destination';
+        select.appendChild(placeholder);
+
+        orgLocations.forEach(loc => {
+          const opt = document.createElement('option');
+          opt.value = loc.location_id;
+          opt.textContent = loc.location_name;
+          select.appendChild(opt);
+        });
+
+        select.addEventListener('change', (e) => {
+          const loc = orgLocations.find(l => String(l.location_id) === e.target.value);
+          if (loc) {
+            toLocationText = loc.location_name;
+            toLatLng = loc.location_latlng;
+            toSelected = true;
+            setLocationStatus('to', 'success');
+          }
+          updateProgress();
+        });
+
+        const existingInput = document.getElementById('to-input');
+        existingInput.replaceWith(select);
+      }
+    }
+    const orgModeReady = initOrgMode();
+
+    // ── Success transition ────────────────────────────────────────────────────
+    function showSuccess(data) {
+      const fc = document.getElementById('form-content');
+      fc.style.opacity = '0';
+      setTimeout(function() {
+        fc.style.display = 'none';
+
+        let km = 3;
+        if (data.actualDist && parseInt(data.actualDist) > 0) {
+          km = parseInt(data.actualDist);
+        } else {
+          const step = parseInt(data.distanceVal || data.distance);
+          if (step === 1) km = 1;
+          else if (step === 2) km = 2;
+          else if (step === 3) km = 4;
+          else if (step === 4) km = 6.5;
+        }
+        const annualKg = Math.round(km * 2 * 5 * 52 * 0.18);
+        const trees = Math.round(annualKg / 21);
+        const annualKgStr = annualKg.toLocaleString();
+
+        const s = document.getElementById('success-content');
+        s.innerHTML = `
+          <div style="background:white;border-radius:16px 16px 0 0;border:2px solid #ecfdf5;border-bottom:none;padding:24px 20px 20px;">
+            <div class="conf-header">
+              <div class="conf-title">
+                <div class="conf-icon"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+                You are in the Pool!
+              </div>
+              <div class="conf-sub">You have successfully recorded Journey #${data.journeyNum}</div>
+            </div>
+          </div>
+          <div class="impact-box" style="border-left:2px solid #ecfdf5;border-right:2px solid #ecfdf5;">
+            <div class="impact-label">YOUR ANNUAL IMPACT</div>
+            <div class="impact-value">${annualKgStr} <span class="impact-unit">kg</span></div>
+            <div class="impact-sub">CO&#x2082; Savings</div>
+            <div style="font-size:15px;color:#64748b;margin-top:6px;">Equivalent to planting ${trees} trees</div>
+            <div style="font-size:13px;color:#94a3b8;margin-top:4px;">(Based on ${km} km one-way commute)</div>
+          </div>
+          <div style="background:white;border-radius:0 0 16px 16px;border:2px solid #ecfdf5;border-top:none;padding:24px 20px 24px;">
+            <div style="text-align:center;margin-bottom:20px;">
+              <div style="font-size:14px;color:#64748b;font-weight:600;margin-bottom:14px;">Get matched faster by sharing!</div>
+              <div class="ss-row">
+                <button class="ss-btn" style="background:#25d366" onclick="shareTo('whatsapp')" title="WhatsApp"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.562 4.14 1.542 5.874L0 24l6.294-1.542A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.374l-.36-.214-3.732.914.93-3.617-.234-.373A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg></button>
+                <button class="ss-btn" style="background:#1877F2" onclick="shareTo('facebook')" title="Facebook"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></button>
+                <button class="ss-btn" style="background:#000" onclick="shareTo('twitter')" title="X / Twitter"><svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.91-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></button>
+                <button class="ss-btn" style="background:#0A66C2" onclick="shareTo('linkedin')" title="LinkedIn"><svg width="19" height="19" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></button>
+                <button class="ss-btn" style="background:#34c759" onclick="shareTo('sms')" title="SMS"><svg width="19" height="19" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg></button>
+              </div>
+            </div>
+            <div style="font-size:14px;color:#94a3b8;text-align:center;line-height:2.1;">
+              <a href="/support.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Support</a> &nbsp;&middot;&nbsp;
+              <a href="/docs/" target="_blank" style="color:#94a3b8;text-decoration:none;">Help &amp; FAQ</a> &nbsp;&middot;&nbsp;
+              <a href="/terms.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Terms</a> &nbsp;&middot;&nbsp;
+              <a href="/privacy.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Privacy Policy</a>
+            </div>
+          </div>
+        `;
+
+        s.classList.add('visible');
+        s.style.opacity = '0';
+        setTimeout(function() { s.style.opacity = '1'; }, 20);
+      }, 300);
+    }
+
+    // ── Share ─────────────────────────────────────────────────────────────────
+    function shareTo(platform) {
+      window.umami?.track('social_share', { platform, page: 'landing' });
+      const ref = sessionStorage.getItem('cc_ref') || '007';
+      const url = 'https://communitycarpool.org?ref=' + ref;
+      const msgFull = encodeURIComponent('Hey! I just signed up on CommunityCarpool.org to find carpooling partners for my commute.\n\nIt matches neighbors going the same route — completely FREE, No Cookies, No App, and you only connect when both sides are interested. Everything over email.\n\nThe more people sign up in our area, the better the matches get. Takes 30 seconds!\n' + url);
+      const msgTwitter = encodeURIComponent('Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, email-only. The more locals sign up, the better the matches! Check it out 👇\n' + url);
+      const links = {
+        whatsapp: 'https://wa.me/?text=' + msgFull,
+        facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url),
+        twitter:  'https://x.com/intent/tweet?text=' + msgTwitter,
+        linkedin: 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent('Free carpooling for your commute') + '&summary=' + encodeURIComponent('Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, everything over email.'),
+        sms:      'sms:?body=' + msgFull
+      };
+      window.open(links[platform], '_blank', 'noopener,noreferrer');
+    }
+
+    // ── Error display ─────────────────────────────────────────────────────────
+    function showError(msg) {
+      const el = document.getElementById('f-error');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+    function clearError() {
+      const el = document.getElementById('f-error');
+      el.style.display = 'none';
+      el.textContent = '';
+    }
+
+    // ── Submit handler ────────────────────────────────────────────────────────
+    document.getElementById('submit-btn').addEventListener('click', function() {
+      clearError();
+      const honeypot = document.getElementById('website').value;
+      if (honeypot) { openMathModal(); return; }
+      submitForm();
+    });
+
+    async function submitForm() {
+      const firstName = document.getElementById('first-name-input').value.trim();
+      const email     = document.getElementById('email-input').value.trim();
+      const distVal   = document.getElementById('distance-slider').value;
+      const terms     = document.getElementById('terms').checked;
+
+      if (!firstName || !email) { showError('Please enter your name and email.'); return; }
+      if (!fromLocationText || !fromLatLng) { showError('Please select your starting area from the suggestions.'); return; }
+      if (!toLocationText || !toLatLng) { showError('Please select your destination from the suggestions.'); return; }
+      if (!terms) { showError('Please agree to the Terms & Conditions to continue.'); return; }
+
+      const btn = document.getElementById('submit-btn');
+      btn.textContent = 'Registering…';
+      btn.disabled = true;
+
+      await termsVersionReady;
+
+      try {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/submit-journey', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            firstName,
+            email,
+            fromLocation: fromLocationText,
+            fromLatLng,
+            toLocation: toLocationText,
+            toLatLng,
+            distance: DISTANCE_MAP[distVal],
+            distanceValue: distVal,
+            country: fromCountry || userCountry.toUpperCase() || 'AE',
+            orgCode: orgCode || undefined,
+            refCode: sessionStorage.getItem('cc_ref') || undefined,
+            utmSource: sessionStorage.getItem('cc_utm_source') || undefined,
+            utmMedium: sessionStorage.getItem('cc_utm_medium') || undefined,
+            utmCampaign: sessionStorage.getItem('cc_utm_campaign') || undefined,
+            termsAgreed: true
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showSuccess({ journeyNum: data.journeyNum, actualDist: data.actualDist, distanceVal: distVal });
+        } else {
+          showError(data.error || 'Something went wrong. Please try again.');
+          btn.textContent = 'Find Carpool Partner →';
+          btn.disabled = false;
+        }
+      } catch (e) {
+        showError('Network error — please check your connection and try again.');
+        btn.textContent = 'Find Carpool Partner →';
+        btn.disabled = false;
+      }
+    }
+
+    // ── Google Places autocomplete ────────────────────────────────────────────
+    const COUNTRY_CENTERS = {
+      'ae': { lat: 24.4539, lng: 54.3773 },
+      'us': { lat: 37.0902, lng: -95.7129 },
+      'uk': { lat: 51.5074, lng: -0.1278 },
+      'gb': { lat: 51.5074, lng: -0.1278 },
+      'in': { lat: 20.5937, lng: 78.9629 },
+      'sa': { lat: 23.8859, lng: 45.0792 },
+      'eg': { lat: 26.8206, lng: 30.8025 },
+      'pk': { lat: 30.3753, lng: 69.3451 },
+      'qa': { lat: 25.3548, lng: 51.1839 },
+      'kw': { lat: 29.3117, lng: 47.4818 }
+    };
+
+    async function initAutocomplete() {
+      await orgModeReady;
+
+      const countryCenter = COUNTRY_CENTERS[userCountry] || COUNTRY_CENTERS['ae'];
+      const circle = new google.maps.Circle({ center: { lat: countryCenter.lat, lng: countryCenter.lng }, radius: 500000 });
+      const bounds = circle.getBounds();
+
+      const opts = {
+        fields: ['formatted_address', 'name', 'geometry', 'address_components'],
+        types: ['geocode', 'establishment']
+      };
+
+      const fromAC = new google.maps.places.Autocomplete(document.getElementById('from-input'), opts);
+      fromAC.setBounds(bounds);
+      fromAC.addListener('place_changed', () => {
+        const p = fromAC.getPlace();
+        if (p && (p.formatted_address || p.name)) {
+          fromLocationText = (p.name && p.formatted_address && p.name !== p.formatted_address)
+            ? p.name + ' - ' + p.formatted_address
+            : (p.name || p.formatted_address);
+        }
+        if (p.geometry?.location) {
+          fromLatLng = p.geometry.location.lat() + ',' + p.geometry.location.lng();
+          fromSelected = true;
+          setLocationStatus('from', 'success');
+        } else {
+          setLocationStatus('from', 'loading');
+          new google.maps.Geocoder().geocode({ address: fromLocationText }, (results, status) => {
+            if (status === 'OK' && results[0]?.geometry) {
+              fromLatLng = results[0].geometry.location.lat() + ',' + results[0].geometry.location.lng();
+              fromSelected = true;
+              setLocationStatus('from', 'success');
             } else {
-                // Fallback
-                try {
-                    await navigator.clipboard.writeText(shareData.text + ' ' + shareData.url);
-                    alert('Link copied to clipboard!');
-                } catch (err) {
-                    alert('Could not copy link. Please manually share: ' + SHARE_URL);
-                }
-            }
-        }
-
-
-
-        let fromLocationText = '', toLocationText = '';
-        let fromLatLng = '', toLatLng = '';
-        let fromSelected = false, toSelected = false;
-        let userCountry = 'ae'; // default for Maps bias; real country detected server-side
-        let fromCountry = null; // ISO country code from Google Maps address_components (e.g. 'AE')
-        let fromAutocomplete = null, toAutocomplete = null;
-
-        // ============================================
-        // DOM
-        // ============================================
-        const form = document.getElementById('form');
-        const firstName = document.getElementById('firstName');
-        const email = document.getElementById('email');
-        const emailError = document.getElementById('emailError');
-        const submitBtn = document.getElementById('submitBtn');
-        const successScreen = document.getElementById('successScreen');
-        const fromInput = document.getElementById('fromInput');
-        let toInput = document.getElementById('toInput');
-        const distanceSlider = document.getElementById('distanceSlider');
-        const distanceValue = document.getElementById('distanceValue');
-
-
-        // ============================================
-        // REFERRAL / UTM CAPTURE — strip from URL immediately
-        // ============================================
-        (function () {
-            const p = new URLSearchParams(window.location.search);
-            const tracking = ['ref', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
-            let found = false;
-            tracking.forEach(function (k) {
-                const v = p.get(k);
-                if (v) { sessionStorage.setItem('cc_' + k, v); p.delete(k); found = true; }
-            });
-            if (found) {
-                // Clean address bar — keeps ?client= and ?edit= if present
-                const clean = window.location.pathname + (p.toString() ? '?' + p.toString() : '');
-                history.replaceState(null, '', clean);
-            }
-        })();
-
-
-        // Country for Maps autocomplete bias — edge function handles real IP/country detection
-
-
-
-        // ============================================
-        // PROGRESS & VALIDATION
-        // ============================================
-        const termsCheckbox = document.getElementById('termsCheckbox');
-
-        function updateProgress() {
-            const hasName = firstName.value.trim().length > 0;
-            const hasEmail = email.value.includes('@');
-            const hasFrom = fromSelected || fromInput.value.trim().length > 3;
-            const hasTo = toSelected || toInput.value.trim().length > 3;
-            const hasTerms = termsCheckbox.checked;
-
-            const valid = hasName && hasEmail && hasFrom && hasTo && hasTerms;
-            submitBtn.disabled = !valid;
-        }
-
-        // Listen for terms checkbox changes
-        termsCheckbox.addEventListener('change', updateProgress);
-
-        function validateEmail(v) {
-            return v.includes('@') && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-        }
-
-        email.addEventListener('blur', () => {
-            const v = email.value.trim();
-            if (v && !validateEmail(v)) {
-                emailError.classList.add('show');
-                email.classList.add('error');
-            } else {
-                emailError.classList.remove('show');
-                email.classList.remove('error');
-                if (v) email.classList.add('success');
+              fromLatLng = '';
+              setLocationStatus('from', '');
             }
             updateProgress();
-        });
-
-        email.addEventListener('input', () => {
-            emailError.classList.remove('show');
-            email.classList.remove('error', 'success');
-            updateProgress();
-        });
-
-        firstName.addEventListener('input', updateProgress);
-        fromInput.addEventListener('input', updateProgress);
-        toInput.addEventListener('input', updateProgress);
-
-        // ============================================
-        // LOCATION STATUS ICONS
-        // ============================================
-        function setLocationStatus(type, status) {
-            const el = document.getElementById(type + 'Status');
-            const input = document.getElementById(type + 'Input');
-            const hint = document.getElementById(type + 'Hint');
-            if (status === 'loading') {
-                el.innerHTML = '<svg class="loc-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
-                input.classList.remove('filled');
-                if (hint) hint.style.display = 'none';
-            } else if (status === 'success') {
-                el.innerHTML = '<svg class="loc-check" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
-                input.classList.add('filled');
-                if (hint) hint.style.display = 'none';
-            } else {
-                el.innerHTML = '';
-                input.classList.remove('filled');
-            }
+          });
+          return;
         }
-
-        // Show hint if user leaves the field without selecting from dropdown
-        function attachLocationBlurHint(type) {
-            const input = document.getElementById(type + 'Input');
-            const hint = document.getElementById(type + 'Hint');
-            input.addEventListener('blur', () => {
-                const selected = type === 'from' ? fromSelected : toSelected;
-                if (!selected && input.value.trim().length > 0 && hint) {
-                    hint.style.display = 'block';
-                }
-            });
-            input.addEventListener('focus', () => {
-                if (hint) hint.style.display = 'none';
-            });
-        }
-
-        // ============================================
-        // GOOGLE PLACES AUTOCOMPLETE
-        // ============================================
-        const COUNTRY_CENTERS = {
-            'ae': { lat: 24.4539, lng: 54.3773 },
-            'us': { lat: 37.0902, lng: -95.7129 },
-            'uk': { lat: 51.5074, lng: -0.1278 },
-            'gb': { lat: 51.5074, lng: -0.1278 },
-            'in': { lat: 20.5937, lng: 78.9629 },
-            'sa': { lat: 23.8859, lng: 45.0792 },
-            'eg': { lat: 26.8206, lng: 30.8025 },
-            'pk': { lat: 30.3753, lng: 69.3451 },
-            'qa': { lat: 25.3548, lng: 51.1839 },
-            'kw': { lat: 29.3117, lng: 47.4818 }
-        };
-
-        async function initAutocomplete() {
-            const countryCenter = COUNTRY_CENTERS[userCountry] || COUNTRY_CENTERS['ae'];
-            const circle = new google.maps.Circle({
-                center: { lat: countryCenter.lat, lng: countryCenter.lng },
-                radius: 500000
-            });
-            const bounds = circle.getBounds();
-
-            const options = {
-                fields: ['formatted_address', 'name', 'geometry', 'address_components'],
-                types: ['geocode', 'establishment']
-            };
-
-            // FROM
-            fromAutocomplete = new google.maps.places.Autocomplete(fromInput, options);
-            fromAutocomplete.setBounds(bounds);
-            fromAutocomplete.addListener('place_changed', () => {
-                const place = fromAutocomplete.getPlace();
-                if (place && (place.formatted_address || place.name)) {
-                    // Prioritize POI name, append area for context
-                    if (place.name && place.formatted_address && place.name !== place.formatted_address) {
-                        fromLocationText = place.name + ' - ' + place.formatted_address;
-                    } else {
-                        fromLocationText = place.name || place.formatted_address;
-                    }
-                    // Extract country ISO code from address_components (e.g. 'AE', 'IN')
-                    // This is more accurate than IP geolocation for knowing where the journey is
-                    const countryComp = place.address_components?.find(c => c.types.includes('country'))
-                    fromCountry = countryComp?.short_name?.toUpperCase() || null
-
-                    if (place.geometry && place.geometry.location) {
-                        fromLatLng = place.geometry.location.lat() + ',' + place.geometry.location.lng();
-                        fromSelected = true;
-                        setLocationStatus('from', 'success');
-                    } else {
-                        // Geocode the address if geometry is missing
-                        setLocationStatus('from', 'loading');
-                        const geocoder = new google.maps.Geocoder();
-                        geocoder.geocode({ address: fromLocationText }, (results, status) => {
-                            if (status === 'OK' && results[0] && results[0].geometry) {
-                                fromLatLng = results[0].geometry.location.lat() + ',' + results[0].geometry.location.lng();
-                                fromSelected = true;
-                                setLocationStatus('from', 'success');
-                            } else {
-                                console.warn('Geocoding failed for From location:', status);
-                                fromLatLng = '';
-                                setLocationStatus('from', '');
-                            }
-                            updateProgress();
-                        });
-                        return; // Exit early, updateProgress will be called in geocoder callback
-                    }
-                }
-                updateProgress();
-            });
-
-            // TO — wait for org mode to resolve before deciding whether to use dropdown or Google Places
-            await orgModeReady;
-            if (orgLocations.length === 0) {
-                toAutocomplete = new google.maps.places.Autocomplete(toInput, options);
-                toAutocomplete.setBounds(bounds);
-                toAutocomplete.addListener('place_changed', () => {
-                    const place = toAutocomplete.getPlace();
-                    if (place && (place.formatted_address || place.name)) {
-                        // Prioritize POI name, append area for context
-                        if (place.name && place.formatted_address && place.name !== place.formatted_address) {
-                            toLocationText = place.name + ' - ' + place.formatted_address;
-                        } else {
-                            toLocationText = place.name || place.formatted_address;
-                        }
-                        if (place.geometry && place.geometry.location) {
-                            toLatLng = place.geometry.location.lat() + ',' + place.geometry.location.lng();
-                            toSelected = true;
-                            setLocationStatus('to', 'success');
-                        } else {
-                            // Geocode the address if geometry is missing
-                            setLocationStatus('to', 'loading');
-                            const geocoder = new google.maps.Geocoder();
-                            geocoder.geocode({ address: toLocationText }, (results, status) => {
-                                if (status === 'OK' && results[0] && results[0].geometry) {
-                                    toLatLng = results[0].geometry.location.lat() + ',' + results[0].geometry.location.lng();
-                                    toSelected = true;
-                                    setLocationStatus('to', 'success');
-                                } else {
-                                    console.warn('Geocoding failed for To location:', status);
-                                    toLatLng = '';
-                                    setLocationStatus('to', '');
-                                }
-                                updateProgress();
-                            });
-                            return; // Exit early, updateProgress will be called in geocoder callback
-                        }
-                    }
-                    updateProgress();
-                });
-            }
-
-            // Reset on type
-            fromInput.addEventListener('input', () => {
-                document.getElementById('locationPickError').style.display = 'none';
-                if (fromSelected) {
-                    fromSelected = false;
-                    fromLocationText = '';
-                    fromLatLng = '';
-                    setLocationStatus('from', '');
-                }
-            });
-            toInput.addEventListener('input', () => {
-                if (toSelected) {
-                    toSelected = false;
-                    toLocationText = '';
-                    toLatLng = '';
-                    setLocationStatus('to', '');
-                }
-            });
-
-            // Show inline hint when user leaves field without picking from dropdown
-            attachLocationBlurHint('from');
-            attachLocationBlurHint('to');
-        }
-
-        // ============================================
-        // SLIDER LOGIC
-        // ============================================
-
-        const DISTANCE_MAP = {
-            '1': '1 - 3 km',
-            '2': '3 - 5 km',
-            '3': '5 - 8 km',
-            '4': '8 - 10 km'
-        };
-
-
-
-        // ============================================
-        // MATH CHALLENGE (BOT PROTECTION)
-        // ============================================
-        let mathAnswer = 0;
-
-        function openMathModal() {
-            const num1 = Math.floor(Math.random() * 5) + 1;
-            const num2 = Math.floor(Math.random() * 5) + 1;
-            mathAnswer = num1 + num2;
-
-            document.getElementById('mathQ').textContent = num1 + " + " + num2;
-            document.getElementById('mathInput').value = '';
-            document.getElementById('mathError').style.display = 'none';
-            document.getElementById('mathModal').classList.add('show');
-            document.getElementById('mathInput').focus();
-        }
-
-        function closeMathModal() {
-            document.getElementById('mathModal').classList.remove('show');
-        }
-
-        function verifyMath() {
-            const userAns = parseInt(document.getElementById('mathInput').value);
-            if (userAns === mathAnswer) {
-                // Correct - clear honeypot to allow submission
-                document.getElementById('website').value = '';
-                closeMathModal();
-                // Re-submit the form
-                submitForm();
-            } else {
-                document.getElementById('mathError').style.display = 'block';
-            }
-        }
-
-        // ============================================
-        // FORM SUBMIT
-        // ============================================
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            // Honeypot check
-            const honeypot = document.getElementById('website').value;
-            if (honeypot) {
-                console.log('Bot suspected via honeypot - showing challenge');
-                openMathModal();
-                return;
-            }
-
-            submitForm();
-        });
-
-        async function submitForm() {
-            const firstNameVal = firstName.value.trim();
-            const emailVal = email.value.trim();
-            const distanceStep = distanceSlider.value;
-            const distanceLabel = DISTANCE_MAP[distanceStep];
-
-            if (!validateEmail(emailVal)) {
-                emailError.classList.add('show');
-                email.classList.add('error');
-                email.focus();
-                return;
-            }
-
-            // Check that both From and To were picked from the dropdown (have coordinates)
-            const locErr = document.getElementById('locationPickError');
-            if (!fromSelected || !toSelected) {
-                locErr.style.display = 'block';
-                locErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                return;
-            }
-            locErr.style.display = 'none';
-
-            submitBtn.classList.add('loading');
-            submitBtn.disabled = true;
-
-            // Ensure terms version is fetched before submitting
-            await termsVersionReady;
-
-            const finalFromLocation = fromLocationText || fromInput.value.trim();
-            const finalToLocation = toLocationText || toInput.value.trim();
-
-            const data = {
-
-                firstName: firstNameVal,
-                email: emailVal,
-                fromLocation: finalFromLocation,
-                fromLatLng: fromLatLng,
-                toLocation: finalToLocation,
-                toLatLng: toLatLng,
-                distance: distanceLabel, // Send label (e.g., "1 - 3 km")
-                distanceValue: distanceStep, // Send step value (1-4)
-                country: fromCountry || userCountry?.toUpperCase() || 'AE', // hint only; edge function detects authoritative IP/country server-side
-                orgCode: orgCode || undefined,
-                refCode: sessionStorage.getItem('cc_ref') || undefined,
-                utmSource: sessionStorage.getItem('cc_utm_source') || undefined,
-                utmMedium: sessionStorage.getItem('cc_utm_medium') || undefined,
-                utmCampaign: sessionStorage.getItem('cc_utm_campaign') || undefined,
-                termsAgreed: true
-            };
-
-            console.log('Submitting:', data);
-
-            try {
-                const response = await fetch(`${SUPABASE_URL}/functions/v1/submit-journey`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-                console.log('Server response:', result);
-
-                if (result.success) {
-                    showSuccess({
-                        num: result.num,
-                        journeyNum: result.journeyNum,
-                        distanceVal: distanceStep,
-                        actualDist: result.actualDist
-                    });
-                } else {
-                    // Show the API's error message directly (e.g. max journeys exceeded)
-                    submitBtn.classList.remove('loading');
-                    submitBtn.disabled = false;
-                    alert(result.error || 'Sorry, something went wrong. Please try again.');
-                    return;
-                }
-
-            } catch (err) {
-                // Network / parse errors only — not API logic errors
-                console.error('Submit error:', err);
-                submitBtn.classList.remove('loading');
-                submitBtn.disabled = false;
-                alert('Sorry, something went wrong. Please try again.');
-            }
-        }
-
-        // Show Success Screen Construction
-        function showSuccess(data) {
-            form.style.display = 'none';
-
-            // Calculate Impact
-            // Distance (one way) * 2 (round trip) * 5 (days) * 52 (weeks) * 0.18 (kg/km)
-            // Map step to avg distance: 1->1, 2->3, 3->5, 4->8 ? Or use max?
-            // Let's use simple logic: 1=<1(1), 2=1-3(2), 3=3-5(4), 4=5-8(6.5)
-            // User just wants "Estimated".
-
-            let km = 3;
-
-            if (data.actualDist && parseInt(data.actualDist) > 0) {
-                km = parseInt(data.actualDist);
-                // console.log("Using actual distance from backend:", km);
-            } else {
-                // Fallback to slider estimation
-                const step = parseInt(data.distanceVal || data.distance); // handle both props
-                if (step === 1) km = 1;
-                else if (step === 2) km = 2;
-                else if (step === 3) km = 4;
-                else if (step === 4) km = 6.5;
-            }
-
-            const annualKg = Math.round(km * 2 * 5 * 52 * 0.18);
-            const trees = Math.round(annualKg / 21);
-            const annualKgStr = annualKg.toLocaleString();
-
-            const screen = document.createElement('div');
-            screen.className = 'form-card';
-            screen.style.textAlign = 'center';
-            screen.style.padding = '0';
-            screen.style.background = 'transparent';
-            screen.style.boxShadow = 'none';
-            screen.innerHTML = `
-                <div style="padding: 16px 24px 0; background: white; border-radius: 24px 24px 0 0; border: 2px solid #ecfdf5; border-bottom: none;">
-                    <div class="conf-header" style="margin-bottom:10px;">
-                        <div class="conf-title">
-                            <div class="conf-icon">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            You are in the Pool!
-                        </div>
-                        <div class="conf-sub">You have successfully recorded Journey # ${data.journeyNum}</div>
-                    </div>
-                </div>
-
-                <div class="impact-box" style="margin: 0; border-radius: 0; padding: 14px 24px; background: #f0f9ff; border-left: 2px solid #ecfdf5; border-right: 2px solid #ecfdf5;">
-                    <div class="impact-label">YOUR ANNUAL IMPACT</div>
-                    <div class="impact-value">${annualKgStr} <span class="impact-unit">kg</span></div>
-                    <div class="impact-sub">CO₂ Savings</div>
-                    <div style="font-size: 14px; color: #64748b; margin-top: 4px;">Equivalent to planting ${trees} trees</div>
-                    <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">(Based on ${km} km one-way commute)</div>
-                </div>
-
-                <div style="padding: 14px 24px 24px; background: white; border-radius: 0 0 24px 24px; border: 2px solid #ecfdf5; border-top: none;">
-                    <div style="text-align:center;margin-bottom:16px">
-                        <div style="font-size:12px;color:#64748b;font-weight:500;margin-bottom:10px">Get matched faster by sharing!</div>
-                        <div style="display:flex;align-items:center;justify-content:center;gap:10px">
-                            <button class="ss-btn" style="background:#25d366" onclick="shareTo('whatsapp','confirmation')" title="WhatsApp"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.562 4.14 1.542 5.874L0 24l6.294-1.542A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.374l-.36-.214-3.732.914.93-3.617-.234-.373A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg></button>
-                            <button class="ss-btn" style="background:#1877F2" onclick="shareTo('facebook','confirmation')" title="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></button>
-                            <button class="ss-btn" style="background:#000" onclick="shareTo('twitter','confirmation')" title="Twitter / X"><svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.91-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></button>
-                            <button class="ss-btn" style="background:#0A66C2" onclick="shareTo('linkedin','confirmation')" title="LinkedIn"><svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></button>
-                            <button class="ss-btn" style="background:#34c759" onclick="shareTo('sms','confirmation')" title="SMS"><svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg></button>
-                        </div>
-                    </div>
-
-                    <div style="margin-top:8px;font-size:15px;color:#94a3b8;text-align:center;">
-                        <a href="/support.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Support</a> &nbsp;&middot;&nbsp;
-                        <a href="/docs/" target="_blank" style="color:#94a3b8;text-decoration:none;">Help &amp; FAQ</a> &nbsp;&middot;&nbsp;
-                        <a href="/terms.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Terms</a> &nbsp;&middot;&nbsp;
-                        <a href="/privacy.html" target="_blank" style="color:#94a3b8;text-decoration:none;">Privacy Policy</a>
-                    </div>
-                </div>
-            `;
-
-            form.parentNode.insertBefore(screen, form.nextSibling);
-            document.querySelector('.footer').style.display = 'none'; // Hide footer
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // ============================================
-        // SHARE
-        // ============================================
-        function shareTo(platform, page) {
-            window.umami?.track('social_share', { platform: platform, page: page });
-            const ref = sessionStorage.getItem('cc_ref') || '007';
-            const url = `https://communitycarpool.org?ref=${ref}`;
-            const msgFull = encodeURIComponent(
-`Hey! I just signed up on CommunityCarpool.org to find carpooling partners for my commute.
-
-It matches neighbors going the same route — completely FREE, No Cookies, No App, and you only connect when both sides are interested. Everything over email.
-
-The more people sign up in our area, the better the matches get. Takes 30 seconds!
-${url}`);
-            const msgTwitter = encodeURIComponent(
-`Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, email-only. The more locals sign up, the better the matches! Check it out 👇
-${url}`);
-            const links = {
-                whatsapp: 'https://wa.me/?text=' + msgFull,
-                facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url),
-                twitter:  'https://x.com/intent/tweet?text=' + msgTwitter,
-                linkedin: 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent('Free carpooling for your commute') + '&summary=' + encodeURIComponent('Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, everything over email.'),
-                sms:      'sms:?body=' + msgFull,
-            };
-            const a = document.createElement('a'); a.href = links[platform]; a.target = '_blank'; a.rel = 'noopener noreferrer'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        }
-
-        function copyLink() {
-            navigator.clipboard.writeText(SHARE_URL).then(() => {
-                alert('Link copied!');
-            });
-        }
-
-        // Initial
+        const countryComp = p.address_components?.find(c => c.types.includes('country'));
+        fromCountry = countryComp?.short_name?.toUpperCase() || null;
         updateProgress();
+      });
+      document.getElementById('from-input').addEventListener('input', () => { fromLatLng = ''; fromLocationText = ''; fromSelected = false; setLocationStatus('from', ''); updateProgress(); });
+      attachLocationBlurHint('from');
 
-
-
-        // ============================================
-        // ORG MODE INITIALIZATION
-        // ============================================
-        async function initOrgMode() {
-            const params = new URLSearchParams(window.location.search);
-            const clientParam = params.get('client');
-            if (!clientParam) return;
-
-            orgCode = clientParam.toLowerCase();
-            let orgName = orgCode;
-
-            // Fetch org details + locations from API
-            try {
-                const res = await fetch(
-                    `${SUPABASE_URL}/functions/v1/get-org-locations?org=${encodeURIComponent(orgCode)}`,
-                    { headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
-                );
-                const data = await res.json();
-                if (data.success) {
-                    orgName = data.org.name || orgCode;
-                    orgLogoUrl = data.org.logoUrl || null;
-                    orgCustomMessage = data.org.customMessage || null;
-                    orgLocations = data.locations || [];
-                }
-            } catch (e) {
-                console.warn('Could not fetch org locations, falling back to Google Places for To field');
-                orgLocations = [];
-            }
-
-            // Update page title
-            document.title = `${orgName} Carpool | Community Carpool`;
-
-            // Insert org branding block after .description (below generic CC content)
-            const description = document.querySelector('.description');
-            if (description) {
-                const brandingBlock = document.createElement('div');
-                brandingBlock.style.cssText = 'margin-top:16px;';
-
-                const hr = document.createElement('hr');
-                hr.style.cssText = 'border:none;border-top:1px solid #e5e7eb;margin:0 0 16px;';
-                brandingBlock.appendChild(hr);
-
-                if (orgLogoUrl) {
-                    const img = document.createElement('img');
-                    img.setAttribute('src', orgLogoUrl); // use setAttribute so & in URL is never HTML-parsed
-                    img.setAttribute('alt', orgName);
-                    img.style.cssText = 'max-width:180px;height:auto;display:block;margin:0 auto 12px;';
-                    img.onerror = () => img.remove();
-                    brandingBlock.appendChild(img);
-                }
-
-                if (orgCustomMessage) {
-                    const label = document.createElement('p');
-                    label.style.cssText = 'text-align:center;color:#374151;font-size:14px;font-weight:600;margin:0;';
-                    label.textContent = orgCustomMessage;
-                    brandingBlock.appendChild(label);
-                }
-
-                description.after(brandingBlock);
-            }
-
-            // Replace To field with dropdown if org has locations
-            if (orgLocations.length > 0) {
-                // Build <select> element imperatively (avoids innerHTML / DOM wrapper fragility)
-                const select = document.createElement('select');
-                select.id = 'toInput';
-                select.className = 'place-input';
-                select.style.cssText = "height:48px;-webkit-appearance:none;appearance:none;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2316a34a%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');background-repeat:no-repeat;background-position:right 0.7rem top 50%;background-size:0.65rem auto;padding-right:3rem;";
-
-                const placeholder = document.createElement('option');
-                placeholder.value = '';
-                placeholder.disabled = true;
-                placeholder.selected = true;
-                placeholder.textContent = 'Select Destination';
-                select.appendChild(placeholder);
-
-                orgLocations.forEach(loc => {
-                    const opt = document.createElement('option');
-                    opt.value = loc.location_id;
-                    opt.textContent = loc.location_name;
-                    select.appendChild(opt);
-                });
-
-                select.addEventListener('change', (e) => {
-                    const loc = orgLocations.find(l => String(l.location_id) === e.target.value);
-                    if (loc) {
-                        toLocationText = loc.location_name;
-                        toLatLng = loc.location_latlng;
-                        toSelected = true;
-                        setLocationStatus('to', 'success');
-                    }
-                    updateProgress();
-                });
-
-                // Swap the <input> for the <select> directly in the DOM — no wrapper innerHTML needed
-                const existingInput = document.getElementById('toInput');
-                existingInput.replaceWith(select);
-                toInput = select; // refresh module-level reference
-            }
-            // else: orgLocations empty → Google Places autocomplete runs normally for To field
-        }
-
-        // Fetch current T&C version from Supabase config table
-        async function fetchTermsVersion() {
-            try {
-                const res = await fetch(
-                    `${SUPABASE_URL}/rest/v1/config?select=value&key=eq.required_terms_version`,
-                    { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
-                )
-                const data = await res.json()
-                if (data?.[0]?.value) termsVersion = data[0].value
-            } catch (e) { /* silent fail — termsVersion stays null */ }
-        }
-        const termsVersionReady = fetchTermsVersion()
-
-        // Start org mode fetch immediately; initAutocomplete will await it before setting up To field
-        const orgModeReady = initOrgMode();
-
-        // Initial
-        updateProgress();
-
-        // ============================================
-        // ANALYTICS TRACKING
-        // ============================================
-        const TRACK_EVENT_URL = `${SUPABASE_URL}/functions/v1/track-event`;
-
-        function trackPageEvent(eventType, metadata = {}) {
-            fetch(TRACK_EVENT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-                body: JSON.stringify({ eventType, metadata })
-            }).catch(() => {}); // fire-and-forget, silent fail
-        }
-
-        // Warm up submit-journey in the background while user fills the form
-        fetch(`${SUPABASE_URL}/functions/v1/submit-journey`, { mode: 'no-cors' }).catch(() => {});
-
-        // page_visited: fires once on load
-        trackPageEvent('page_visited', {
-            client: new URLSearchParams(window.location.search).get('client') || null,
-            referrer: document.referrer || null
+      // Only attach Places autocomplete to To field if org-mode didn't replace it with a dropdown
+      if (orgLocations.length === 0) {
+        const toAC = new google.maps.places.Autocomplete(document.getElementById('to-input'), opts);
+        toAC.setBounds(bounds);
+        toAC.addListener('place_changed', () => {
+          const p = toAC.getPlace();
+          if (p && (p.formatted_address || p.name)) {
+            toLocationText = (p.name && p.formatted_address && p.name !== p.formatted_address)
+              ? p.name + ' - ' + p.formatted_address
+              : (p.name || p.formatted_address);
+          }
+          if (p.geometry?.location) {
+            toLatLng = p.geometry.location.lat() + ',' + p.geometry.location.lng();
+            toSelected = true;
+            setLocationStatus('to', 'success');
+          } else {
+            setLocationStatus('to', 'loading');
+            new google.maps.Geocoder().geocode({ address: toLocationText }, (results, status) => {
+              if (status === 'OK' && results[0]?.geometry) {
+                toLatLng = results[0].geometry.location.lat() + ',' + results[0].geometry.location.lng();
+                toSelected = true;
+                setLocationStatus('to', 'success');
+              } else {
+                toLatLng = '';
+                setLocationStatus('to', '');
+              }
+              updateProgress();
+            });
+            return;
+          }
+          updateProgress();
         });
+        document.getElementById('to-input').addEventListener('input', () => { toLatLng = ''; toLocationText = ''; toSelected = false; setLocationStatus('to', ''); updateProgress(); });
+        attachLocationBlurHint('to');
+      }
+    }
 
-        // form_started: fires once on first user interaction with any key form input
-        let formStartedFired = false;
-        function onFormStarted() {
-            if (formStartedFired) return;
-            formStartedFired = true;
-            trackPageEvent('form_started');
-        }
-        ['firstName', 'email', 'fromInput'].forEach(function(id) {
-            const el = document.getElementById(id);
-            if (el) el.addEventListener('focus', onFormStarted, { once: true });
+    // ── Feedback modal ────────────────────────────────────────────────────────
+    let _fbRating = 0, _fbOpenedAt = null;
+    function openFeedbackModal() {
+      _fbRating = 0; _fbOpenedAt = Date.now();
+      document.querySelectorAll('#feedbackOverlay .star-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('fbStarCount').textContent = '0 / 5';
+      document.getElementById('fbComment').value = '';
+      document.getElementById('fbHoneypot').value = '';
+      const fbBtn = document.getElementById('fbSubmitBtn');
+      fbBtn.disabled = true; fbBtn.textContent = 'Submit Rating';
+      document.getElementById('feedbackOverlay').classList.remove('hidden');
+    }
+    function closeFeedbackModal() {
+      document.getElementById('feedbackOverlay').classList.add('hidden');
+    }
+    function setFbRating(val) {
+      _fbRating = val;
+      document.querySelectorAll('#feedbackOverlay .star-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.val) <= val);
+      });
+      document.getElementById('fbStarCount').textContent = val + ' / 5';
+      document.getElementById('fbSubmitBtn').disabled = false;
+    }
+    async function submitFbFeedback() {
+      if (_fbRating < 1) return;
+      const btn = document.getElementById('fbSubmitBtn');
+      btn.disabled = true; btn.textContent = 'Submitting…';
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/submit-feedback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rating: _fbRating,
+            comment: document.getElementById('fbComment').value.trim() || null,
+            source: 'footer_link',
+            pageContext: 'landing',
+            formOpenedAt: _fbOpenedAt,
+            honeypot: document.getElementById('fbHoneypot').value || null
+          })
         });
-    </script>
+        const data = await res.json();
+        if (data.success || data.error === 'Already submitted') {
+          closeFeedbackModal();
+        }
+      } catch(e) {
+        btn.disabled = false; btn.textContent = 'Submit Rating';
+      }
+    }
+    document.getElementById('feedbackOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeFeedbackModal();
+    });
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARzmbbhT0ki5-bZ-43pkkPyJNmOCTz4P0&libraries=places&loading=async&callback=initAutocomplete" async defer></script>
+  <script>
+    // ── Mobile setup ─────────────────────────────────────────────────────────
+    const mobileCta = document.getElementById('mobile-cta');
+    if (window.innerWidth <= 900) {
+      // Move form between panel 2 and panel 3
+      const right  = document.getElementById('right-panel');
+      const panel3 = document.querySelector('.snap-panel-3');
+      panel3.parentNode.insertBefore(right, panel3);
 
-    <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARzmbbhT0ki5-bZ-43pkkPyJNmOCTz4P0&libraries=places&loading=async&callback=initAutocomplete"
-        async defer></script>
+      // Scroll to form on CTA click
+      mobileCta.addEventListener('click', function() {
+        right.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      // Hide CTA when form is visible, show when scrolled away
+      const observer = new IntersectionObserver(function(entries) {
+        mobileCta.style.opacity = entries[0].isIntersecting ? '0' : '1';
+        mobileCta.style.pointerEvents = entries[0].isIntersecting ? 'none' : 'auto';
+      }, { threshold: 0.1 });
+      observer.observe(right);
+    }
+
+    // ── Hero carousel ─────────────────────────────────────────────────────────
+    const heroSlides = document.querySelectorAll('#hero-carousel .hero-slide');
+    const heroDots   = document.querySelectorAll('#hero-dots .hero-img-dot');
+    let heroIdx = 0, heroTimer;
+
+    function showHeroSlide(idx) {
+      heroSlides.forEach((s, i) => s.classList.toggle('active', i === idx));
+      heroDots.forEach((d, i)   => d.classList.toggle('active', i === idx));
+      heroIdx = idx;
+    }
+    function advanceHero() { showHeroSlide((heroIdx + 1) % heroSlides.length); }
+    heroTimer = setInterval(advanceHero, 3000);
+    heroDots.forEach(d => d.addEventListener('click', function() {
+      clearInterval(heroTimer);
+      showHeroSlide(+this.dataset.slide);
+      heroTimer = setInterval(advanceHero, 3000);
+    }));
+
+    // ── Panel switcher ────────────────────────────────────────────────────────
+    const panels = document.querySelectorAll('.snap-panel');
+    const dots   = document.querySelectorAll('.panel-dot');
+    let current  = 0;
+
+    function showPanel(idx) {
+      panels.forEach((p, i) => p.classList.toggle('active', i === idx));
+      dots.forEach((d, i)   => d.classList.toggle('active', i === idx));
+      current = idx;
+    }
+
+    // Boot — show panel 1
+    showPanel(0);
+
+    // Dot clicks
+    dots.forEach(d => d.addEventListener('click', () => showPanel(+d.dataset.panel)));
+
+    // Next arrows
+    document.querySelectorAll('.panel-next').forEach(btn =>
+      btn.addEventListener('click', () => showPanel(+btn.dataset.next))
+    );
+
+    // Keyboard left/right arrows
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') showPanel(Math.min(current + 1, panels.length - 1));
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   showPanel(Math.max(current - 1, 0));
+    });
+
+    // Scroll: move between panels only — hero images cycle on timer independently
+    let wheelCooldown = false;
+    document.querySelector('.left').addEventListener('wheel', function(e) {
+      if (wheelCooldown) return;
+      const active = document.querySelector('.snap-panel.active');
+      const atBottom = active.scrollTop + active.clientHeight >= active.scrollHeight - 4;
+      const atTop    = active.scrollTop <= 0;
+      if (e.deltaY > 0 && atBottom) {
+        showPanel(Math.min(current + 1, panels.length - 1));
+        wheelCooldown = true;
+        setTimeout(function() { wheelCooldown = false; }, 900);
+      } else if (e.deltaY < 0 && atTop && current > 0) {
+        showPanel(current - 1);
+        wheelCooldown = true;
+        setTimeout(function() { wheelCooldown = false; }, 900);
+      }
+    }, { passive: true });
+  </script>
+
+</div>
+
+<!-- Math modal (bot challenge) -->
+<div class="modal-overlay" id="mathModal">
+  <div class="modal-box">
+    <h3>Human Verification</h3>
+    <p>Please solve this simple math problem:</p>
+    <div class="modal-math-q"><span id="mathQ">2 + 3</span> = ?</div>
+    <input type="number" id="mathInput" class="modal-input" placeholder="Answer"/>
+    <div class="modal-error" id="mathError">Incorrect answer, try again.</div>
+    <button class="modal-btn" onclick="verifyMath()">Verify &amp; Submit</button>
+  </div>
+</div>
+
+<!-- Feedback Modal -->
+<div id="feedbackOverlay" class="feedback-overlay hidden">
+  <div class="feedback-modal">
+    <div class="feedback-modal-header">
+      <span>Rate your experience</span>
+      <button class="feedback-close" onclick="closeFeedbackModal()">✕</button>
+    </div>
+    <div class="feedback-title">How was your CommunityCarpool experience?</div>
+    <div class="feedback-subtitle">Your honest feedback helps us improve for everyone.</div>
+    <div class="star-row">
+      <div class="stars">
+        <button class="star-btn" data-val="1" onclick="setFbRating(1)">★</button>
+        <button class="star-btn" data-val="2" onclick="setFbRating(2)">★</button>
+        <button class="star-btn" data-val="3" onclick="setFbRating(3)">★</button>
+        <button class="star-btn" data-val="4" onclick="setFbRating(4)">★</button>
+        <button class="star-btn" data-val="5" onclick="setFbRating(5)">★</button>
+      </div>
+      <span id="fbStarCount">0 / 5</span>
+    </div>
+    <div class="feedback-label">Your feedback <span style="font-weight:400;color:#64748b">(optional)</span></div>
+    <textarea class="feedback-textarea" id="fbComment" placeholder="Tell us about your experience — what worked well and what could be better"></textarea>
+    <input type="text" id="fbHoneypot" style="display:none" tabindex="-1" autocomplete="off">
+    <div class="feedback-actions">
+      <button class="btn-submit-feedback" id="fbSubmitBtn" onclick="submitFbFeedback()" disabled>Submit Rating</button>
+      <button class="btn-skip-feedback" onclick="closeFeedbackModal()">Skip</button>
+    </div>
+  </div>
+</div>
 </body>
-
 </html>
