@@ -4,9 +4,27 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <meta name="format-detection" content="telephone=no"/>
-<title>Community Carpool — Landing</title>
+<title>Community Carpool | Share Rides. Cut Emissions.</title>
+<meta name="description" content="Match with people on similar routes to carpool voluntarily." />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Community Carpool" />
+<meta property="og:title" content="Community Carpool | Find Your Carpool Match" />
+<meta property="og:description" content="Match with people on similar routes. Contact shared only after a match." />
+<meta property="og:url" content="https://communitycarpool.org/" />
+<meta property="og:image" content="https://communitycarpool.org/og-image.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Community Carpool | Find Your Carpool Match" />
+<meta name="twitter:description" content="Match with people on similar routes. Contact shared only after a match." />
+<meta name="twitter:image" content="https://communitycarpool.org/og-image.jpg" />
+<link rel="canonical" href="https://communitycarpool.org/">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="config.js"></script>
+<script src="umami.js" defer></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -652,10 +670,10 @@
       <h2>Know someone who should carpool?</h2>
       <p style="font-size:16px;color:var(--body);margin-bottom:28px;">Every share brings one more person closer to a match. It takes 2 seconds.</p>
       <div class="share-row">
-        <button class="share-card-btn" style="background:#1877F2;color:#fff;border-color:#1059c1;border-bottom-color:#0d47a1;box-shadow:3px 3px 0 #0d47a1" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https://communitycarpool.org','_blank')">
+        <a class="share-card-btn" href="/share/facebook.html" target="_blank" rel="noopener noreferrer" style="background:#1877F2;color:#fff;border-color:#1059c1;border-bottom-color:#0d47a1;box-shadow:3px 3px 0 #0d47a1;text-decoration:none;">
           <svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
           Facebook
-        </button>
+        </a>
         <a class="share-card-btn" href="https://x.com/intent/tweet?url=https://communitycarpool.org&text=Find+a+carpool+partner+near+you" target="_blank" rel="noopener noreferrer" style="background:#000;color:#fff;border-color:#000;border-bottom-color:#000;box-shadow:3px 3px 0 #333;text-decoration:none;">
           <svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
           X / Twitter
