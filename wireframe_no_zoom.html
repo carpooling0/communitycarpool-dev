@@ -806,6 +806,22 @@
     document.getElementById('first-name-input').addEventListener('input', updateProgress);
     document.getElementById('terms').addEventListener('change', updateProgress);
 
+    // form_started: fires once on first user interaction with any key form input
+    let formStartedFired = false;
+    function onFormStarted() {
+      if (formStartedFired) return;
+      formStartedFired = true;
+      fetch(`${SUPABASE_URL}/functions/v1/track-event`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ eventType: 'form_started', metadata: { page: 'landing' } })
+      }).catch(() => {});
+    }
+    ['first-name-input', 'email-input', 'from-input'].forEach(function(id) {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('focus', onFormStarted, { once: true });
+    });
+
     const emailInput = document.getElementById('email-input');
     emailInput.addEventListener('input', () => {
       document.getElementById('email-error').style.display = 'none';
