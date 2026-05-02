@@ -654,11 +654,11 @@
         </button>
       </div>
       <div class="legal-links">
-        <a href="#">Support</a>
-        <a href="#">Help &amp; FAQ</a>
-        <a href="#">Terms</a>
-        <a href="#">Privacy Policy</a>
-        <a href="#">Feedback</a>
+        <a href="/support.html" target="_blank">Support</a>
+        <a href="/docs/" target="_blank">Help &amp; FAQ</a>
+        <a href="/terms.html" target="_blank">Terms</a>
+        <a href="/privacy.html" target="_blank">Privacy Policy</a>
+        <a href="/support.html" target="_blank">Feedback</a>
       </div>
     </section>
 
@@ -1077,7 +1077,7 @@
         linkedin: 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent('Free carpooling for your commute') + '&summary=' + encodeURIComponent('Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, everything over email.'),
         sms:      'sms:?body=' + msgFull
       };
-      const a = document.createElement('a'); a.href = links[platform]; a.target = '_blank'; a.rel = 'noopener noreferrer'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      window.open(links[platform], '_blank', 'noopener,noreferrer');
     }
 
     // ── Error display ─────────────────────────────────────────────────────────
