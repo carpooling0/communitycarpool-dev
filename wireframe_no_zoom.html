@@ -248,8 +248,28 @@
   .share-card-btn:active { transform: translateY(2px); border-bottom-width: 1px; }
   .share-card-btn svg { flex-shrink: 0; color: var(--green); width: 16px; height: 16px; }
   .legal-links { display: flex; gap: 20px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid var(--border); margin-top: auto; }
-  .legal-links a { font-size: 16px; color: var(--muted); text-decoration: none; font-weight: 500; }
+  .legal-links a { font-size: 16px; color: var(--muted); text-decoration: none; font-weight: 500; cursor: pointer; }
   .legal-links a:hover { color: var(--green); }
+  /* Feedback modal */
+  .feedback-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 16px; }
+  .feedback-overlay.hidden { display: none; }
+  .feedback-modal { background: white; border-radius: 16px; padding: 28px 24px 24px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .feedback-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .feedback-modal-header span { font-size: 14px; font-weight: 600; color: #64748b; }
+  .feedback-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b; }
+  .feedback-title { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+  .feedback-subtitle { font-size: 14px; color: #64748b; margin-bottom: 22px; }
+  .star-row { display: flex; align-items: center; gap: 8px; margin-bottom: 22px; }
+  .star-row .stars { display: flex; gap: 6px; }
+  .star-btn { background: none; border: none; font-size: 30px; cursor: pointer; color: #d1d5db; transition: color 0.15s; padding: 0; line-height: 1; }
+  .star-btn.active { color: #f59e0b; }
+  .feedback-label { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+  .feedback-textarea { width: 100%; border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 90px; color: #1e293b; box-sizing: border-box; }
+  .feedback-textarea:focus { outline: none; border-color: #10b981; }
+  .feedback-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-submit-feedback { flex: 1; background: #10b981; color: white; border: none; border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .btn-submit-feedback:disabled { background: #9ca3af; cursor: not-allowed; }
+  .btn-skip-feedback { background: none; border: 2px solid #e2e8f0; border-radius: 10px; padding: 13px 18px; font-size: 15px; font-weight: 500; color: #64748b; cursor: pointer; }
 
   /* ══════════════════════════════
      RIGHT FORM PANEL
@@ -658,7 +678,7 @@
         <a href="/docs/" target="_blank">Help &amp; FAQ</a>
         <a href="/terms.html" target="_blank">Terms</a>
         <a href="/privacy.html" target="_blank">Privacy Policy</a>
-        <a href="/support.html" target="_blank">Feedback</a>
+        <a href="#" onclick="openFeedbackModal(); return false;">Feedback</a>
       </div>
     </section>
 
@@ -1255,6 +1275,57 @@
         attachLocationBlurHint('to');
       }
     }
+
+    // ── Feedback modal ────────────────────────────────────────────────────────
+    let _fbRating = 0, _fbOpenedAt = null;
+    function openFeedbackModal() {
+      _fbRating = 0; _fbOpenedAt = Date.now();
+      document.querySelectorAll('#feedbackOverlay .star-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('fbStarCount').textContent = '0 / 5';
+      document.getElementById('fbComment').value = '';
+      document.getElementById('fbHoneypot').value = '';
+      document.getElementById('fbSubmitBtn').disabled = true;
+      document.getElementById('feedbackOverlay').classList.remove('hidden');
+    }
+    function closeFeedbackModal() {
+      document.getElementById('feedbackOverlay').classList.add('hidden');
+    }
+    function setFbRating(val) {
+      _fbRating = val;
+      document.querySelectorAll('#feedbackOverlay .star-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.val) <= val);
+      });
+      document.getElementById('fbStarCount').textContent = val + ' / 5';
+      document.getElementById('fbSubmitBtn').disabled = false;
+    }
+    async function submitFbFeedback() {
+      if (_fbRating < 1) return;
+      const btn = document.getElementById('fbSubmitBtn');
+      btn.disabled = true; btn.textContent = 'Submitting…';
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/submit-feedback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rating: _fbRating,
+            comment: document.getElementById('fbComment').value.trim() || null,
+            source: 'footer_link',
+            pageContext: 'landing',
+            formOpenedAt: _fbOpenedAt,
+            honeypot: document.getElementById('fbHoneypot').value || null
+          })
+        });
+        const data = await res.json();
+        if (data.success || data.error === 'Already submitted') {
+          closeFeedbackModal();
+        }
+      } catch(e) {
+        btn.disabled = false; btn.textContent = 'Submit Rating';
+      }
+    }
+    document.getElementById('feedbackOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeFeedbackModal();
+    });
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARzmbbhT0ki5-bZ-43pkkPyJNmOCTz4P0&libraries=places&loading=async&callback=initAutocomplete" async defer></script>
   <script>
@@ -1374,6 +1445,35 @@
     <input type="number" id="mathInput" class="modal-input" placeholder="Answer"/>
     <div class="modal-error" id="mathError">Incorrect answer, try again.</div>
     <button class="modal-btn" onclick="verifyMath()">Verify &amp; Submit</button>
+  </div>
+</div>
+
+<!-- Feedback Modal -->
+<div id="feedbackOverlay" class="feedback-overlay hidden">
+  <div class="feedback-modal">
+    <div class="feedback-modal-header">
+      <span>Rate your experience</span>
+      <button class="feedback-close" onclick="closeFeedbackModal()">✕</button>
+    </div>
+    <div class="feedback-title">How was your CommunityCarpool experience?</div>
+    <div class="feedback-subtitle">Your honest feedback helps us improve for everyone.</div>
+    <div class="star-row">
+      <div class="stars">
+        <button class="star-btn" data-val="1" onclick="setFbRating(1)">★</button>
+        <button class="star-btn" data-val="2" onclick="setFbRating(2)">★</button>
+        <button class="star-btn" data-val="3" onclick="setFbRating(3)">★</button>
+        <button class="star-btn" data-val="4" onclick="setFbRating(4)">★</button>
+        <button class="star-btn" data-val="5" onclick="setFbRating(5)">★</button>
+      </div>
+      <span id="fbStarCount">0 / 5</span>
+    </div>
+    <div class="feedback-label">Your feedback <span style="font-weight:400;color:#64748b">(optional)</span></div>
+    <textarea class="feedback-textarea" id="fbComment" placeholder="Tell us about your experience — what worked well and what could be better"></textarea>
+    <input type="text" id="fbHoneypot" style="display:none" tabindex="-1" autocomplete="off">
+    <div class="feedback-actions">
+      <button class="btn-submit-feedback" id="fbSubmitBtn" onclick="submitFbFeedback()" disabled>Submit Rating</button>
+      <button class="btn-skip-feedback" onclick="closeFeedbackModal()">Skip</button>
+    </div>
   </div>
 </div>
 </body>
