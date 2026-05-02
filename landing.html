@@ -652,10 +652,10 @@
       <h2>Know someone who should carpool?</h2>
       <p style="font-size:16px;color:var(--body);margin-bottom:28px;">Every share brings one more person closer to a match. It takes 2 seconds.</p>
       <div class="share-row">
-        <a class="share-card-btn" href="https://www.facebook.com/sharer/sharer.php?u=https://communitycarpool.org" target="_blank" rel="noopener noreferrer" style="background:#1877F2;color:#fff;border-color:#1059c1;border-bottom-color:#0d47a1;box-shadow:3px 3px 0 #0d47a1;text-decoration:none;">
+        <button class="share-card-btn" style="background:#1877F2;color:#fff;border-color:#1059c1;border-bottom-color:#0d47a1;box-shadow:3px 3px 0 #0d47a1" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https://communitycarpool.org','_blank')">
           <svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
           Facebook
-        </a>
+        </button>
         <a class="share-card-btn" href="https://x.com/intent/tweet?url=https://communitycarpool.org&text=Find+a+carpool+partner+near+you" target="_blank" rel="noopener noreferrer" style="background:#000;color:#fff;border-color:#000;border-bottom-color:#000;box-shadow:3px 3px 0 #333;text-decoration:none;">
           <svg viewBox="0 0 24 24" fill="white" width="22" height="22"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
           X / Twitter
@@ -1362,11 +1362,11 @@
       heroIdx = idx;
     }
     function advanceHero() { showHeroSlide((heroIdx + 1) % heroSlides.length); }
-    heroTimer = setInterval(advanceHero, 4000);
+    heroTimer = setInterval(advanceHero, 3000);
     heroDots.forEach(d => d.addEventListener('click', function() {
       clearInterval(heroTimer);
       showHeroSlide(+this.dataset.slide);
-      heroTimer = setInterval(advanceHero, 4000);
+      heroTimer = setInterval(advanceHero, 3000);
     }));
 
     // ── Panel switcher ────────────────────────────────────────────────────────
