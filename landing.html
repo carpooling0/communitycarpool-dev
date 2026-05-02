@@ -1106,8 +1106,25 @@
     }
 
     // ── Google Places autocomplete ────────────────────────────────────────────
+    const COUNTRY_CENTERS = {
+      'ae': { lat: 24.4539, lng: 54.3773 },
+      'us': { lat: 37.0902, lng: -95.7129 },
+      'uk': { lat: 51.5074, lng: -0.1278 },
+      'gb': { lat: 51.5074, lng: -0.1278 },
+      'in': { lat: 20.5937, lng: 78.9629 },
+      'sa': { lat: 23.8859, lng: 45.0792 },
+      'eg': { lat: 26.8206, lng: 30.8025 },
+      'pk': { lat: 30.3753, lng: 69.3451 },
+      'qa': { lat: 25.3548, lng: 51.1839 },
+      'kw': { lat: 29.3117, lng: 47.4818 }
+    };
+
     async function initAutocomplete() {
       await orgModeReady;
+
+      const countryCenter = COUNTRY_CENTERS[userCountry] || COUNTRY_CENTERS['ae'];
+      const circle = new google.maps.Circle({ center: { lat: countryCenter.lat, lng: countryCenter.lng }, radius: 500000 });
+      const bounds = circle.getBounds();
 
       const opts = {
         fields: ['formatted_address', 'name', 'geometry', 'address_components'],
@@ -1115,9 +1132,14 @@
       };
 
       const fromAC = new google.maps.places.Autocomplete(document.getElementById('from-input'), opts);
+      fromAC.setBounds(bounds);
       fromAC.addListener('place_changed', () => {
         const p = fromAC.getPlace();
-        fromLocationText = p.name || p.formatted_address || '';
+        if (p && (p.formatted_address || p.name)) {
+          fromLocationText = (p.name && p.formatted_address && p.name !== p.formatted_address)
+            ? p.name + ' - ' + p.formatted_address
+            : (p.name || p.formatted_address);
+        }
         if (p.geometry?.location) {
           fromLatLng = p.geometry.location.lat() + ',' + p.geometry.location.lng();
         } else {
@@ -1132,9 +1154,14 @@
       // Only attach Places autocomplete to To field if org-mode didn't replace it with a dropdown
       if (orgLocations.length === 0) {
         const toAC = new google.maps.places.Autocomplete(document.getElementById('to-input'), opts);
+        toAC.setBounds(bounds);
         toAC.addListener('place_changed', () => {
           const p = toAC.getPlace();
-          toLocationText = p.name || p.formatted_address || '';
+          if (p && (p.formatted_address || p.name)) {
+            toLocationText = (p.name && p.formatted_address && p.name !== p.formatted_address)
+              ? p.name + ' - ' + p.formatted_address
+              : (p.name || p.formatted_address);
+          }
           if (p.geometry?.location) {
             toLatLng = p.geometry.location.lat() + ',' + p.geometry.location.lng();
           } else {
