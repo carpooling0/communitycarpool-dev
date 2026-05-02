@@ -24,7 +24,6 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="config.js"></script>
-<script src="umami.js" defer></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -841,7 +840,7 @@
       body: JSON.stringify({ eventType: 'page_visited', metadata: {
         client: new URLSearchParams(window.location.search).get('client') || null,
         referrer: document.referrer || null,
-        page: 'landing'
+        page: 'home'
       }})
     }).catch(() => {});
 
@@ -899,7 +898,7 @@
       fetch(`${SUPABASE_URL}/functions/v1/track-event`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-        body: JSON.stringify({ eventType: 'form_started', metadata: { page: 'landing' } })
+        body: JSON.stringify({ eventType: 'form_started', metadata: { page: 'home' } })
       }).catch(() => {});
     }
     ['first-name-input', 'email-input', 'from-input'].forEach(function(id) {
@@ -1103,7 +1102,7 @@
 
     // ── Share ─────────────────────────────────────────────────────────────────
     function shareTo(platform) {
-      window.umami?.track('social_share', { platform, page: 'landing' });
+      window.umami?.track('social_share', { platform, page: 'home' });
       const ref = sessionStorage.getItem('cc_ref') || '007';
       const url = 'https://communitycarpool.org?ref=' + ref;
       const msgFull = encodeURIComponent('Hey! I just signed up on CommunityCarpool.org to find carpooling partners for my commute.\n\nIt matches neighbors going the same route — completely FREE, No Cookies, No App, and you only connect when both sides are interested. Everything over email.\n\nThe more people sign up in our area, the better the matches get. Takes 30 seconds!\n' + url);
@@ -1329,7 +1328,7 @@
             rating: _fbRating,
             comment: document.getElementById('fbComment').value.trim() || null,
             source: 'footer_link',
-            pageContext: 'landing',
+            pageContext: 'home',
             formOpenedAt: _fbOpenedAt,
             honeypot: document.getElementById('fbHoneypot').value || null
           })
@@ -1476,5 +1475,6 @@
     </div>
   </div>
 </div>
+<script src="umami.js"></script>
 </body>
 </html>
