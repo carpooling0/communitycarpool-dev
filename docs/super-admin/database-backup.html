@@ -112,6 +112,27 @@
     <h1 class="article-title">Backup &amp; recovery</h1>
     <p class="article-lead">Database backups protect against accidental data loss from bad migrations, human error, or infrastructure failures. Users, submissions, and matches are irreplaceable — treat them accordingly.</p>
 
+    <h2>Automated daily backup (GitHub Actions)</h2>
+    <p>A GitHub Actions workflow runs daily at 20:00 UTC in the <code>carpooling0/community-carpool-data-backup</code> private repo. It connects directly to the production database via <code>pg_dump</code> and commits a compressed SQL dump.</p>
+    <table>
+      <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Backup repo</td><td><code>carpooling0/community-carpool-data-backup</code></td></tr>
+        <tr><td>Schedule</td><td>Daily at 20:00 UTC (<code>0 20 * * *</code>)</td></tr>
+        <tr><td>File location</td><td><code>backups/backup_YYYY-MM-DD.sql.gz</code></td></tr>
+        <tr><td>Retention</td><td>7 days — older files are deleted automatically by the workflow</td></tr>
+        <tr><td>Also backed up</td><td>Cron jobs (<code>Backup-Edge-Functions/cron-jobs.csv</code>)</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Limitation:</strong> The backup files are stored in GitHub. If GitHub is unavailable, the backup files are also unreachable. For full disaster recovery, download a recent backup periodically to a local machine or second cloud location.</div>
+    </div>
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body"><strong>Implementation note:</strong> The old backup deletion used <code>find -mtime +7</code> which checked filesystem modification time — this always returned 0 on a fresh checkout, so no files were ever deleted. Fixed: the workflow now parses the date from the filename (e.g. <code>backup_2026-04-25.sql.gz</code>) to determine age.</div>
+    </div>
+
     <h2>Automatic backups (Supabase Pro plan)</h2>
     <p>On the Supabase Pro plan, daily backups are taken automatically and retained for 7 days. These are full database snapshots including schema and data.</p>
     <ul>

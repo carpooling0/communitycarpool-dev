@@ -1,6 +1,6 @@
 # Community Carpool — Agent Handoff Document
 
-**Last updated:** 2026-04-26  
+**Last updated:** 2026-04-27  
 **Project:** Community Carpool (communitycarpool.org)  
 **Purpose:** Complete context for a new agent to continue work without needing prior conversation history.
 
@@ -10,7 +10,7 @@
 
 A carpooling matchmaking platform. Users submit journeys (from/to locations), the system finds nearby matches, and emails both parties. Interest is expressed on a matches page; when mutual, contact details are revealed.
 
-**Stack:** Static HTML/CSS/JS frontend · Supabase (Postgres + Edge Functions) backend · Resend for email · Mapbox for road distances (optional) · Umami for analytics
+**Stack:** Static HTML/CSS/JS frontend · Supabase (Postgres + Edge Functions) backend · Resend for email · Mapbox for road distances · Umami for analytics
 
 ---
 
@@ -46,74 +46,110 @@ A carpooling matchmaking platform. Users submit journeys (from/to locations), th
 
 ---
 
-## 4. Edge Functions — All 24
+## 4. Edge Functions — Full Inventory (as of 2026-04-27)
 
-All deployed and in parity as of 2026-04-14. Source in `Supabse Edge Functions/<name>/index.ts`.
+### Prod (`tbkjealpnoriwdosvmju`) — 27 functions
 
-| Function | verify_jwt | Notes |
-|---|---|---|
-| admin-api | false | Token via `Authorization: Bearer` header. Reads from req header, NOT body. |
-| admin-auth | false | Login/logout/reset for admin panel |
-| batch-send-emails | false | Groups unsent matches, sends via Resend, updates match status to `notified` |
-| confirm-deletion | false | Handles deletion confirmation link clicks |
-| deactivate-journey | false | Sets journey_status = archived |
-| expire-journeys | **true** | Cron job — expires journeys past `expires_at` |
-| find-matches | false | Haversine/Mapbox/hybrid distance matching, upserts matches |
-| get-analytics | false | Calls Umami API (17 parallel requests), admin token auth |
-| get-matches-page | **true** | User-facing matches page, token auth, name masking pre-mutual |
-| get-org-locations | false | Returns org locations for journey form |
-| manage-deletion | false | Mode 1: request deletion token. Mode 2: confirm deletion, deactivate subs/matches |
-| mutual-match-notify | **true** | Sends mutual match notification emails (cron or manual trigger) |
-| process-deletions | **true** | Cron — deletes users past retention window |
-| request-deletion | false | Generates deletion token, sends confirm email |
-| resend-webhook | false | Svix HMAC verification, stores email_events, handles bounce suppression |
-| send-interest-reminders | false | Daily cron — sends reminders for unresponded matches |
-| submit-feedback | false | Saves feedback to DB |
-| submit-intern-application | false | Saves intern application, sends admin notification, bot protection |
-| submit-journey | false | Creates user + submission, triggers find-matches on hybrid/instant mode |
-| submit-support-ticket | false | Saves ticket, blocks deletion type, emails admin |
-| sync-analytics | false | Syncs Umami → analytics_daily table |
-| track-event | false | Generic event tracking |
-| update-email-prefs | false | GET/POST for unsubscribe preferences (camelCase body keys) |
-| update-match-status | false | Interest/decline/reset, mutual match detection → contact_revealed, sends emails |
+| Function | verify_jwt | Version | Notes |
+|---|---|---|---|
+| admin-api | false | v15 | Token via `Authorization: Bearer` header |
+| admin-auth | false | v9 | Login/logout/reset for admin panel. 7-day sessions |
+| batch-send-emails | false | v41 | Groups unsent matches, sends via Resend, updates match to `notified` |
+| confirm-deletion | false | v8 | Handles deletion confirmation link clicks |
+| deactivate-journey | false | v13 | Sets journey_status = archived |
+| expire-journeys | **true** | v16 | Cron job — expires journeys past `expires_at` |
+| find-matches | false | v22 | Haversine/Mapbox/hybrid distance matching, upserts matches |
+| get-analytics | false | v9 | Calls Umami API (17 parallel requests), admin token auth |
+| get-matches-page | **true** | v29 | User-facing matches, token auth, name masking pre-mutual |
+| get-org-locations | false | v13 | Returns org locations for journey form |
+| manage-deletion | false | v11 | Request deletion token / confirm deletion |
+| mutual-match-notify | **true** | v12 | Sends mutual match notification emails |
+| process-deletions | **true** | v10 | Cron — deletes users past retention window |
+| request-deletion | false | v9 | Generates deletion token, sends confirm email |
+| resend-webhook | false | v9 | Svix HMAC verification, stores email_events, bounce suppression |
+| school-share-batch | false | v5 | **Prod only** — One-off school parent email batch sender |
+| send-interest-reminders | false | v5 | Daily cron — reminders for unresponded matches (days 3/7/11/15) |
+| submit-feedback | false | v8 | Saves feedback to DB |
+| submit-intern-application | false | v4 | Saves intern application, sends admin notification |
+| submit-journey | false | v31 | Creates user + submission, triggers find-matches |
+| submit-support-ticket | false | v15 | Saves ticket, blocks deletion type, emails admin |
+| sync-analytics | false | v10 | Syncs Umami → analytics_daily table |
+| test-ses | false | v2 | Temporary test function — can be deleted |
+| track-email-open | false | v7 | Pixel tracker for email open events |
+| track-event | false | v19 | Generic event tracking |
+| update-email-prefs | false | v9 | GET/POST for unsubscribe preferences (camelCase body keys) |
+| update-match-status | false | v36 | Interest/decline/reset, mutual match detection, immediate YES nudge email |
 
-### Key impl details
-- `admin-api`: validates session by reading `Authorization: Bearer <token>` header. The deployed v12 was broken (read token from body) — was fixed to v13 on 2026-04-14.
-- `batch-send-emails` + `update-match-status`: testing_mode check — if `config.testing_mode != 'false'`, only sends to users with `email_whitelist = true`.
-- `find-matches`: uses `find_nearby_users` RPC (returns float lat/lng, not WKB geography). Do NOT switch back to direct column access on geography columns.
-- `send-interest-reminders`: reads `interest_reminders_sent` JSONB column on `matches` table.
+### Dev (`jboohdwihsiuvyrfeftp`) — 28 functions
+
+Same as prod plus these **dev-only** functions:
+
+| Function | verify_jwt | Version | Notes |
+|---|---|---|---|
+| email-events-query | false | v1 | Dev-only debugging helper |
+| fetch-reddit-posts | false | v14 | Reddit Agent — dev only |
+| school-share-test | false | v7 | Dev-only school share test function |
+
+Dev is **missing** `school-share-batch` (prod-only campaign function).
 
 ---
 
-## 5. Key Database Tables
+## 5. Prod vs Dev — Key Differences
+
+| Dimension | Prod | Dev |
+|---|---|---|
+| **testing_mode** | `false` (live sends to all users) | Likely `true` (sends only to whitelisted emails) |
+| **journey_expiry_days** | `180` | `180` |
+| **agents.html** | Blank stub (auto-stubbed by deploy-prod.sh) | Full page — Reddit Agent UI |
+| **fetch-reddit-posts** | ❌ Not deployed | ✅ Deployed (v14) |
+| **school-share-batch** | ✅ Deployed (v5) | ❌ Not deployed |
+| **school-share-test** | ❌ Not deployed | ✅ Deployed (v7) |
+| **email-events-query** | ❌ Not deployed | ✅ Deployed (v1) |
+| **Edge function code** | Most functions have higher version numbers and different SHA256 from dev — prod has been more actively deployed to | Lower version numbers on most functions |
+| **Data** | ~770 active submissions, live user data | Test data only |
+| **AWS Bedrock secrets** | Not set | Set (`AWS_BEDROCK_ACCESS_KEY_ID`, `AWS_BEDROCK_SECRET_ACCESS_KEY`, `AWS_BEDROCK_REGION=eu-west-1`) |
+
+### Why version numbers differ between prod and dev
+Dev was set up **after** prod was already running. Every function started at v1 on dev when prod was already at v10–v30+. Lower version numbers on dev simply reflect the later start date — the code content deployed from the same local source files should be functionally identical. If SHA256 hashes differ, it means a function was updated on one env but not yet redeployed to the other (e.g. deployed to prod first, dev deployment was skipped or came later). Always redeploy to both envs after any change.
+
+### What is intentionally dev-only (never deploy to prod)
+Everything under the "Agents" category: `agents.html`, `fetch-reddit-posts`, Reddit Agent DB table (`reddit_digest`), AWS Bedrock secrets, Agents nav cron jobs. `deploy-prod.sh` automatically stubs `agents.html` before pushing to prod.
+
+---
+
+## 6. Key Database Tables
 
 | Table | Purpose |
 |---|---|
-| users | email, name, match_page_token, email_bounced, deletion_requested_at, journey_limit |
-| submissions | from/to locations, lat/lng (float), journey_status (active/archived/deletion_pending/expired) |
-| matches | sub_a_id, sub_b_id, status, interest_a/b, interest_reminders_sent (JSONB) |
-| config | key/value pairs for runtime settings |
+| users | email, name, match_page_token, email_bounced, deletion_requested_at, journey_limit, unsubscribed_matches/reminders/marketing |
+| submissions | from/to locations, journey_status (active/inactive/expired), expires_at |
+| matches | sub_a_id, sub_b_id, status, interest_a/b, interest_a_at/b_at, interest_reminders_sent (JSONB) |
+| config | key/value pairs for all runtime settings |
 | admin_users | admin accounts (PBKDF2 hashed passwords) |
-| admin_sessions | session tokens, 8-hour expiry |
-| email_events | Resend webhook events for bounce/quota tracking |
+| admin_sessions | session tokens, 7-day expiry |
+| email_events | Resend webhook events — bounce tracking, open tracking, send audit |
 | referral_links | ref_code, mode (individual/client), url, person_campaign_name |
 | deletion_log | audit trail for deleted users |
+| events | general event log (match_interest_expressed, nudge_sent, etc.) |
+| analytics_daily | daily web traffic synced from Umami (synced nightly at 00:05 UTC) |
 
-### Key config keys (prod, as of 2026-04-14)
+### Key config values (prod, as of 2026-04-27)
 
 ```
-testing_mode = false              (live — emails go to all users)
-matching_mode = hybrid            (or instant/batch)
-distance_method = haversine       (or mapbox/hybrid)
+testing_mode = false              ← live — emails go to all users
+matching_mode = instant
+distance_method = mapbox
 match_token_expiry_days = 120
-journey_expiry_days = 90
+journey_expiry_days = 180         ← changed from 90 on 2026-04-27
 max_journeys_per_user = 10
-required_terms_version = (check live)
+required_terms_version = 1.2
 interest_reminder_enabled = true
-interest_reminder_days = 3
+interest_reminder_days = 3        ← first reminder fires on day 3
 interest_reminder_interval_days = 6
-interest_reminder_max = 4
+interest_reminder_max = 4         ← reminders at days 3 / 7 / 11 / 15
 resend_daily_limit = 90
+batch_email_hour_utc = 15
+expiry_nudge_days = 7
 ```
 
 ### DB functions (RPCs)
@@ -124,20 +160,20 @@ resend_daily_limit = 90
 
 ---
 
-## 6. Known Bugs Fixed (do not revert)
+## 7. Known Bugs Fixed (do not revert)
 
 1. **PostGIS WKB**: Geography columns return WKB hex, not GeoJSON. `find-matches` uses float columns (`from_lat` etc.) and the `find_nearby_users` RPC — never use `.coordinates` on geography columns.
 2. **SES module-level init**: SESClient must be initialised lazily inside the handler, not at module top-level (causes 502 on cold start if secrets missing).
 3. **`!inner` + `.or()`**: Using `!inner` join notation with `.or()` returns empty results. Use plain FK column name joins without `!inner`.
-4. **admin-api token auth**: Token must be read from `Authorization: Bearer` header, not request body. Frontend `apiPost()` sends token in header only — never in body. (Fixed in v13/prod, v29/dev on 2026-04-14.)
-5. **email_events missing columns**: `resend-webhook` inserts `provider`, `batch_id`, `raw_payload`, `occurred_at` but the table originally lacked those 4 columns → every webhook silently failed, bounce tracking non-functional since day 1. Fixed via migration on 2026-04-14. No historical data recoverable.
-6. **sync-analytics silent 401 (6-day gap)**: Nightly cron read `app.settings.sync_secret` from DB (NULL) → sent `{"secret":""}` → empty string is falsy in JS → auth check failed → 401 every night for 6 days (Apr 9-14). `SYNC_SECRET` env var IS set correctly, but cron read from wrong source. Fix: removed auth entirely from `sync-analytics` (write-only analytics, no sensitive data). Backfill triggered for Apr 9-14 and confirmed. (v9/prod on 2026-04-15, v7/dev on 2026-04-15.)
+4. **admin-api token auth**: Token must be read from `Authorization: Bearer` header, not request body. Frontend `apiPost()` sends token in header only — never in body.
+5. **email_events missing columns**: `resend-webhook` inserts `provider`, `batch_id`, `raw_payload`, `occurred_at`. Applied migration to add those 4 columns — bounce tracking now functional.
+6. **sync-analytics silent 401**: Cron sent empty `secret` string (read from NULL DB setting). Fixed: removed auth from `sync-analytics` (write-only, safe). Auth-free version on both prod + dev since 2026-04-15.
 
 ---
 
-## 7. Cron Jobs (prod)
+## 8. Cron Jobs (prod & dev)
 
-All confirmed active on **both prod and dev** as of 2026-04-15.
+All confirmed active on **both prod and dev**.
 
 | Job | Schedule | Function |
 |---|---|---|
@@ -151,160 +187,144 @@ All confirmed active on **both prod and dev** as of 2026-04-15.
 
 ---
 
-## 8. Admin Panel
+## 9. Admin Panel
 
 - URL: `https://communitycarpool.org/admin.html`
-- Auth: email/password → 7-day session token stored in `localStorage` as `ccp_admin_token` *(extended from 8h on 2026-04-20 / 2026-04-21; existing sessions only update on next login)*
+- Auth: email/password → 7-day session token stored in `localStorage` as `ccp_admin_token`
 - `admin-auth`: login/me/logout/forgot_password/reset_password
 - `admin-api`: all dashboard actions — metrics, tickets, deletions, users, blacklist, audit, team management, orgs, referral links
 
 ---
 
-## 9. Other Agent's Changes (2026-04-13) — Status
+## 10. Email System
 
-Another agent (Cursor) made these changes. Assessment:
+### Provider
+- **Primary:** Resend (`RESEND_API_KEY` in Supabase secrets)
+- **From address:** `hello@mail.communitycarpool.org` (set in `RESEND_FROM_EMAIL` secret)
+- **Fallback:** AWS SES (secrets not yet configured — `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `SES_FROM_EMAIL` all unset)
 
-| Change | Status | Action needed |
+### Email types sent
+| Type | Trigger | Function |
 |---|---|---|
-| Git remotes updated (`origin` = prod, `dev-repo` = dev) | ✅ Correct — matches expected config | None |
-| Pre-push hook created then removed | ✅ Removed — no residue | None |
-| Cron reconciled (removed send-interest-reminders from dev, then re-added) | ✅ End state correct — cron exists on both prod and dev | None |
-| `supabase/functions/send-interest-reminders/index.ts` added to repo | ✅ Rogue directory `supabase/functions/` confirmed deleted (2026-04-15) | None |
-| Deployed send-interest-reminders to both envs | ✅ Already re-deployed from local source in current session | No further action |
+| Match notification | New match found | batch-send-emails (daily cron 15:00 UTC) |
+| Immediate YES nudge | User A clicks YES, User B hasn't responded | update-match-status (fires immediately) |
+| Interest reminders | Day 3, 7, 11, 15 after one-way interest | send-interest-reminders (nightly 23:50 UTC) |
+| Mutual match reveal | Both sides say YES | update-match-status |
+| Deletion confirmation | User requests deletion | request-deletion |
+| Support notification | Support ticket submitted | submit-support-ticket |
+| School parent share | One-off campaign | School share Python script / school-share-batch |
 
-**Two agents on the codebase:** Yes, this is a problem. The Cursor agent:
-- Created a duplicate edge functions directory (`supabase/functions/`)
-- May push to wrong git remotes if not careful
-- Can diverge the deployed edge functions from the local source
+### Bounce handling
+`resend-webhook` receives bounce events from Resend (Svix HMAC verified), sets `email_bounced=true` on the user, logs to `email_events`. Users with `email_bounced=true` are excluded from all future sends.
 
-**Recommendation:** Use only one agent at a time. Before starting a session, verify deployed SHA256 hashes match local source using `get_edge_function` MCP on both envs. The re-deploy of all 24 functions done in this session re-established parity as of 2026-04-14.
-
----
-
-## 10. What Was Done in Session 2026-04-14
-
-1. Re-deployed all 24 edge functions to both prod and dev to restore SHA256 parity after Cursor diverged them
-2. Fixed `admin-api` login loop bug (token was being read from body instead of Authorization header)
-3. Applied `send-interest-reminders` prod prerequisites (column + config keys + cron — all were already present)
-4. Inserted `referral_links` row for DAMAC Campaign (`mode=client`, `url=https://communitycarpool.org/?client=damac`, `ref_code=NULL`)
-5. Backfilled `person_campaign_name` for ref codes 001–007 (008/DAMAC was missing row, handled as insert)
-6. Deleted test user 288 (Anvith / anvithy09@gmail.com) — no matches, 1 submission, logged to deletion_log
-7. Fixed `email_events` missing columns — applied migration to add `provider`, `batch_id`, `raw_payload`, `occurred_at`; bounce tracking now functional
-8. Fixed `sync-analytics` 6-day gap — root cause: cron sent empty `secret` string (read from NULL DB setting), auth check failed silently; removed auth from function (write-only, safe); backfilled Apr 9-14 confirmed; deployed auth-free version to both prod (v9) and dev (v7)
+### Testing mode
+When `config.testing_mode = 'true'`, emails only go to users with `email_whitelist = true`. Prod has been in live mode (`false`) since 2026-04-02.
 
 ---
 
-## 11. What Was Done in Session 2026-04-15
+## 11. Journey Expiry (updated 2026-04-27)
 
-1. Confirmed all cron jobs exist and are active on both prod and dev — updated section 7 with full cron list
-2. Confirmed rogue `supabase/functions/` directory is deleted — updated section 9
-
----
-
-## 12. What Was Done in Session 2026-04-20 / 2026-04-21
-
-1. **email_read_at stamping** — Implemented in `get-matches-page`: stamps `email_read_at_a`/`email_read_at_b` on first page visit (non-poll). Fixed fire-and-forget bug (must use `await Promise.all`). Deployed prod v28, dev v13.
-2. **email_read_at backfill** — Backfilled historical data using first `matches_page_viewed` event per user after match creation. 233 side A + 285 side B stamped; 93 matches remain NULL (genuinely never visited). Run on both prod and dev.
-3. **Terms v1.3** — Created `legal/terms-v1.3.html` archive (NOT yet activated). 6 changes: non-commercial clause, reciprocal carpooling bullet, driver warranty, prohibited uses (passenger-only), right to refuse wording. Do NOT activate until user approves — copy to `terms.html` and set `required_terms_version=1.3` in config on both envs.
-4. **user_deleted match UI** — Confirmed already on prod (HANDOFF was stale). Greyed row + "No longer available" pill working.
-5. **Deleted test user** — anvithy09@gmail.com (user_id=419) deleted from prod. Logged to deletion_log.
-6. **support.html** — Added "Enquiry" as 4th ticket category (2×2 radio grid, left-aligned circles), email format validation on all fields. Deployed prod + dev. Edge function `submit-support-ticket` updated with `enquiry: '💬 Enquiry'` label (prod v14, dev v13).
-7. **admin-auth session** — Extended from 8h to 7 days. Deployed prod v8 + dev v8. Existing sessions unaffected until next login.
-8. **index.html OG tags** — Added `og:image:width/height/type`, changed `twitter:card` to `summary_large_image`. Deployed prod + dev. WhatsApp OG preview confirmed working with `https://communitycarpool.org` (https:// prefix required).
+- **Config:** `journey_expiry_days = 180` (updated from 90)
+- **All existing submissions** extended to `created_at + 180 days` (applied 2026-04-27)
+- **Current state:** 767 active, 11 inactive; earliest expiry now 2026-08-28
+- **How it works:** `expire-journeys` cron (22:00 UTC) sets `journey_status = 'expired'` for submissions where `expires_at < NOW()`
+- **New submissions:** `expires_at = NOW() + 180 days` (set by `submit-journey` reading from config)
 
 ---
 
-## 13. What Was Learned in Session 2026-04-24
+## 12. School Parent Email Campaign (2026-04-26/27)
 
-1. **Prod dashboard snapshot (user-provided from `admin.html`)** — `673` total users, `706` active journeys (`716` total), `1157` total matches, `66.3%` match rate, `238` zero-match active submissions, `3` notification backlog, `86.4%` one-way interest, `1.4%` conversion rate, `2d` avg response time.
-2. **Reminder bottleneck is cadence, not lack of demand** — Read-only prod query against `send-interest-reminders` logic showed `97` matches in `interest_expressed`, but only `13` reminders eligible to send right now (`12` unique people; one user has 2 eligible matches). Breakdown: `57` blocked by the current 6-day repeat interval, `23` too recent (<3 days), `3` bounced, `1` inactive journey. This explains why the reminder audience feels “too low” despite high one-way interest.
-3. **Live prod reminder config (read-only verified on 2026-04-24)** — `interest_reminder_enabled=true`, `interest_reminder_days=3`, `interest_reminder_interval_days=6`, `interest_reminder_max=4`, `testing_mode=false`.
-4. **Eligible reminder audience on 2026-04-24** — All `13` currently eligible reminders were first reminders (`interest_reminders_sent` empty), not follow-ups. So the current low send count is not because matches hit max reminders; it is mostly because most matches are still in the wait window.
-5. **How to manually trigger reminder function** — Preview/test: `GET /functions/v1/send-interest-reminders?test_to=email&test_num=1|2`. Real send: `POST /functions/v1/send-interest-reminders` with `Authorization: Bearer <prod anon key>` and `{}` body. Real send only targets matches already in `status='interest_expressed'` where one side said yes and the other side has not replied.
-6. **Querying prod Supabase from local/Codex** — Prefer `curl -sS` against Supabase REST with `apikey` + `Authorization: Bearer <service_role>` headers for read-only inspection. In this macOS environment, Python `urllib` failed with `SSL: CERTIFICATE_VERIFY_FAILED` against Supabase HTTPS. Do **not** work around this by disabling SSL verification; just use `curl`.
-7. **Codex terminal session gotcha** — Exports set in a separate macOS Terminal window are **not** visible to Codex. If an agent needs env vars/secrets, set them in the attached Codex app terminal or store them in a local non-committed file and point the agent to it.
-8. **Security note** — If `service_role` is ever exported directly into the attached terminal, it is visible in thread terminal scrollback. Do not put it in repo files or HANDOFF. Clear the terminal/session afterward or rotate the key if needed.
+### What was done
+1. **CSV export:** `prod_school_routes_2026-04-26.csv` — 190 parents whose `to_location` or `from_location` matches a school keyword. Columns: `submission_id, name, email, school_name, from_location, to_location`.
+2. **Template:** Custom HTML email with logo, body copy, green share message box, 5 share icons (WhatsApp, Facebook, X, LinkedIn, SMS). Uses referral URL `https://communitycarpool.org?ref=013`.
+3. **Sends completed:**
+   - 184 school parent share emails sent (6 were pre-sent and skipped), batch_id: `school-share-prod-batch`
+   - 91 "Someone Just Said YES" nudge emails sent on 2026-04-27, batch_id: `yes-nudge-blast-2026-04-27`
+4. **All logged** to `email_events` table.
+5. **Referral link `ref=013`** created for this campaign.
 
----
-
-## 14. Dev-Only Features (do NOT deploy to prod)
-
-**Everything under the "Agents" category is dev-only.** This includes the frontend page, the edge function, the DB table, the cron jobs, and the AWS Bedrock secrets. None of this should ever be deployed to prod until explicitly decided.
-
-The `deploy-prod.sh` script automatically stubs `agents.html` with a blank placeholder before pushing to prod and restores the real file after. No manual action needed — but do not bypass this.
-
-| Feature | Dev pieces | Notes |
-|---|---|---|
-| **agents.html** | Frontend page | Standalone page (not inside admin.html). Linked from admin sidebar under "Agents > Reddit Agent". `deploy-prod.sh` replaces it with a blank stub on prod push. |
-| **Reddit Agent** | `fetch-reddit-posts` edge function (v3), `reddit_digest` DB table, 2x daily cron jobs (04:00 + 10:00 UTC) | Monitors 30 subreddits, sends posts to Claude Haiku on AWS Bedrock for relevance scoring and reply drafting. Results reviewed manually in `agents.html`. |
-| **Subreddits monitored** | Configured in `fetch-reddit-posts/index.ts` | 30 subreddits across: carpooling/commuting, sustainability, urban/transport, UAE/Gulf (dubai, DubaiExpats, abudhabi, sharjah), India (Kerala, mumbai, bangalore, hyderabad, delhi, Chennai, pune, india), expat/frugal. |
-| **AWS Bedrock** | `AWS_BEDROCK_ACCESS_KEY_ID`, `AWS_BEDROCK_SECRET_ACCESS_KEY`, `AWS_BEDROCK_REGION=eu-west-1` | Set in dev Supabase secrets only. Model: `anthropic.claude-3-haiku-20240307-v1:0`. Separate from future SES credentials. |
-| **admin.html Agents nav** | "Agents" section in sidebar (admin-only) | Links to `agents.html` in a new tab. The nav section itself is in admin.html on both prod and dev — but in prod it just opens the blank stub page. |
+### Script location
+One-off Python script was run from `/tmp/` (not in repo). Template HTML is in `school-share-helper.js` in the codebase root. For future sends, use `school-share-batch` edge function on prod.
 
 ---
 
-## 15. Pending Items (not yet built)
+## 13. Pending Items
 
-### A. Admin Dashboard — Analytics "last synced" label
-
-**What:** The Web Traffic analytics section shows data synced once daily from Cloudflare (at ~4 AM Dubai). When an admin selects "last 24 hours", they're actually seeing yesterday's data — which is confusing (e.g., 100% bounce rate when 85 users signed up today).
-
-**Fix:** Add a small "last synced: 19 Apr, 04:05 AM" note below the Web Traffic section header so it's clear the data is not real-time. Source: `synced_at` column in `analytics_daily` — use the most recent row's value.
-
-**File:** `admin.html` — the `if (an)` block that renders the Web Traffic KPI grid (~line 1647).
-
----
-
-### B. Terms v1.3 Activation (when ready)
-
+### A. Terms v1.3 Activation (when ready)
 1. Copy `legal/terms-v1.3.html` → `terms.html` (overwrite)
-2. Set `required_terms_version = '1.3'` in config table on both prod and dev
+2. Set `required_terms_version = '1.3'` in config on both prod and dev
 3. Deploy frontend to both envs
-4. Users will be prompted to re-accept on next matches page visit
+4. Users prompted to re-accept on next matches page visit
+
+### B. Admin Dashboard — "Last Synced" Label
+Add a small `last synced: [date]` note below the Web Traffic section in `admin.html`. Source: `synced_at` column in `analytics_daily` (most recent row). The `if (an)` block ~line 1647 in `admin.html`.
+
+### C. matches.html — `user_deleted` Match Status UI
+When a match has `status = 'user_deleted'`, the matches page should show a greyed row with "No longer available" pill. Not yet built.
+
+### E. landing.html — Split-Pane Landing Page (dev only, not yet built)
+Design spec:
+- **Desktop (>900px):** 50/50 split. Left column (52%): `scroll-driver` (height:400vh) with `sticky-left` (position:sticky, top:60px, height:calc(100vh-60px)) containing 4 sections that transition via JS on scroll. Right column (48%): `form-sticky` (position:sticky, top:60px) with the **exact** form from `index.html` (no changes, preserve all JS).
+- **Mobile (≤900px):** Stacked single column. Content sections as `.mobile-section` divs, form at bottom. Sticky CTA bar fixed at bottom; fades away via IntersectionObserver when user scrolls to form.
+- **Nav:** Fixed, 60px, logo left + links right + green CTA button.
+- **4 content sections:**
+  1. Hero — "Find someone going your way" + route visual (green/red dots + line)
+  2. How it works — 3 numbered steps
+  3. Privacy — "Your details stay hidden until you're ready" + before/after cards
+  4. Community — Stats (770+ journeys, Free)
+- **Confirmation screen:** Add PIN verification step (email/mobile verification) after the current success screen
+- **Colours:** White background, `#10b981` green accents
+- **Deploy to dev only** (`bash deploy-dev.sh`) — do NOT touch prod until explicit approval
+- **Kimi reference page** `https://zvb33q2cftcfi.kimi.show` — use Chrome MCP tool (`mcp__Claude_in_Chrome__navigate` + `mcp__Claude_in_Chrome__get_page_text`) to retrieve content before writing the page
+
+### D. Future Email Queue
+When the daily Resend quota (90/day) is exhausted, emails are silently skipped. Future improvement: build a proper `email_queue` table with retry logic. Not built yet.
 
 ---
 
-### C. Future Email Queue (not built yet)
+## 14. How to Start a New Session
 
-**Need:** When email daily quota is exhausted, unsent emails currently do **not** go into a true queue. They are only retried later if a future cron run happens to re-select them.
-
-**Recommendation for later:** Build a dedicated `email_queue` table instead of overloading `email_events`.
-
-| Table | Purpose |
-|---|---|
-| `email_queue` | Stores pending emails that still need to be sent |
-| `email_events` | Audit log of send attempts / sends / failures / skips |
-
-**Suggested `email_queue` fields:** `id`, `email_type`, `user_id`, `match_id`, `submission_id`, `recipient_email`, `subject`, `payload`, `status`, `retry_at`, `attempt_count`, `created_at`, `sent_at`
-
-**Expected behavior later:**
-1. When an email should be sent, insert into `email_queue`
-2. If quota is available, send now and mark `sent`
-3. If quota is exhausted, leave row as `pending`
-4. Next cron run picks oldest eligible `pending` rows
-5. If match becomes mutual / failed / unsubscribed before send, mark row `cancelled`
-
----
-
-### D. Future Journey Status Change (approved for later revisit, not built yet)
-
-**Requested later change:**
-
-1. Change all currently `expired` journeys back to `active`
-2. Change the inactive/archival timeout from `90 days` to `180 days`
-
-**Notes:**
-- This was explicitly requested on 2026-04-26 but deferred for a later session
-- Do not implement silently; revisit before applying to prod/dev
-- This likely touches both data backfill and the cron / expiry logic
-
----
-
-## 16. How to Start a New Session
-
-1. Check memory: `/Users/ny/.claude/projects/-Users-ny-Downloads-Carpooling-CodeBase/memory/MEMORY.md`
-2. Check this handoff: `/Users/ny/Downloads/Carpooling CodeBase/HANDOFF.md`
-3. Verify any edge function before editing: use `get_edge_function` MCP to check deployed version
+1. Read memory: `/Users/ny/.claude/projects/-Users-ny-Downloads-Carpooling-CodeBase/memory/MEMORY.md`
+2. Read this handoff: `/Users/ny/Downloads/Carpooling CodeBase/HANDOFF.md`
+3. Before editing any edge function: use `get_edge_function` MCP to verify deployed version on both envs
 4. Always deploy to **both** envs after any edge function change
-5. Never commit or push frontend without running deploy scripts
-6. For read-only prod data inspection, prefer `curl -sS` + Supabase REST + `service_role` headers; do not use Python HTTPS in this environment unless the SSL cert issue is resolved
+5. Never commit or push frontend without running `deploy-prod.sh` and `deploy-dev.sh`
+6. For DB inspection: use the Supabase MCP `execute_sql` tool — do not use Python HTTPS in this macOS environment (SSL cert issue with `urllib`); use `subprocess.run(['curl', ...])` if HTTP calls are needed from scripts
+7. To send emails from a local script: get the `RESEND_API_KEY` from the user, write it to a temp `.env` file, source it, run the Python script, then **delete the `.env` file immediately after**
+
+---
+
+## 15. Architecture Notes
+
+- All DB access via service role in edge functions — RLS is on, no policies = correct (anon blocked from direct table access)
+- `spatial_ref_sys` is a PostGIS system table — can't enable RLS on it, safe to ignore in security advisor
+- `get-matches-page` is `verify_jwt: true` — requires valid anon JWT in Authorization header
+- `batch-send-emails` + `update-match-status` both check `testing_mode` before sending
+- Two git remotes: `origin` = prod, `dev-repo` = dev. **Always verify before pushing.**
+
+---
+
+## 16. Session History Summary
+
+| Session | Date | Key Work |
+|---|---|---|
+| Session 1 | 2026-02-18 | Fixed 4 critical bugs: PostGIS WKB, SES init, `!inner`+`.or()`, missing interest columns |
+| Session 2 | 2026-03-03 | End-to-end test all edge functions; all passing |
+| Session 3 | 2026-04-14 | Re-deployed all 24 functions; fixed admin-api bug; fixed email_events columns; fixed sync-analytics 6-day gap |
+| Session 4 | 2026-04-15 | Confirmed all crons active; cleaned up rogue `supabase/functions/` dir |
+| Session 5 | 2026-04-20/21 | email_read_at stamping + backfill; Terms v1.3 draft; support.html Enquiry type; admin session 7-day; OG tags |
+| Session 6 | 2026-04-24 | Reminder cadence analysis; YES nudge + reminder copy overhaul; prod rollout of update-match-status + send-interest-reminders |
+| Session 7 | 2026-04-26 | School parent CSV export (190 parents); 184 school share emails sent; template rebuilt with correct SVG share icons |
+| Session 8 | 2026-04-27 | 91 "YES nudge" blast emails sent; journey expiry changed 90→180 days on prod+dev; user 781 (bose.yalamanchili@gmai.com — typo) merged into user 134 (correct email); final HANDOFF written |
+| Session 9 | 2026-05-03 | landing.html redesign rolled into index.html; share buttons via /share/*.html redirects (ad blocker fix); email icons locally hosted at /email-icons/; RESEND_FROM_EMAIL → hello@mail.communitycarpool.org; Umami script moved to end of body, page identifier → 'home'; feedback modal added to footer; GitHub backup workflow fixed (filename-based 7-day retention, was broken -mtime); workflow run history cleaned up; confirmed edge functions identical between prod and dev (SHA256 difference is bundler artifact, not code drift); super-admin docs updated |
+
+---
+
+## 17. Frontend Notes (as of 2026-05-03)
+
+- `index.html` is the redesigned landing page (rolled from `landing.html` on 2026-05-02); backup of old design at `index-backup-2026-05-02.html`
+- All social share buttons route through `/share/*.html` redirect pages (whatsapp, facebook, x, linkedin, sms) — avoids ad blocker and popup blocker interference on desktop
+- Email templates use locally hosted icons at `/email-icons/` (PNG files) — do not replace with external URLs
+- Umami: script loaded at end of `<body>` (not `<head>` with `defer`); page identifier is `'home'`
+- Feedback modal triggered by footer Feedback link (`openFeedbackModal()`) — submits to `submit-feedback` edge function
+- GitHub Actions backup workflow (`community-carpool-data-backup`): runs daily 20:00 UTC, keeps 7 days of pg_dumps — retention now works correctly (fixed filename-based date check)

@@ -123,8 +123,13 @@
         </tr>
         <tr>
           <td><code>carpooling0/communitycarpool-dev</code></td>
-          <td><span class="tag tag-amber">Development</span> — safe to experiment</td>
-          <td>carpooling0.github.io/communitycarpool-dev</td>
+          <td><span class="tag tag-amber">Staging</span> — test before deploying to prod</td>
+          <td>dev.communitycarpool.org (custom domain)</td>
+        </tr>
+        <tr>
+          <td><code>carpooling0/community-carpool-data-backup</code></td>
+          <td><span class="tag tag-blue">Backup</span> — daily pg_dump, private repo</td>
+          <td>N/A (not a Pages site)</td>
         </tr>
       </tbody>
     </table>
@@ -145,23 +150,37 @@ origin     git@github.com:carpooling0/communitycarpool.git (push)</code></pre>
       <div class="callout-body"><strong>Always verify remotes before pushing.</strong> Pushing to <code>origin</code> deploys to the live production site immediately. There is no staging buffer or CI gate.</div>
     </div>
 
-    <h2>Deploying to development</h2>
-    <p>Push your local <code>dev</code> branch to the dev repo's <code>main</code> branch:</p>
-    <pre><code>git push dev-repo dev:main</code></pre>
-    <p>GitHub Pages auto-deploys within 1–2 minutes. Check the dev site to verify changes.</p>
-
-    <h2>Deploying to production</h2>
+    <h2>Deploying frontend changes</h2>
     <div class="callout warning">
       <div class="callout-icon">🚫</div>
-      <div class="callout-body"><strong>This is LIVE immediately.</strong> Only push to production when changes have been tested on dev and you are confident they are correct.</div>
+      <div class="callout-body"><strong>Never use raw <code>git push</code> to deploy.</strong> Always use the deploy scripts — they handle config swapping (prod vs dev Supabase credentials), CNAME, and agents.html stubbing automatically. Raw pushes have caused wrong-environment deployments.</div>
     </div>
-    <pre><code># Ensure you are on the main branch and it is up to date
-git checkout main
-git merge dev   # or cherry-pick specific commits
+    <p><strong>Always commit first, then deploy:</strong></p>
+    <pre><code># 1. Commit your changes
+git add [files]
+git commit -m "your message"
 
-# Push to production
-git push origin main</code></pre>
-    <p>GitHub Pages deploys the <code>main</code> branch of the production repo. The custom domain <code>communitycarpool.org</code> is configured in repo Settings &gt; Pages.</p>
+# 2. Deploy to production (communitycarpool.org)
+bash deploy-prod.sh
+
+# 3. Deploy to dev (dev.communitycarpool.org)
+bash deploy-dev.sh</code></pre>
+    <p>Always run both scripts after every frontend change to keep prod and dev in parity.</p>
+
+    <h3>What the deploy scripts do</h3>
+    <table>
+      <thead><tr><th>Script</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>deploy-prod.sh</code></td>
+          <td>Verifies <code>config.js</code> points to prod, stubs <code>agents.html</code> (Reddit Agent is dev-only), sets CNAME to <code>communitycarpool.org</code>, pushes to <code>origin</code>, restores <code>agents.html</code> locally</td>
+        </tr>
+        <tr>
+          <td><code>deploy-dev.sh</code></td>
+          <td>Swaps <code>config.dev.js</code> → <code>config.js</code>, sets CNAME to <code>dev.communitycarpool.org</code>, force-pushes to <code>dev-repo</code>, then restores prod config locally</td>
+        </tr>
+      </tbody>
+    </table>
 
     <h2>What GitHub Pages serves</h2>
     <p>GitHub Pages serves static HTML, CSS, and JS files directly from the repository root. There is no build step. All page logic is vanilla JS in the HTML files, and all dynamic data comes from Supabase edge functions via <code>fetch()</code> calls.</p>

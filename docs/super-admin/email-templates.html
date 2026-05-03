@@ -142,7 +142,7 @@
     <table>
       <thead><tr><th>Header</th><th>Value</th></tr></thead>
       <tbody>
-        <tr><td>From</td><td>"Community Carpool" &lt;noreply@communitycarpool.org&gt;</td></tr>
+        <tr><td>From</td><td>"Community Carpool" &lt;hello@mail.communitycarpool.org&gt;</td></tr>
         <tr><td>Reply-To</td><td>[REDACTED] — internal support email</td></tr>
         <tr><td>Content-Type</td><td>text/html; charset=UTF-8</td></tr>
       </tbody>
@@ -190,6 +190,14 @@ supabase functions deploy batch-send-emails</code></pre>
       <li>Check your inbox and the Resend delivery log</li>
       <li>Remove your whitelist flag when done: <code>UPDATE users SET email_whitelist = false WHERE email = 'your@email.com'</code></li>
     </ol>
+
+    <h2>Email icons and share links</h2>
+    <p>Match notification emails include a row of share icons (WhatsApp, Facebook, X, LinkedIn, SMS). These are implemented as:</p>
+    <ul>
+      <li><strong>Icons:</strong> Locally hosted PNGs at <code>/email-icons/whatsapp.png</code>, <code>/email-icons/facebook.png</code>, etc. — served from <code>communitycarpool.org/email-icons/</code>. Do not use external icon URLs — they may be blocked by email clients.</li>
+      <li><strong>Share links:</strong> Each icon links to a redirect page at <code>communitycarpool.org/share/whatsapp.html</code>, <code>/share/facebook.html</code>, etc. These redirect to the actual share URL. Using our own domain avoids ad blockers and popup blockers that flag direct links to social platforms.</li>
+    </ul>
+    <p>If you add a new share platform, create a corresponding <code>/share/platform.html</code> redirect file and add a matching icon PNG to <code>/email-icons/</code>.</p>
 
     <h2>Email design principles</h2>
     <ul>

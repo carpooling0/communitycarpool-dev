@@ -119,7 +119,7 @@
         <tr><td>Dashboard</td><td><a href="https://resend.com/overview" target="_blank">resend.com/overview</a></td></tr>
         <tr><td>Login</td><td>[REDACTED] — see password manager</td></tr>
         <tr><td>API key (secret name)</td><td><code>RESEND_API_KEY</code> (stored in Supabase Vault)</td></tr>
-        <tr><td>Sender address</td><td>noreply@communitycarpool.org</td></tr>
+        <tr><td>Sender address</td><td>hello@mail.communitycarpool.org</td></tr>
         <tr><td>Sender name</td><td>"Community Carpool"</td></tr>
         <tr><td>Reply-to</td><td>[REDACTED] support email</td></tr>
       </tbody>
@@ -150,7 +150,7 @@
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    from: 'Community Carpool &lt;noreply@communitycarpool.org&gt;',
+    from: 'Community Carpool &lt;hello@mail.communitycarpool.org&gt;',
     to: [userEmail],
     subject: 'Your carpool matches are ready',
     html: emailHtml,
