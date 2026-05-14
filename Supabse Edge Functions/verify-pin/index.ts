@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
     if (req.method === 'GET' && token) {
       const { data: sub } = await supabase
         .from('submissions')
-        .select('submission_id, email_verification_status, email_verification_pin_expires_at, journey_num, distance_km')
+        .select('submission_id, user_id, email_verification_status, email_verification_pin_expires_at, journey_num, distance_km')
         .eq('email_verification_token', token)
         .single()
 
@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
 
     const { data: sub } = await supabase
       .from('submissions')
-      .select('submission_id, email_verification_status, email_verification_pin, email_verification_pin_expires_at, journey_num, distance_km')
+      .select('submission_id, user_id, email_verification_status, email_verification_pin, email_verification_pin_expires_at, journey_num, distance_km')
       .eq('submission_id', submissionId)
       .single()
 
