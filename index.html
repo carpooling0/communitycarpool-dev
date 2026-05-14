@@ -396,13 +396,14 @@
 
   /* PIN entry */
   .pin-entry-phase { padding-top:20px; }
-  .pin-digits { display:flex; align-items:center; justify-content:center; gap:0; margin:0 0 8px; }
-  .pin-digit { width:54px; height:64px; border:2.5px solid #D1D5DB; border-radius:12px; font-size:28px; font-weight:900; text-align:center; font-family:'Montserrat',sans-serif; color:#1B5C3A; outline:none; caret-color:transparent; transition:border-color .15s,background .15s; margin:0 5px; appearance:none; -moz-appearance:textfield; }
+  .pin-digits { display:flex; align-items:center; justify-content:center; gap:10px; margin:0 0 8px; }
+  .pin-pair { display:flex; gap:10px; }
+  .pin-digit { width:54px; height:64px; border:2.5px solid #D1D5DB; border-radius:12px; font-size:28px; font-weight:900; text-align:center; font-family:'Montserrat',sans-serif; color:#1B5C3A; outline:none; caret-color:transparent; transition:border-color .15s,background .15s; appearance:none; -moz-appearance:textfield; }
   .pin-digit::-webkit-outer-spin-button,.pin-digit::-webkit-inner-spin-button { -webkit-appearance:none; }
   .pin-digit:focus { border-color:#1B5C3A; box-shadow:0 0 0 3px rgba(27,92,58,.15); }
   .pin-digit.filled { border-color:#1B5C3A; background:#f0fdf4; }
   .pin-digit.error { border-color:#ef4444; background:#fef2f2; animation:pin-shake .3s; }
-  .pin-sep { font-size:20px; color:#D1D5DB; font-weight:900; line-height:1; margin:0 3px; }
+  .pin-sep { font-size:22px; color:#D1D5DB; font-weight:900; line-height:1; }
   @keyframes pin-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
   .pin-error { font-size:13px; color:#ef4444; min-height:18px; margin-bottom:4px; }
   .pin-submit-btn { width:100%; padding:13px; background:#1B5C3A; color:#fff; border:none; border-radius:50px; font-size:15px; font-weight:700; font-family:'Montserrat',sans-serif; cursor:pointer; margin-top:12px; transition:opacity .15s; }
@@ -883,15 +884,19 @@
           <p style="font-size:15px;color:#6B7280;margin:0 0 16px;">Enter the PIN from your email to activate your journey:</p>
 
           <div class="pin-digits" onpaste="onPinPaste(event)">
-            <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin0"
-                   oninput="onPinInput(this,0)" onkeydown="onPinKeydown(this,0,event)" onpaste="onPinPaste(event)">
-            <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin1"
-                   oninput="onPinInput(this,1)" onkeydown="onPinKeydown(this,1,event)" onpaste="onPinPaste(event)">
+            <div class="pin-pair">
+              <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin0"
+                     oninput="onPinInput(this,0)" onkeydown="onPinKeydown(this,0,event)" onpaste="onPinPaste(event)">
+              <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin1"
+                     oninput="onPinInput(this,1)" onkeydown="onPinKeydown(this,1,event)" onpaste="onPinPaste(event)">
+            </div>
             <span class="pin-sep">·</span>
-            <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin2"
-                   oninput="onPinInput(this,2)" onkeydown="onPinKeydown(this,2,event)" onpaste="onPinPaste(event)">
-            <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin3"
-                   oninput="onPinInput(this,3)" onkeydown="onPinKeydown(this,3,event)" onpaste="onPinPaste(event)">
+            <div class="pin-pair">
+              <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin2"
+                     oninput="onPinInput(this,2)" onkeydown="onPinKeydown(this,2,event)" onpaste="onPinPaste(event)">
+              <input class="pin-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="pin3"
+                     oninput="onPinInput(this,3)" onkeydown="onPinKeydown(this,3,event)" onpaste="onPinPaste(event)">
+            </div>
           </div>
 
           <div class="pin-error" id="pinError"></div>
@@ -1198,7 +1203,7 @@
             <div class="impact-value">${annualKgStr} <span class="impact-unit">kg</span></div>
             <div class="impact-sub">CO&#x2082; Savings</div>
             <div style="font-size:15px;color:#64748b;margin-top:6px;">Equivalent to planting ${trees} trees</div>
-            <div style="font-size:15px;color:#94a3b8;margin-top:4px;">(Based on ${km} km one-way commute)</div>
+            <div style="font-size:15px;color:#94a3b8;margin-top:4px;">(Based on ${km.toLocaleString()} km one-way commute)</div>
           </div>
           <div style="background:white;border-radius:0 0 0 0;border:2px solid #ecfdf5;border-top:none;border-bottom:none;padding:20px 20px 4px;">
             <div class="road-tracker">

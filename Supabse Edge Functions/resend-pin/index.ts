@@ -83,7 +83,7 @@ async function sendPinEmail(toEmail: string, firstName: string, pin: string, ver
     body: JSON.stringify({
       from: `Community Carpool <${fromEmail}>`,
       to: [toEmail],
-      subject: `${pin} — your new Community Carpool PIN`,
+      subject: `Your new Community Carpool activation PIN`,
       html
     })
   })
