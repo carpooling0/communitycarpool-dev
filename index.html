@@ -1621,7 +1621,29 @@
 
     function skipPinVerification() {
       document.getElementById('pinOverlay').classList.remove('show');
-      showSuccess(_pinSuccessData);
+      // Show a neutral "saved but unverified" screen — not the full celebration
+      const fc = document.getElementById('form-content');
+      fc.style.opacity = '0';
+      setTimeout(() => {
+        fc.style.display = 'none';
+        const s = document.getElementById('success-content');
+        s.innerHTML = `
+          <div style="background:white;border-radius:16px;border:2px solid #E5E7EB;padding:28px 20px 24px;text-align:center;">
+            <div style="font-size:36px;margin-bottom:12px;">📬</div>
+            <div style="font-size:17px;font-weight:800;color:#1a1a1a;margin-bottom:8px;">Journey Recorded</div>
+            <div style="font-size:14px;color:#6B7280;line-height:1.5;margin-bottom:20px;">
+              Your journey has been saved. Check your inbox — there's a PIN waiting to verify your email and activate your match profile.
+            </div>
+            <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 16px;font-size:13px;color:#15803d;font-weight:600;">
+              📧 Check your email to complete verification
+            </div>
+          </div>`;
+        s.style.display = 'flex';
+        s.style.flexDirection = 'column';
+        s.style.opacity = '0';
+        s.style.transition = 'opacity .3s';
+        requestAnimationFrame(() => { s.style.opacity = '1'; });
+      }, 250);
     }
 
     // ── Handle ?verify_email=TOKEN on page load (link from email) ─────────────
