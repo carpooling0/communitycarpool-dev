@@ -62,26 +62,27 @@ async function sendPinEmail(toEmail: string, firstName: string, pin: string, ver
 
               <!-- Journey Tracker — Step 1 active -->
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;"><tr><td style="border-top:1px solid #E5E7EB;padding-bottom:16px;"></td></tr></table>
+              <div style="font-size:11px;font-weight:700;color:#1B5C3A;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;">Your Carpool Status</div>
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
                 <tr>
                   <td align="center" width="20%">
                     <div style="width:28px;height:28px;border-radius:50%;background:#B4E035;color:#1B5C3A;font-size:12px;font-weight:900;line-height:28px;margin:0 auto 4px;border:2px solid #1B5C3A;">1</div>
-                    <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;">Joined the Pool</div>
+                    <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;word-break:break-word;">Joined the Pool</div>
                   </td>
-                  <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+                  <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
                   <td align="center" width="20%">
                     <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">2</div>
-                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Matched</div>
+                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Matched</div>
                   </td>
-                  <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+                  <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
                   <td align="center" width="20%">
                     <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">3</div>
-                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Connected</div>
+                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Connected</div>
                   </td>
-                  <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+                  <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
                   <td align="center" width="20%">
                     <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">4</div>
-                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Carpooling!</div>
+                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Carpooling!</div>
                   </td>
                 </tr>
               </table>
@@ -93,7 +94,6 @@ async function sendPinEmail(toEmail: string, firstName: string, pin: string, ver
 
     <tr>
       <td style="padding-top:20px;text-align:center;">
-        <p style="margin:0;font-size:12px;color:#9CA3AF;">Community Carpool &middot; communitycarpool.org</p>
         <p style="margin:4px 0 0;font-size:12px;color:#D1D5DB;">If you did not request this, you can safely ignore this email.</p>
       </td>
     </tr>
@@ -118,6 +118,15 @@ async function sendPinEmail(toEmail: string, firstName: string, pin: string, ver
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  // ── Preview / test mode ──────────────────────────────────────────────────────
+  const url = new URL(req.url)
+  const testTo = url.searchParams.get('test_to')
+  if (testTo) {
+    const siteUrl = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
+    await sendPinEmail(testTo, 'Alex', '1234', 'preview-token-000', siteUrl)
+    return new Response(JSON.stringify({ preview: true, to: testTo }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  }
 
   try {
     const { submissionId } = await req.json()

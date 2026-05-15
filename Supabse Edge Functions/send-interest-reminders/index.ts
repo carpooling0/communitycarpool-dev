@@ -202,7 +202,7 @@ function buildReminderEmail(
             <div style="width:8px;height:8px;border-radius:50%;background:#1B5C3A;flex-shrink:0;"></div>
             <div style="font-size:15px;color:#1F2937;font-weight:500;">${fromLocation}</div>
           </div>
-          <div style="width:2px;height:10px;background:#B4E035;margin:0 0 0 3px;"></div>
+          <div style="font-size:12px;color:#9ca3af;margin:2px 0 2px 6px;">&#8595;</div>
           <div style="display:flex;align-items:center;gap:8px;margin-top:0;">
             <div style="width:8px;height:8px;border-radius:50%;background:#dc2626;flex-shrink:0;"></div>
             <div style="font-size:15px;color:#1F2937;font-weight:500;">${toLocation}</div>
@@ -222,30 +222,29 @@ function buildReminderEmail(
         </a>
       </div>
 
-      ${buildShareBlock(SITE_URL)}
-
       <!-- Journey Tracker — Step 2 active -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px;"><tr><td style="border-top:1px solid #E5E7EB;padding-bottom:16px;"></td></tr></table>
+      <div style="font-size:11px;font-weight:700;color:#1B5C3A;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;">Your Carpool Status</div>
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
         <tr>
           <td align="center" width="20%">
             <div style="width:28px;height:28px;border-radius:50%;background:#1B5C3A;color:#fff;font-size:13px;font-weight:700;line-height:28px;margin:0 auto 4px;">&#10003;</div>
-            <div style="font-size:9px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;">Joined the Pool</div>
+            <div style="font-size:9px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;word-break:break-word;">Joined the Pool</div>
           </td>
-          <td style="padding-bottom:16px;"><div style="height:2px;background:#1B5C3A;"></div></td>
+          <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#1B5C3A;"></div></td>
           <td align="center" width="20%">
             <div style="width:28px;height:28px;border-radius:50%;background:#B4E035;color:#1B5C3A;font-size:12px;font-weight:900;line-height:28px;margin:0 auto 4px;border:2px solid #1B5C3A;">2</div>
-            <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Matched</div>
+            <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Matched</div>
           </td>
-          <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+          <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
           <td align="center" width="20%">
             <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">3</div>
-            <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Connected</div>
+            <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Connected</div>
           </td>
-          <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+          <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
           <td align="center" width="20%">
             <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">4</div>
-            <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Carpooling!</div>
+            <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Carpooling!</div>
           </td>
         </tr>
       </table>
@@ -253,16 +252,17 @@ function buildReminderEmail(
     </div>
   </div>
 
+  ${buildShareBlock(SITE_URL)}
+
   <!-- Footer -->
   <div style="text-align:center;color:#9CA3AF;font-size:12px;padding:0 16px;">
     <p style="margin:0 0 5px;">
       <a href="${SITE_URL}/docs/" style="color:#6B7280;text-decoration:none;">Help &amp; FAQ</a>&nbsp;&nbsp;&#183;&nbsp;&nbsp;
       <a href="${SITE_URL}/terms.html" style="color:#6B7280;text-decoration:none;">Terms</a>&nbsp;&nbsp;&#183;&nbsp;&nbsp;
-      <a href="${SITE_URL}/privacy.html" style="color:#6B7280;text-decoration:none;">Privacy</a>&nbsp;&nbsp;&#183;&nbsp;&nbsp;
+      <a href="${SITE_URL}/privacy.html" style="color:#6B7280;text-decoration:none;">Privacy Policy</a>&nbsp;&nbsp;&#183;&nbsp;&nbsp;
       <a href="${SITE_URL}/unsubscribe.html?token=${token}" style="color:#6B7280;text-decoration:none;">Unsubscribe</a>&nbsp;&nbsp;&#183;&nbsp;&nbsp;
       <a href="${SITE_URL}/support.html" style="color:#6B7280;text-decoration:none;">Feedback</a>
     </p>
-    <p style="margin:0;">Community Carpool &middot; communitycarpool.org</p>
   </div>
 
 </div>

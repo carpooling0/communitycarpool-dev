@@ -73,6 +73,89 @@ async function sendEmail(to: string, subject: string, html: string, batchId?: st
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  // ── Preview / test mode ──────────────────────────────────────────────────────
+  if (req.method === 'GET') {
+    const url = new URL(req.url)
+    const testTo = url.searchParams.get('test_to')
+    if (testTo) {
+      const shareBase = 'https://communitycarpool.org/share'
+      const previewToken = 'preview-token-000'
+      const batchDate = new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Dubai' })
+      const previewRow = `<tr><td style="padding:20px 0;border-bottom:1px solid #e5e7eb;">
+        <div style="font-weight:700;color:#111827;margin-bottom:10px;font-size:15px;">Journey #1</div>
+        <div style="font-size:14px;color:#374151;margin-bottom:4px;"><span style="color:#16a34a;font-size:12px;">&#9679;</span>&nbsp;Dubai Marina</div>
+        <div style="font-size:13px;color:#9ca3af;margin:0 0 4px 6px;">&#8595;</div>
+        <div style="font-size:14px;color:#374151;margin-bottom:12px;"><span style="color:#dc2626;font-size:12px;">&#9679;</span>&nbsp;Dubai International Financial Centre (DIFC)</div>
+        <div style="font-size:13px;color:#15803d;font-weight:600;margin-bottom:10px;">🎉 2 new matches!</div>
+        <a href="${SITE_URL}/matches.html?token=${previewToken}&journey=1" style="display:inline-block;background:#16a34a;color:white;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">View Matches &#x2192;</a>
+      </td></tr>`
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+        <body style="margin:0;padding:0;background:#f9fafb;font-family:Inter,system-ui,sans-serif;">
+        <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+          <div style="text-align:center;margin-bottom:32px;">
+            <a href="${SITE_URL}" style="text-decoration:none;">
+              <img src="${SITE_URL}/logo-email.png" alt="Community Carpool" style="height:64px;width:auto;display:block;margin:0 auto;" />
+            </a>
+          </div>
+          <div style="background:white;border-radius:16px;padding:32px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <h2 style="color:#111827;font-size:20px;margin:0 0 4px;">Hi Alex!</h2>
+            <p style="color:#6b7280;margin:0 0 24px;font-size:14px;">Your Carpool Update &mdash; ${batchDate}</p>
+            <table width="100%" cellpadding="0" cellspacing="0">${previewRow}</table>
+          </div>
+          <!-- Journey Tracker — Step 2 active -->
+          <div style="background:white;border-radius:12px;padding:20px 24px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+            <div style="font-size:11px;font-weight:700;color:#1B5C3A;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;text-align:center;">Your Carpool Status</div>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
+              <tr>
+                <td align="center" width="20%">
+                  <div style="width:28px;height:28px;border-radius:50%;background:#1B5C3A;color:#fff;font-size:13px;font-weight:700;line-height:28px;margin:0 auto 4px;">&#10003;</div>
+                  <div style="font-size:9px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;word-break:break-word;">Joined the Pool</div>
+                </td>
+                <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#1B5C3A;"></div></td>
+                <td align="center" width="20%">
+                  <div style="width:28px;height:28px;border-radius:50%;background:#B4E035;color:#1B5C3A;font-size:12px;font-weight:900;line-height:28px;margin:0 auto 4px;border:2px solid #1B5C3A;">2</div>
+                  <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Matched</div>
+                </td>
+                <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
+                <td align="center" width="20%">
+                  <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">3</div>
+                  <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Connected</div>
+                </td>
+                <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
+                <td align="center" width="20%">
+                  <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">4</div>
+                  <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Carpooling!</div>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div style="background:white;border-radius:12px;padding:20px 24px;margin-top:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+            <p style="color:#374151;font-size:14px;font-weight:600;margin:0 0 4px;">Know someone who commutes the same way?</p>
+            <p style="color:#6b7280;font-size:13px;margin:0 0 16px;">The more people in your area sign up, the better the matches get.</p>
+            <table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>
+              <td style="padding:0 5px;"><a href="${shareBase}/whatsapp.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/whatsapp.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="WhatsApp" /></a></td>
+              <td style="padding:0 5px;"><a href="${shareBase}/facebook.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/facebook.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="Facebook" /></a></td>
+              <td style="padding:0 5px;"><a href="${shareBase}/x.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/twitter.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="X" /></a></td>
+              <td style="padding:0 5px;"><a href="${shareBase}/linkedin.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/linkedin.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="LinkedIn" /></a></td>
+              <td style="padding:0 5px;"><a href="${shareBase}/sms.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/sms.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="SMS" /></a></td>
+            </tr></table>
+          </div>
+          <div style="text-align:center;margin-top:24px;color:#9ca3af;font-size:13px;">
+            <p style="margin:0 0 6px;">
+              <a href="${SITE_URL}/docs/" style="color:#6b7280;text-decoration:none;">Help &amp; FAQ</a> &nbsp;&middot;&nbsp;
+              <a href="${SITE_URL}/terms.html" style="color:#6b7280;text-decoration:none;">Terms</a> &nbsp;&middot;&nbsp;
+              <a href="${SITE_URL}/privacy.html" style="color:#6b7280;text-decoration:none;">Privacy Policy</a> &nbsp;&middot;&nbsp;
+              <a href="${SITE_URL}/unsubscribe.html?token=${previewToken}" style="color:#6b7280;text-decoration:none;">Unsubscribe</a> &nbsp;&middot;&nbsp;
+              <a href="${SITE_URL}/support.html" style="color:#6b7280;text-decoration:none;">Feedback</a>
+            </p>
+          </div>
+        </div></body></html>`
+      await sendEmail(testTo, `Your Carpool Update — ${batchDate}`, html)
+      return new Response(JSON.stringify({ preview: true, to: testTo }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+  }
+
   try {
     if (await getConfig('match_notification_enabled') !== 'true') {
       return new Response(JSON.stringify({ success: true, message: 'Notifications disabled' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
@@ -179,26 +262,27 @@ Deno.serve(async (req) => {
             </div>
             <!-- Journey Tracker — Step 2 active -->
             <div style="background:white;border-radius:12px;padding:20px 24px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+              <div style="font-size:11px;font-weight:700;color:#1B5C3A;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;text-align:center;">Your Carpool Status</div>
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
                 <tr>
                   <td align="center" width="20%">
                     <div style="width:28px;height:28px;border-radius:50%;background:#1B5C3A;color:#fff;font-size:13px;font-weight:700;line-height:28px;margin:0 auto 4px;">&#10003;</div>
-                    <div style="font-size:9px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;">Joined the Pool</div>
+                    <div style="font-size:9px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;word-break:break-word;">Joined the Pool</div>
                   </td>
-                  <td style="padding-bottom:16px;"><div style="height:2px;background:#1B5C3A;"></div></td>
+                  <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#1B5C3A;"></div></td>
                   <td align="center" width="20%">
                     <div style="width:28px;height:28px;border-radius:50%;background:#B4E035;color:#1B5C3A;font-size:12px;font-weight:900;line-height:28px;margin:0 auto 4px;border:2px solid #1B5C3A;">2</div>
-                    <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Matched</div>
+                    <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Matched</div>
                   </td>
-                  <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+                  <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
                   <td align="center" width="20%">
                     <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">3</div>
-                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Connected</div>
+                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Connected</div>
                   </td>
-                  <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+                  <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
                   <td align="center" width="20%">
                     <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">4</div>
-                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Carpooling!</div>
+                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Carpooling!</div>
                   </td>
                 </tr>
               </table>
@@ -222,7 +306,6 @@ Deno.serve(async (req) => {
                 <a href="${SITE_URL}/unsubscribe.html?token=${userData.token}" style="color:#6b7280;text-decoration:none;">Unsubscribe</a> &nbsp;&middot;&nbsp;
                 <a href="${SITE_URL}/support.html" style="color:#6b7280;text-decoration:none;">Feedback</a>
               </p>
-              <p style="margin:0;">Community Carpool &middot; communitycarpool.org</p>
             </div>
           </div></body></html>`
 

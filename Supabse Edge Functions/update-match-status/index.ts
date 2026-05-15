@@ -86,29 +86,41 @@ function buildImmediateInterestEmail(
       </div>
       <!-- Journey Tracker — Step 2 active -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;"><tr><td style="border-top:1px solid #E5E7EB;padding-bottom:16px;"></td></tr></table>
+      <div style="font-size:11px;font-weight:700;color:#1B5C3A;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;">Your Carpool Status</div>
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
         <tr>
           <td align="center" width="20%">
             <div style="width:28px;height:28px;border-radius:50%;background:#1B5C3A;color:#fff;font-size:13px;font-weight:700;line-height:28px;margin:0 auto 4px;">&#10003;</div>
-            <div style="font-size:9px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;">Joined the Pool</div>
+            <div style="font-size:9px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;word-break:break-word;">Joined the Pool</div>
           </td>
-          <td style="padding-bottom:16px;"><div style="height:2px;background:#1B5C3A;"></div></td>
+          <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#1B5C3A;"></div></td>
           <td align="center" width="20%">
             <div style="width:28px;height:28px;border-radius:50%;background:#B4E035;color:#1B5C3A;font-size:12px;font-weight:900;line-height:28px;margin:0 auto 4px;border:2px solid #1B5C3A;">2</div>
-            <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Matched</div>
+            <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Matched</div>
           </td>
-          <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+          <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
           <td align="center" width="20%">
             <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">3</div>
-            <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Connected</div>
+            <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Connected</div>
           </td>
-          <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
+          <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
           <td align="center" width="20%">
             <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">4</div>
-            <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Carpooling!</div>
+            <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Carpooling!</div>
           </td>
         </tr>
       </table>
+    </div>
+    <div style="background:white;border-radius:12px;padding:20px 24px;margin-top:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <p style="color:#374151;font-size:14px;font-weight:600;margin:0 0 4px;">Know someone who commutes the same way?</p>
+      <p style="color:#6b7280;font-size:13px;margin:0 0 16px;">The more people in your area sign up, the better the matches get.</p>
+      <table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>
+        <td style="padding:0 5px;"><a href="${SITE_URL}/share/whatsapp.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/whatsapp.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="WhatsApp" /></a></td>
+        <td style="padding:0 5px;"><a href="${SITE_URL}/share/facebook.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/facebook.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="Facebook" /></a></td>
+        <td style="padding:0 5px;"><a href="${SITE_URL}/share/twitter.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/twitter.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="X" /></a></td>
+        <td style="padding:0 5px;"><a href="${SITE_URL}/share/linkedin.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/linkedin.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="LinkedIn" /></a></td>
+        <td style="padding:0 5px;"><a href="${SITE_URL}/share/sms.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/sms.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="SMS" /></a></td>
+      </tr></table>
     </div>
     <div style="text-align:center;margin-top:22px;color:#9ca3af;font-size:12px;">
       <p style="margin:0 0 6px;">
@@ -118,7 +130,6 @@ function buildImmediateInterestEmail(
         <a href="${SITE_URL}/unsubscribe.html?token=${myToken}" style="color:#6b7280;text-decoration:none;">Unsubscribe</a> &nbsp;&middot;&nbsp;
         <a href="${SITE_URL}/support.html" style="color:#6b7280;text-decoration:none;">Feedback</a>
       </p>
-      <p style="margin:0;">Community Carpool &middot; communitycarpool.org</p>
     </div>
   </div></body></html>`
 }
@@ -158,26 +169,27 @@ function buildMutualEmail(recipientName: string, otherName: string, otherEmail: 
       </div>
       <!-- Journey Tracker — Step 3 active -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;"><tr><td style="border-top:1px solid #E5E7EB;padding-bottom:16px;"></td></tr></table>
+      <div style="font-size:11px;font-weight:700;color:#1B5C3A;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;">Your Carpool Status</div>
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
         <tr>
           <td align="center" width="20%">
             <div style="width:28px;height:28px;border-radius:50%;background:#1B5C3A;color:#fff;font-size:13px;font-weight:700;line-height:28px;margin:0 auto 4px;">&#10003;</div>
-            <div style="font-size:9px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;">Joined the Pool</div>
+            <div style="font-size:9px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;word-break:break-word;">Joined the Pool</div>
           </td>
-          <td style="padding-bottom:16px;"><div style="height:2px;background:#1B5C3A;"></div></td>
+          <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#1B5C3A;"></div></td>
           <td align="center" width="20%">
             <div style="width:28px;height:28px;border-radius:50%;background:#1B5C3A;color:#fff;font-size:13px;font-weight:700;line-height:28px;margin:0 auto 4px;">&#10003;</div>
-            <div style="font-size:9px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Matched</div>
+            <div style="font-size:9px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Matched</div>
           </td>
-          <td style="padding-bottom:16px;"><div style="height:2px;background:#1B5C3A;"></div></td>
+          <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#1B5C3A;"></div></td>
           <td align="center" width="20%">
             <div style="width:28px;height:28px;border-radius:50%;background:#B4E035;color:#1B5C3A;font-size:12px;font-weight:900;line-height:28px;margin:0 auto 4px;border:2px solid #1B5C3A;">3</div>
-            <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;">Connected</div>
+            <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Connected</div>
           </td>
-          <td style="padding-bottom:16px;"><div style="height:2px;background:#D1FAE5;"></div></td>
+          <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#D1FAE5;"></div></td>
           <td align="center" width="20%">
             <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">4</div>
-            <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Carpooling!</div>
+            <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Carpooling!</div>
           </td>
         </tr>
       </table>
@@ -201,13 +213,29 @@ function buildMutualEmail(recipientName: string, otherName: string, otherEmail: 
         <a href="${SITE_URL}/unsubscribe.html?token=${myToken}" style="color:#6b7280;text-decoration:none;">Unsubscribe</a> &nbsp;&middot;&nbsp;
         <a href="${SITE_URL}/support.html" style="color:#6b7280;text-decoration:none;">Feedback</a>
       </p>
-      <p style="margin:0;">Community Carpool &middot; communitycarpool.org</p>
     </div>
   </div></body></html>`
 }
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  if (req.method === 'GET') {
+    const url = new URL(req.url)
+    const testTo = url.searchParams.get('test_to')
+    const type = url.searchParams.get('type') || 'interest'
+    if (testTo) {
+      if (type === 'mutual') {
+        const html = buildMutualEmail('Alex', 'Jordan', 'jordan@example.com', 'Dubai Marina', 'Dubai International Financial Centre (DIFC)', 'preview-token-000', 0)
+        await sendEmail(testTo, '🎉 You have a mutual match! Contact details revealed', html)
+      } else {
+        const html = buildImmediateInterestEmail('Alex', 'Dubai Marina', 'Dubai International Financial Centre (DIFC)', 'preview-token-000', 0)
+        await sendEmail(testTo, 'Someone Just Said YES to Your Match!', html)
+      }
+      return new Response(JSON.stringify({ preview: true, to: testTo, type }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+  }
+
   try {
     const { token, action, matchId, submissionId, interest, termsVersion } = await req.json()
 
