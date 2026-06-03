@@ -409,7 +409,6 @@
   .pin-resend { font-size:15px; color:#6B7280; margin-top:12px; }
   .pin-resend button { background:none; border:none; color:#1B5C3A; font-weight:600; font-size:15px; cursor:pointer; text-decoration:underline; font-family:inherit; }
   .pin-resend button:disabled { color:#9CA3AF; cursor:not-allowed; text-decoration:none; }
-  .pin-skip { font-size:15px; color:#9CA3AF; margin-top:10px; cursor:pointer; text-decoration:underline; background:none; border:none; font-family:inherit; }
   .pin-verify-success { text-align:center; padding:24px 0 12px; }
   .pin-verify-success .pin-tick { font-size:48px; margin-bottom:8px; }
   .pin-verify-success p { font-size:15px; color:#1B5C3A; font-weight:600; }
@@ -1014,7 +1013,6 @@
             Did not receive it? &nbsp;<button id="pinResendBtn" onclick="resendPin()">Resend PIN</button>
           </div>
           <div style="margin-top:10px;font-size:15px;color:#9CA3AF;">Check your spam folder if you do not see it within a minute.</div>
-          <button class="pin-skip" onclick="skipPinVerification()">Skip for now</button>
         </div>
 
         <!-- Phase 3: success tick -->
@@ -1986,11 +1984,6 @@
         setTimeout(() => { resendBtn.disabled = false; resendBtn.textContent = 'Resend PIN'; }, 2000);
       }
       document.querySelector('.pin-digit').focus();
-    }
-
-    function skipPinVerification() {
-      document.getElementById('pinOverlay').classList.remove('show');
-      // Leave the form exactly as it is — nothing else to do
     }
 
     // ── Combined PIN modal (email + WhatsApp) ─────────────────────────────────
