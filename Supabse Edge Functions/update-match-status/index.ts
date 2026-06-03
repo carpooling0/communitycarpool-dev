@@ -4,6 +4,40 @@ const supabase = createClient(Deno.env.get('DB_URL')!, Deno.env.get('DB_SERVICE_
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
 const corsHeaders = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' }
 
+// ── Send WhatsApp template via Meta Cloud API ────────────────────────────────
+async function sendWhatsAppTemplate(
+  to: string,
+  templateName: string,
+  bodyParams: Array<{ parameter_name: string; text: string }>,
+  buttonToken?: string
+): Promise<void> {
+  const accessToken   = Deno.env.get('WHATSAPP_ACCESS_TOKEN')
+  const phoneNumberId = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID')
+  if (!accessToken || !phoneNumberId)
+    throw new Error('WhatsApp secrets not configured')
+
+  const components: any[] = [{
+    type: 'body',
+    parameters: bodyParams.map(p => ({ type: 'text', parameter_name: p.parameter_name, text: p.text })),
+  }]
+  if (buttonToken) {
+    components.push({ type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: buttonToken }] })
+  }
+
+  const res = await fetch(`https://graph.facebook.com/v19.0/${phoneNumberId}/messages`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to,
+      type: 'template',
+      template: { name: templateName, language: { code: 'en' }, components },
+    }),
+  })
+  if (!res.ok) throw new Error(`WhatsApp API error ${res.status}: ${await res.text()}`)
+}
+
 // ── Email helper (same pattern as batch-send-emails — Resend preferred, SES fallback) ──
 async function sendEmail(to: string, subject: string, html: string): Promise<void> {
   const resendKey = Deno.env.get('RESEND_API_KEY')
@@ -84,8 +118,9 @@ function buildImmediateInterestEmail(
       <div style="text-align:center;">
         <a href="${SITE_URL}/matches.html?token=${myToken}&journey=${mySubmissionId}" style="display:inline-block;background:#10b981;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;">Respond to My Match →</a>
       </div>
-      <!-- Journey Tracker — Step 2 active -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;"><tr><td style="border-top:1px solid #E5E7EB;padding-bottom:16px;"></td></tr></table>
+    </div>
+    <!-- Journey Tracker — Step 2 active -->
+    <div style="background:white;border-radius:12px;padding:16px 20px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
       <div style="font-size:11px;font-weight:700;color:#1B5C3A;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;">Your Carpool Status</div>
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
         <tr>
@@ -122,7 +157,7 @@ function buildImmediateInterestEmail(
         <td style="padding:0 5px;"><a href="${SITE_URL}/share/sms.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/sms.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="SMS" /></a></td>
       </tr></table>
     </div>
-    <div style="text-align:center;margin-top:22px;color:#9ca3af;font-size:12px;">
+    <div style="text-align:center;margin-top:22px;color:#9ca3af;font-size:13px;">
       <p style="margin:0 0 6px;">
         <a href="${SITE_URL}/docs/" style="color:#6b7280;text-decoration:none;">Help &amp; FAQ</a> &nbsp;&middot;&nbsp;
         <a href="${SITE_URL}/terms.html" style="color:#6b7280;text-decoration:none;">Terms</a> &nbsp;&middot;&nbsp;
@@ -167,8 +202,9 @@ function buildMutualEmail(recipientName: string, otherName: string, otherEmail: 
       <div style="text-align:center;">
         <a href="${SITE_URL}/matches.html?token=${myToken}&journey=${mySubmissionId}" style="display:inline-block;background:#16a34a;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">View My Matches &#x2192;</a>
       </div>
-      <!-- Journey Tracker — Step 3 active -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;"><tr><td style="border-top:1px solid #E5E7EB;padding-bottom:16px;"></td></tr></table>
+    </div>
+    <!-- Journey Tracker — Step 3 active -->
+    <div style="background:white;border-radius:12px;padding:16px 20px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
       <div style="font-size:11px;font-weight:700;color:#1B5C3A;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;">Your Carpool Status</div>
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
         <tr>
@@ -198,14 +234,14 @@ function buildMutualEmail(recipientName: string, otherName: string, otherEmail: 
       <p style="color:#374151;font-size:14px;font-weight:600;margin:0 0 4px;">Know someone who commutes the same way?</p>
       <p style="color:#6b7280;font-size:13px;margin:0 0 16px;">The more people in your area sign up, the better the matches get.</p>
       <table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>
-        <td style="padding:0 5px;"><a href="https://wa.me/?text=${shareWA}" style="text-decoration:none;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2236%22%20height%3D%2236%22%20viewBox%3D%220%200%2036%2036%22%3E%3Crect%20width%3D%2236%22%20height%3D%2236%22%20rx%3D%229%22%20fill%3D%22%2325d366%22%2F%3E%3Cg%20transform%3D%22translate%289%2C9%29%20scale%280.75%29%22%3E%3Cpath%20d%3D%22M17.472%2014.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94%201.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198%200-.52.074-.792.372-.272.297-1.04%201.016-1.04%202.479%200%201.462%201.065%202.875%201.213%203.074.149.198%202.096%203.2%205.077%204.487.709.306%201.262.489%201.694.625.712.227%201.36.195%201.871.118.571-.085%201.758-.719%202.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z%22%20fill%3D%22white%22%2F%3E%3Cpath%20d%3D%22M12%200C5.373%200%200%205.373%200%2012c0%202.136.562%204.14%201.542%205.874L0%2024l6.294-1.542A11.94%2011.94%200%200012%2024c6.627%200%2012-5.373%2012-12S18.627%200%2012%200zm0%2021.818a9.818%209.818%200%2001-5.006-1.374l-.36-.214-3.732.914.93-3.617-.234-.373A9.818%209.818%200%20012.182%2012C2.182%206.57%206.57%202.182%2012%202.182S21.818%206.57%2021.818%2012%2017.43%2021.818%2012%2021.818z%22%20fill%3D%22white%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="WhatsApp" /></a></td>
-        <td style="padding:0 5px;"><a href="https://www.facebook.com/sharer/sharer.php?u=${shareFB}" style="text-decoration:none;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2236%22%20height%3D%2236%22%20viewBox%3D%220%200%2036%2036%22%3E%3Crect%20width%3D%2236%22%20height%3D%2236%22%20rx%3D%229%22%20fill%3D%22%231877F2%22%2F%3E%3Cg%20transform%3D%22translate%289%2C9%29%20scale%280.75%29%22%3E%3Cpath%20d%3D%22M24%2012.073c0-6.627-5.373-12-12-12s-12%205.373-12%2012c0%205.99%204.388%2010.954%2010.125%2011.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007%201.792-4.669%204.533-4.669%201.312%200%202.686.235%202.686.235v2.953H15.83c-1.491%200-1.956.925-1.956%201.874v2.25h3.328l-.532%203.47h-2.796v8.385C19.612%2023.027%2024%2018.062%2024%2012.073z%22%20fill%3D%22white%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="Facebook" /></a></td>
-        <td style="padding:0 5px;"><a href="https://x.com/intent/tweet?text=${shareTW}" style="text-decoration:none;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2236%22%20height%3D%2236%22%20viewBox%3D%220%200%2036%2036%22%3E%3Crect%20width%3D%2236%22%20height%3D%2236%22%20rx%3D%229%22%20fill%3D%22%23000000%22%2F%3E%3Cg%20transform%3D%22translate%289%2C9%29%20scale%280.75%29%22%3E%3Cpath%20d%3D%22M18.244%202.25h3.308l-7.227%208.26%208.502%2011.24H16.17l-4.714-6.231-5.401%206.231H2.747l7.73-8.835L1.254%202.25H8.08l4.253%205.622%205.91-5.622zm-1.161%2017.52h1.833L7.084%204.126H5.117z%22%20fill%3D%22white%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="Twitter / X" /></a></td>
-        <td style="padding:0 5px;"><a href="https://www.linkedin.com/shareArticle?mini=true&url=${shareLI}&title=${encodeURIComponent('Free carpooling for your commute')}&summary=${encodeURIComponent('Just joined communitycarpool.org to find carpooling neighbors on my route. Free, no app, everything over email.')}" style="text-decoration:none;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2236%22%20height%3D%2236%22%20viewBox%3D%220%200%2036%2036%22%3E%3Crect%20width%3D%2236%22%20height%3D%2236%22%20rx%3D%229%22%20fill%3D%22%230A66C2%22%2F%3E%3Cg%20transform%3D%22translate%289%2C9%29%20scale%280.75%29%22%3E%3Cpath%20d%3D%22M20.447%2020.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853%200-2.136%201.445-2.136%202.939v5.667H9.351V9h3.414v1.561h.046c.477-.9%201.637-1.85%203.37-1.85%203.601%200%204.267%202.37%204.267%205.455v6.286zM5.337%207.433a2.062%202.062%200%2001-2.063-2.065%202.064%202.064%200%20112.063%202.065zm1.782%2013.019H3.555V9h3.564v11.452zM22.225%200H1.771C.792%200%200%20.774%200%201.729v20.542C0%2023.227.792%2024%201.771%2024h20.451C23.2%2024%2024%2023.227%2024%2022.271V1.729C24%20.774%2023.2%200%2022.222%200h.003z%22%20fill%3D%22white%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="LinkedIn" /></a></td>
-        <td style="padding:0 5px;"><a href="sms:?body=${shareSMS}" style="text-decoration:none;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2236%22%20height%3D%2236%22%20viewBox%3D%220%200%2036%2036%22%3E%3Crect%20width%3D%2236%22%20height%3D%2236%22%20rx%3D%229%22%20fill%3D%22%2322c55e%22%2F%3E%3Cpath%20d%3D%22M9%2011a2%202%200%200%201%202-2h14a2%202%200%200%201%202%202v9a2%202%200%200%201-2%202h-5l-4%203v-3h-5a2%202%200%200%201-2-2v-9z%22%20fill%3D%22white%22%2F%3E%3C%2Fsvg%3E" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="SMS" /></a></td>
+        <td style="padding:0 5px;"><a href="${SITE_URL}/share/whatsapp.html" style="text-decoration:none;"><img src="https://communitycarpool.org/email-icons/whatsapp.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="WhatsApp" /></a></td>
+        <td style="padding:0 5px;"><a href="${SITE_URL}/share/facebook.html" style="text-decoration:none;"><img src="https://communitycarpool.org/email-icons/facebook.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="Facebook" /></a></td>
+        <td style="padding:0 5px;"><a href="${SITE_URL}/share/x.html" style="text-decoration:none;"><img src="https://communitycarpool.org/email-icons/twitter.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="X / Twitter" /></a></td>
+        <td style="padding:0 5px;"><a href="${SITE_URL}/share/linkedin.html" style="text-decoration:none;"><img src="https://communitycarpool.org/email-icons/linkedin.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="LinkedIn" /></a></td>
+        <td style="padding:0 5px;"><a href="${SITE_URL}/share/sms.html" style="text-decoration:none;"><img src="https://communitycarpool.org/email-icons/sms.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="SMS" /></a></td>
       </tr></table>
     </div>
-    <div style="text-align:center;margin-top:24px;color:#9ca3af;font-size:13px;">
+    <div style="text-align:center;margin-top:24px;color:#9ca3af;font-size:14px;">
       <p style="margin:0 0 6px;">
         <a href="${SITE_URL}/docs/" style="color:#6b7280;text-decoration:none;">Help &amp; FAQ</a> &nbsp;&middot;&nbsp;
         <a href="${SITE_URL}/terms.html" style="color:#6b7280;text-decoration:none;">Terms</a> &nbsp;&middot;&nbsp;
@@ -252,8 +288,8 @@ Deno.serve(async (req) => {
 
     const { data: match } = await supabase.from('matches').select(`
       match_id, status, sub_a_id, sub_b_id, interest_a, interest_b,
-      sub_a:submissions!sub_a_id (submission_id, user_id, journey_num, from_location, to_location, journey_status, users(name, email, match_page_token, email_whitelist, email_bounced, unsubscribed_matches, deletion_requested_at)),
-      sub_b:submissions!sub_b_id (submission_id, user_id, journey_num, from_location, to_location, journey_status, users(name, email, match_page_token, email_whitelist, email_bounced, unsubscribed_matches, deletion_requested_at))
+      sub_a:submissions!sub_a_id (submission_id, user_id, journey_num, from_location, to_location, journey_status, whatsapp_number, whatsapp_verification_status, users(name, email, match_page_token, email_whitelist, email_bounced, unsubscribed_matches, unsubscribed_whatsapp, deletion_requested_at)),
+      sub_b:submissions!sub_b_id (submission_id, user_id, journey_num, from_location, to_location, journey_status, whatsapp_number, whatsapp_verification_status, users(name, email, match_page_token, email_whitelist, email_bounced, unsubscribed_matches, unsubscribed_whatsapp, deletion_requested_at))
     `).eq('match_id', matchId).single()
 
     if (!match) return new Response(JSON.stringify({ success: false, error: 'Match not found' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 })
@@ -333,6 +369,26 @@ Deno.serve(async (req) => {
               otherSub.submission_id
             )
             await sendEmail(otherUser.email, 'Someone Just Said YES to Your Match!', html)
+
+            // WhatsApp nudge
+            const waMatchesEnabled = (await supabase.from('config').select('value').eq('key', 'whatsapp_matches_notification_enabled').single()).data?.value === 'true'
+            if (waMatchesEnabled && otherSub.whatsapp_number && otherSub.whatsapp_verification_status === 'whatsapp_verified' && !otherUser.unsubscribed_whatsapp) {
+              try {
+                await sendWhatsAppTemplate(
+                  otherSub.whatsapp_number,
+                  'whatsapp_interest_expressed_cc',
+                  [
+                    { parameter_name: 'first_name',    text: otherUser.name },
+                    { parameter_name: 'from_location', text: otherSub.from_location },
+                    { parameter_name: 'to_location',   text: otherSub.to_location },
+                  ],
+                  otherUser.match_page_token
+                )
+              } catch (waErr: any) {
+                console.error('[WA] YES nudge failed:', waErr.message)
+              }
+            }
+
             await supabase.from('events').insert({
               event_type: 'interest_yes_nudge_sent',
               user_id: otherSub.user_id,
@@ -400,6 +456,28 @@ Deno.serve(async (req) => {
             )
             await sendEmail(userB.email, '🎉 You have a mutual match! Contact details revealed', htmlB)
             supabase.from('events').insert({ event_type: 'mutual_match_email_sent', match_id: matchId, metadata: { recipient: userB.email } })
+          }
+          // WhatsApp mutual match notifications
+          const waMatchesEnabled2 = (await supabase.from('config').select('value').eq('key', 'whatsapp_matches_notification_enabled').single()).data?.value === 'true'
+          if (waMatchesEnabled2) {
+            for (const [sub, user] of [[subA, userA], [subB, userB]] as any) {
+              if (sub.whatsapp_number && sub.whatsapp_verification_status === 'whatsapp_verified' && !user.unsubscribed_whatsapp) {
+                try {
+                  await sendWhatsAppTemplate(
+                    sub.whatsapp_number,
+                    'whatsapp_mutual_match_cc',
+                    [
+                      { parameter_name: 'first_name',    text: user.name },
+                      { parameter_name: 'from_location', text: sub.from_location },
+                      { parameter_name: 'to_location',   text: sub.to_location },
+                    ],
+                    user.match_page_token
+                  )
+                } catch (waErr: any) {
+                  console.error('[WA] Mutual match failed:', waErr.message)
+                }
+              }
+            }
           }
         } catch (emailErr: any) {
           console.error('Mutual match email failed:', emailErr.message)

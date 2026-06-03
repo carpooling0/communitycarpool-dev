@@ -9,6 +9,40 @@ async function getConfig(key: string): Promise<string> {
   return data?.value || ''
 }
 
+// ── Send WhatsApp template via Meta Cloud API ────────────────────────────────
+async function sendWhatsAppTemplate(
+  to: string,
+  templateName: string,
+  bodyParams: Array<{ parameter_name: string; text: string }>,
+  buttonToken?: string
+): Promise<void> {
+  const accessToken   = Deno.env.get('WHATSAPP_ACCESS_TOKEN')
+  const phoneNumberId = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID')
+  if (!accessToken || !phoneNumberId)
+    throw new Error('WhatsApp secrets not configured')
+
+  const components: any[] = [{
+    type: 'body',
+    parameters: bodyParams.map(p => ({ type: 'text', parameter_name: p.parameter_name, text: p.text })),
+  }]
+  if (buttonToken) {
+    components.push({ type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: buttonToken }] })
+  }
+
+  const res = await fetch(`https://graph.facebook.com/v19.0/${phoneNumberId}/messages`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to,
+      type: 'template',
+      template: { name: templateName, language: { code: 'en' }, components },
+    }),
+  })
+  if (!res.ok) throw new Error(`WhatsApp API error ${res.status}: ${await res.text()}`)
+}
+
 // sendEmail returns the provider message ID if sent via Resend, else null
 async function sendEmail(to: string, subject: string, html: string, batchId?: string): Promise<string | null> {
   const resendKey = Deno.env.get('RESEND_API_KEY')
@@ -141,7 +175,7 @@ Deno.serve(async (req) => {
               <td style="padding:0 5px;"><a href="${shareBase}/sms.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/sms.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="SMS" /></a></td>
             </tr></table>
           </div>
-          <div style="text-align:center;margin-top:24px;color:#9ca3af;font-size:13px;">
+          <div style="text-align:center;margin-top:24px;color:#9ca3af;font-size:14px;">
             <p style="margin:0 0 6px;">
               <a href="${SITE_URL}/docs/" style="color:#6b7280;text-decoration:none;">Help &amp; FAQ</a> &nbsp;&middot;&nbsp;
               <a href="${SITE_URL}/terms.html" style="color:#6b7280;text-decoration:none;">Terms</a> &nbsp;&middot;&nbsp;
@@ -167,8 +201,8 @@ Deno.serve(async (req) => {
     const { data: unsentMatches, error } = await supabase.from('matches')
       .select(`
         match_id, sub_a_id, sub_b_id, match_strength,
-        sub_a:submissions!sub_a_id (submission_id, from_location, to_location, journey_num, user_id, users(name, email, match_page_token, email_whitelist, unsubscribed_matches, deletion_requested_at, email_bounced)),
-        sub_b:submissions!sub_b_id (submission_id, from_location, to_location, journey_num, user_id, users(name, email, match_page_token, email_whitelist, unsubscribed_matches, deletion_requested_at, email_bounced))
+        sub_a:submissions!sub_a_id (submission_id, from_location, to_location, journey_num, user_id, whatsapp_number, whatsapp_verification_status, users(name, email, match_page_token, email_whitelist, unsubscribed_matches, unsubscribed_whatsapp, deletion_requested_at, email_bounced)),
+        sub_b:submissions!sub_b_id (submission_id, from_location, to_location, journey_num, user_id, whatsapp_number, whatsapp_verification_status, users(name, email, match_page_token, email_whitelist, unsubscribed_matches, unsubscribed_whatsapp, deletion_requested_at, email_bounced))
       `).eq('notification_sent', false).eq('status', 'new')
     if (error) throw error
     if (!unsentMatches || unsentMatches.length === 0) {
@@ -183,9 +217,9 @@ Deno.serve(async (req) => {
     for (const match of unsentMatches) {
       for (const sub of [match.sub_a, match.sub_b]) {
         const userEmail = sub.users.email
-        if (!userMatches[userEmail]) userMatches[userEmail] = { name: sub.users.name, token: sub.users.match_page_token, userId: sub.user_id, emailWhitelist: sub.users.email_whitelist === true, unsubscribedMatches: sub.users.unsubscribed_matches === true, deletionRequested: !!sub.users.deletion_requested_at, emailBounced: sub.users.email_bounced === true, newJourneys: {} }
+        if (!userMatches[userEmail]) userMatches[userEmail] = { name: sub.users.name, token: sub.users.match_page_token, userId: sub.user_id, emailWhitelist: sub.users.email_whitelist === true, unsubscribedMatches: sub.users.unsubscribed_matches === true, unsubscribedWhatsapp: sub.users.unsubscribed_whatsapp === true, deletionRequested: !!sub.users.deletion_requested_at, emailBounced: sub.users.email_bounced === true, newJourneys: {} }
         if (!userMatches[userEmail].newJourneys[sub.submission_id]) {
-          userMatches[userEmail].newJourneys[sub.submission_id] = { journeyNum: sub.journey_num, fromLocation: sub.from_location, toLocation: sub.to_location, newMatchCount: 0 }
+          userMatches[userEmail].newJourneys[sub.submission_id] = { journeyNum: sub.journey_num, fromLocation: sub.from_location, toLocation: sub.to_location, newMatchCount: 0, waNumber: sub.whatsapp_number || null, waVerified: sub.whatsapp_verification_status === 'whatsapp_verified' }
         }
         userMatches[userEmail].newJourneys[sub.submission_id].newMatchCount++
       }
@@ -298,7 +332,7 @@ Deno.serve(async (req) => {
                 <td style="padding:0 5px;"><a href="${shareBase}/sms.html" style="text-decoration:none;"><img src="${SITE_URL}/email-icons/sms.png" width="36" height="36" style="display:block;border:0;border-radius:9px;" alt="SMS" /></a></td>
               </tr></table>
             </div>
-            <div style="text-align:center;margin-top:24px;color:#9ca3af;font-size:13px;">
+            <div style="text-align:center;margin-top:24px;color:#9ca3af;font-size:14px;">
               <p style="margin:0 0 6px;">
                 <a href="${SITE_URL}/docs/" style="color:#6b7280;text-decoration:none;">Help &amp; FAQ</a> &nbsp;&middot;&nbsp;
                 <a href="${SITE_URL}/terms.html" style="color:#6b7280;text-decoration:none;">Terms</a> &nbsp;&middot;&nbsp;
@@ -323,6 +357,34 @@ Deno.serve(async (req) => {
         emailsFailed++
         console.error(`Email failed for ${email}:`, emailErr.message)
         supabase.from('events').insert({ event_type: 'match_email_failed', metadata: { email, error: emailErr.message, batch_id: batchId } })
+      }
+    }
+
+    // ── WhatsApp match notifications (one per journey with new matches) ──────
+    const waMatchesEnabled = (await getConfig('whatsapp_matches_notification_enabled')) === 'true'
+    if (waMatchesEnabled) {
+      for (const [, userData] of Object.entries(userMatches) as any) {
+        if (userData.unsubscribedWhatsapp || userData.deletionRequested) continue
+        if (testingMode && !userData.emailWhitelist) continue
+        for (const [subId, journey] of Object.entries(userData.newJourneys) as any) {
+          if (!journey.waNumber || !journey.waVerified) continue
+          try {
+            await sendWhatsAppTemplate(
+              journey.waNumber,
+              'whatsapp_match_notification_cc',
+              [
+                { parameter_name: 'first_name',   text: userData.name },
+                { parameter_name: 'match_count',  text: String(journey.newMatchCount) },
+                { parameter_name: 'from_location', text: journey.fromLocation },
+                { parameter_name: 'to_location',   text: journey.toLocation },
+              ],
+              userData.token
+            )
+            console.log(`[WA] Match notification sent → ${journey.waNumber} (submission ${subId})`)
+          } catch (waErr: any) {
+            console.error(`[WA] Match notification failed for ${journey.waNumber}:`, waErr.message)
+          }
+        }
       }
     }
 

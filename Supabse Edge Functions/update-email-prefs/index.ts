@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
       const tokenExpiry = await getTokenExpiry()
       const { data: user } = await supabase
         .from('users')
-        .select('unsubscribed_matches, unsubscribed_reminders, unsubscribed_marketing')
+        .select('unsubscribed_matches, unsubscribed_reminders, unsubscribed_marketing, unsubscribed_whatsapp')
         .eq('match_page_token', token)
         .gt('token_created_at', tokenExpiry.toISOString())
         .single()
@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
 
     // POST — update preferences
     if (req.method === 'POST') {
-      const { token, unsubscribedMatches, unsubscribedReminders, unsubscribedMarketing } = await req.json()
+      const { token, unsubscribedMatches, unsubscribedReminders, unsubscribedMarketing, unsubscribedWhatsapp } = await req.json()
 
       if (!token) {
         return new Response(JSON.stringify({ success: false, error: 'token required' }), {
@@ -57,11 +57,11 @@ Deno.serve(async (req) => {
         })
       }
 
-      // Validate token with expiry check before allowing any preference changes
+      // Validate token and fetch current prefs in one query
       const tokenExpiry = await getTokenExpiry()
       const { data: user } = await supabase
         .from('users')
-        .select('user_id')
+        .select('user_id, unsubscribed_matches, unsubscribed_reminders, unsubscribed_whatsapp')
         .eq('match_page_token', token)
         .gt('token_created_at', tokenExpiry.toISOString())
         .single()
@@ -72,25 +72,34 @@ Deno.serve(async (req) => {
         })
       }
 
+      // Compute effective values (incoming overrides current)
+      const effectiveMatches  = unsubscribedMatches  !== undefined ? unsubscribedMatches  : user.unsubscribed_matches
+      const effectiveReminders= unsubscribedReminders!== undefined ? unsubscribedReminders: user.unsubscribed_reminders
+      const effectiveWhatsapp = unsubscribedWhatsapp !== undefined ? unsubscribedWhatsapp : user.unsubscribed_whatsapp
+
+      // Block: at least one of matches / reminders / WhatsApp must remain active
+      if (effectiveMatches && effectiveReminders && effectiveWhatsapp) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'You must keep at least one notification channel active to receive your match updates.'
+        }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+
       const updateData: Record<string, any> = {}
       if (unsubscribedMatches   !== undefined) updateData.unsubscribed_matches   = unsubscribedMatches
       if (unsubscribedReminders !== undefined) updateData.unsubscribed_reminders = unsubscribedReminders
       if (unsubscribedMarketing !== undefined) updateData.unsubscribed_marketing = unsubscribedMarketing
+      if (unsubscribedWhatsapp  !== undefined) updateData.unsubscribed_whatsapp  = unsubscribedWhatsapp
 
       // Set unsubscribed_at timestamp if any flag is being set to true
-      const anyUnsubscribing = Object.values(updateData).some(v => v === true)
-      if (anyUnsubscribing) updateData.unsubscribed_at = new Date().toISOString()
+      if (Object.values(updateData).some(v => v === true)) updateData.unsubscribed_at = new Date().toISOString()
 
-      // If ALL explicitly set to false (re-subscribe), clear the timestamp
-      if (unsubscribedMatches === false && unsubscribedReminders === false && unsubscribedMarketing === false) {
+      // Clear timestamp if all are being set back to false
+      if (unsubscribedMatches === false && unsubscribedReminders === false && unsubscribedMarketing === false && unsubscribedWhatsapp === false) {
         updateData.unsubscribed_at = null
       }
 
-      const { error } = await supabase
-        .from('users')
-        .update(updateData)
-        .eq('user_id', user.user_id)
-
+      const { error } = await supabase.from('users').update(updateData).eq('user_id', user.user_id)
       if (error) throw error
 
       return new Response(JSON.stringify({ success: true }), {

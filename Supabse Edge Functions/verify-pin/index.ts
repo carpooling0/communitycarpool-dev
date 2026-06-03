@@ -53,20 +53,51 @@ Deno.serve(async (req) => {
     }
 
     // ── POST: verify by PIN (entered in modal) ───────────────────────────────────
-    const { submissionId, pin } = await req.json()
+    const { submissionId, pin, channel = 'email' } = await req.json()
 
     if (!submissionId || !pin)
       return new Response(JSON.stringify({ success: false, error: 'submissionId and pin required.' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 })
 
     const { data: sub } = await supabase
       .from('submissions')
-      .select('submission_id, user_id, email_verification_status, email_verification_pin, email_verification_pin_expires_at, journey_num, distance_km')
+      .select(`submission_id, user_id, journey_num, distance_km,
+               email_verification_status, email_verification_pin, email_verification_pin_expires_at,
+               whatsapp_verification_status, whatsapp_verification_pin, whatsapp_verification_pin_expires_at`)
       .eq('submission_id', submissionId)
       .single()
 
     if (!sub)
       return new Response(JSON.stringify({ success: false, error: 'Submission not found.' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 })
 
+    // ── WhatsApp channel ─────────────────────────────────────────────────────
+    if (channel === 'whatsapp') {
+      if (sub.whatsapp_verification_status === 'whatsapp_verified')
+        return new Response(JSON.stringify({ success: true, alreadyVerified: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+
+      if (!sub.whatsapp_verification_pin)
+        return new Response(JSON.stringify({ success: false, error: 'No WhatsApp PIN found. Please request a new one.' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 })
+
+      if (new Date(sub.whatsapp_verification_pin_expires_at) < new Date())
+        return new Response(JSON.stringify({ success: false, error: 'PIN has expired. Please request a new one.' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 })
+
+      if (sub.whatsapp_verification_pin !== String(pin))
+        return new Response(JSON.stringify({ success: false, error: 'Incorrect PIN. Please try again.' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 })
+
+      await supabase.from('submissions').update({
+        whatsapp_verification_status: 'whatsapp_verified',
+        whatsapp_verification_pin: null,
+      }).eq('submission_id', submissionId)
+
+      await supabase.from('events').insert({
+        event_type: 'whatsapp_verified',
+        submission_id: submissionId,
+        metadata: { method: 'pin' }
+      })
+
+      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    // ── Email channel (default) ──────────────────────────────────────────────
     if (sub.email_verification_status === 'email_verified')
       return new Response(JSON.stringify({ success: true, alreadyVerified: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 

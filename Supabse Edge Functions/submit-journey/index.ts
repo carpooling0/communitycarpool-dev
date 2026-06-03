@@ -57,6 +57,45 @@ async function roadDistance(
   }
 }
 
+// ── Send WhatsApp PIN via Meta Cloud API ─────────────────────────────────────
+async function sendWhatsAppPin(to: string, pin: string): Promise<void> {
+  const accessToken   = Deno.env.get('WHATSAPP_ACCESS_TOKEN')
+  const phoneNumberId = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID')
+
+  if (!accessToken || !phoneNumberId)
+    throw new Error('WhatsApp secrets not configured (WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID)')
+
+  const res = await fetch(
+    `https://graph.facebook.com/v19.0/${phoneNumberId}/messages`,
+    {
+      method:  'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type':  'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        recipient_type:    'individual',
+        to,
+        type: 'template',
+        template: {
+          name:     'whatsapp_accountcreation_cc',
+          language: { code: 'en' },
+          components: [
+            {
+              type: 'body',
+              parameters: [
+                { type: 'text', parameter_name: 'pin_code', text: pin },
+              ],
+            },
+          ],
+        },
+      }),
+    }
+  )
+  if (!res.ok) throw new Error(`WhatsApp API error ${res.status}: ${await res.text()}`)
+}
+
 // ── Send PIN verification email ──────────────────────────────────────────────
 async function sendPinEmail(toEmail: string, firstName: string, pin: string, verifyToken: string, siteUrl: string): Promise<void> {
   const resendKey = Deno.env.get('RESEND_API_KEY')
@@ -187,7 +226,8 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json()
     const { firstName, email, fromLocation, fromLatLng, toLocation, toLatLng, distance, distanceValue, country: countryHint, orgCode,
-            refCode, utmSource, utmMedium, utmCampaign, termsVersion, termsAgreed } = body
+            refCode, utmSource, utmMedium, utmCampaign, termsVersion, termsAgreed,
+            whatsappNumber } = body
 
     const ip = req.headers.get('cf-connecting-ip')
             || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
@@ -291,22 +331,37 @@ Deno.serve(async (req) => {
       .select('*', { count: 'exact', head: true }).eq('user_id', userId)
     const journeyNum = (journeyCount || 0) + 1
 
-    // Check email verification config
-    const verificationEnabled = (await getConfig('email_verification_enabled')) === 'true'
+    // Check verification config
+    const verificationEnabled   = (await getConfig('email_verification_enabled'))    === 'true'
+    const waVerificationEnabled = (await getConfig('whatsapp_verification_enabled')) === 'true'
 
-    // Generate PIN and token if verification is enabled
+    // ── Email PIN ────────────────────────────────────────────────────────────
     let emailVerificationStatus = 'verification_skipped'
     let pin: string | null = null
     let verifyToken: string | null = null
     let pinExpiresAt: string | null = null
 
     if (verificationEnabled) {
-      pin = String(Math.floor(1000 + Math.random() * 9000))  // 4-digit PIN: 1000–9999
+      pin = String(Math.floor(1000 + Math.random() * 9000))
       verifyToken = crypto.randomUUID()
       const expiry = new Date()
-      expiry.setHours(expiry.getHours() + 24)  // 24-hour window — valid if user opens email later that day
+      expiry.setMinutes(expiry.getMinutes() + 15)
       pinExpiresAt = expiry.toISOString()
       emailVerificationStatus = 'email_unverified'
+    }
+
+    // ── WhatsApp PIN ─────────────────────────────────────────────────────────
+    const waEnabled = waVerificationEnabled && !!whatsappNumber
+    let waVerificationStatus = 'not_applicable'
+    let waPin: string | null = null
+    let waPinExpiresAt: string | null = null
+
+    if (waEnabled) {
+      waPin = String(Math.floor(1000 + Math.random() * 9000))
+      const waExpiry = new Date()
+      waExpiry.setMinutes(waExpiry.getMinutes() + 15)
+      waPinExpiresAt = waExpiry.toISOString()
+      waVerificationStatus = 'whatsapp_unverified'
     }
 
     const { data: submission, error: subError } = await supabase.from('submissions')
@@ -324,7 +379,12 @@ Deno.serve(async (req) => {
         email_verification_status: emailVerificationStatus,
         email_verification_pin: pin,
         email_verification_token: verifyToken,
-        email_verification_pin_expires_at: pinExpiresAt
+        email_verification_pin_expires_at: pinExpiresAt,
+        // WhatsApp verification (null when WA not enabled)
+        whatsapp_number:                       waEnabled ? whatsappNumber : null,
+        whatsapp_verification_status:          waVerificationStatus,
+        whatsapp_verification_pin:             waPin,
+        whatsapp_verification_pin_expires_at:  waPinExpiresAt,
       }).select('submission_id').single()
     if (subError) throw subError
 
@@ -334,7 +394,7 @@ Deno.serve(async (req) => {
       metadata: { org_code: orgCode, distance_pref: distancePrefKm }
     })
 
-    // Send PIN email fire-and-forget
+    // Send email PIN fire-and-forget
     if (verificationEnabled && pin && verifyToken) {
       const siteUrl = Deno.env.get('SITE_URL') || 'https://communitycarpool.org'
       ;(async () => {
@@ -343,6 +403,18 @@ Deno.serve(async (req) => {
           console.log(`[submit-journey] PIN email sent to ${email} for submission ${submission!.submission_id}`)
         } catch (emailErr: any) {
           console.error(`[submit-journey] PIN email failed for ${email}:`, emailErr.message)
+        }
+      })()
+    }
+
+    // Send WhatsApp PIN fire-and-forget
+    if (waEnabled && waPin) {
+      ;(async () => {
+        try {
+          await sendWhatsAppPin(whatsappNumber, waPin!)
+          console.log(`[submit-journey] WA PIN sent → ${whatsappNumber} (submission ${submission!.submission_id})`)
+        } catch (waErr: any) {
+          console.error(`[submit-journey] WA PIN failed for ${whatsappNumber}:`, waErr.message)
         }
       })()
     }
@@ -363,12 +435,19 @@ Deno.serve(async (req) => {
       })
     }
 
+    // verificationChannel tells the frontend which modal variant to show:
+    //   'both'  → combined email + WhatsApp modal
+    //   'email' → existing email-only modal
+    //   'none'  → no modal, go straight to success
+    const verificationChannel = waEnabled ? 'both' : verificationEnabled ? 'email' : 'none'
+
     return new Response(JSON.stringify({
       success: true,
       submissionId: submission!.submission_id,
       journeyNum,
       actualDist: Math.round(distanceKm * 10) / 10,
-      verificationRequired: verificationEnabled
+      verificationRequired: verificationEnabled,
+      verificationChannel,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
   } catch (err: any) {

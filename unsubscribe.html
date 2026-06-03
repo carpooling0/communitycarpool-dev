@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Email Preferences | Community Carpool</title>
+  <title>Notification Preferences | Community Carpool</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="favicon.png" type="image/png">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📧</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📧</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+  <noscript><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -41,6 +41,12 @@
     h1 { font-size: 21px; font-weight: 700; color: #111827; margin-bottom: 6px; }
     .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 28px; line-height: 1.5; }
 
+    .section-label {
+      font-size: 11px; font-weight: 700; color: #6b7280;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 8px; padding-left: 2px;
+    }
+
     /* Preference rows */
     .pref-list {
       display: flex; flex-direction: column;
@@ -59,6 +65,15 @@
     .pref-text { flex: 1; }
     .pref-label { font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 2px; }
     .pref-desc  { font-size: 13px; color: #6b7280; line-height: 1.4; }
+
+    /* Channel icon */
+    .channel-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; flex-shrink: 0;
+    }
+    .channel-icon.email    { background: #eff6ff; }
+    .channel-icon.whatsapp { background: #f0fdf4; }
 
     /* Toggle switch */
     .toggle { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
@@ -81,6 +96,7 @@
     }
     .toggle input:checked + .toggle-track { background: #16a34a; }
     .toggle input:checked + .toggle-track::after { transform: translateX(20px); }
+    .toggle input:disabled + .toggle-track { opacity: 0.4; cursor: not-allowed; }
 
     /* Buttons */
     .btn {
@@ -143,7 +159,7 @@
   <div class="card">
     <div class="logo">
       <a href="https://communitycarpool.org">
-        <picture><source srcset="logo_with_slogan.webp" type="image/webp"><img src="logo_with_slogan.png" alt="Community Carpool" ></picture>
+        <picture><source srcset="logo_with_slogan.webp" type="image/webp"><img src="logo_with_slogan.png" alt="Community Carpool"></picture>
       </a>
     </div>
 
@@ -155,7 +171,7 @@
 
     <!-- No token -->
     <div id="stateNoToken" class="hidden" style="text-align:center;">
-      <h1>Email Preferences</h1>
+      <h1>Notification Preferences</h1>
       <p style="font-size:14px;color:#6b7280;margin-top:12px;margin-bottom:24px;line-height:1.6;">
         This page requires an unsubscribe link from one of our emails.<br>
         If you'd like to update your preferences, please contact us.
@@ -165,13 +181,16 @@
 
     <!-- Main state -->
     <div id="stateMain" class="hidden">
-      <h1>Email Preferences</h1>
-      <p class="subtitle">Choose what you'd like to receive from Community Carpool.</p>
+      <h1>Notification Preferences</h1>
+      <p class="subtitle">Choose how you'd like to hear from Community Carpool. At least one channel must stay active.</p>
 
       <div id="statusMsg" class="status-msg"></div>
 
-      <div class="pref-list">
+      <!-- Email section -->
+      <div class="section-label">Email</div>
+      <div class="pref-list" style="margin-bottom:20px;">
         <div class="pref-row">
+          <div class="channel-icon email">✉️</div>
           <div class="pref-text">
             <div class="pref-label">Match notifications</div>
             <div class="pref-desc">Get notified when new carpool matches are found for your journeys</div>
@@ -183,6 +202,7 @@
         </div>
 
         <div class="pref-row">
+          <div class="channel-icon email">✉️</div>
           <div class="pref-text">
             <div class="pref-label">Match reminders</div>
             <div class="pref-desc">Follow-up reminders for matches awaiting your response</div>
@@ -194,6 +214,7 @@
         </div>
 
         <div class="pref-row">
+          <div class="channel-icon email">✉️</div>
           <div class="pref-text">
             <div class="pref-label">Product updates</div>
             <div class="pref-desc">Platform news and improvements</div>
@@ -205,8 +226,24 @@
         </div>
       </div>
 
+      <!-- WhatsApp section -->
+      <div class="section-label">WhatsApp</div>
+      <div class="pref-list">
+        <div class="pref-row">
+          <div class="channel-icon whatsapp">💬</div>
+          <div class="pref-text">
+            <div class="pref-label">WhatsApp notifications</div>
+            <div class="pref-desc">Match updates and reminders via WhatsApp, if you have a verified number</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggleWhatsapp" checked>
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+      </div>
+
       <button class="btn btn-save" id="saveBtn" onclick="savePrefs()">Save Preferences</button>
-      <button class="btn btn-unsub-all" id="unsubAllBtn" onclick="unsubscribeAll()">Unsubscribe from all emails</button>
+      <button class="btn btn-unsub-all" id="unsubAllBtn" onclick="unsubscribeAllEmail()">Unsubscribe from all emails</button>
 
     </div>
   </div>
@@ -233,7 +270,7 @@
       const el = $('statusMsg')
       el.textContent = msg
       el.className = 'status-msg ' + type + ' show'
-      setTimeout(() => el.classList.remove('show'), 4000)
+      setTimeout(() => el.classList.remove('show'), 5000)
     }
 
     function show(stateId) {
@@ -242,29 +279,39 @@
       })
     }
 
+    // Block save if all 3 notification channels would be off
+    function allChannelsOff() {
+      return !$('toggleMatches').checked && !$('toggleReminders').checked && !$('toggleWhatsapp').checked
+    }
+
     async function init() {
       if (!token) { show('stateNoToken'); return }
 
-try {
+      try {
         const res  = await fetch(`${SUPABASE_URL}/functions/v1/update-email-prefs?token=${encodeURIComponent(token)}`, {
           headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
         })
         const data = await res.json()
 
         if (data.success && data.prefs) {
-          // Toggle ON (checked = green) means subscribed = unsubscribed_* is false
           $('toggleMatches').checked   = !data.prefs.unsubscribed_matches
           $('toggleReminders').checked = !data.prefs.unsubscribed_reminders
           $('toggleMarketing').checked = !data.prefs.unsubscribed_marketing
+          $('toggleWhatsapp').checked  = !data.prefs.unsubscribed_whatsapp
         }
       } catch(e) {
-        // Default all ON — safe fallback if fetch fails
+        // Default all ON — safe fallback
       }
 
       show('stateMain')
     }
 
     async function savePrefs() {
+      if (allChannelsOff()) {
+        showStatus('You must keep at least one notification channel active to receive your match updates.', 'error')
+        return
+      }
+
       const btn = $('saveBtn')
       btn.disabled = true; btn.textContent = 'Saving…'
       try {
@@ -275,18 +322,26 @@ try {
             token,
             unsubscribedMatches:   !$('toggleMatches').checked,
             unsubscribedReminders: !$('toggleReminders').checked,
-            unsubscribedMarketing: !$('toggleMarketing').checked
+            unsubscribedMarketing: !$('toggleMarketing').checked,
+            unsubscribedWhatsapp:  !$('toggleWhatsapp').checked
           })
         })
         const data = await res.json()
-        showStatus(data.success ? '✓ Preferences saved' : 'Something went wrong. Please try again.', data.success ? 'success' : 'error')
+        showStatus(data.success ? '✓ Preferences saved' : (data.error || 'Something went wrong. Please try again.'), data.success ? 'success' : 'error')
       } catch(e) {
         showStatus('Unable to save. Please try again.', 'error')
       }
       btn.disabled = false; btn.textContent = 'Save Preferences'
     }
 
-    async function unsubscribeAll() {
+    // Unsubscribe from all email types only — WhatsApp left as-is
+    async function unsubscribeAllEmail() {
+      // Check if turning off all email would also leave WA off
+      if (!$('toggleWhatsapp').checked) {
+        showStatus('You must keep at least one notification channel active. Enable WhatsApp notifications first, or keep at least one email type on.', 'error')
+        return
+      }
+
       const btn = $('unsubAllBtn')
       btn.disabled = true; btn.textContent = 'Unsubscribing…'
 
@@ -301,9 +356,17 @@ try {
           body:    JSON.stringify({ token, unsubscribedMatches: true, unsubscribedReminders: true, unsubscribedMarketing: true })
         })
         const data = await res.json()
-        showStatus(data.success ? "✓ You've been unsubscribed from all emails" : 'Something went wrong. Please try again.', data.success ? 'success' : 'error')
+        showStatus(data.success ? "✓ Unsubscribed from all emails" : (data.error || 'Something went wrong. Please try again.'), data.success ? 'success' : 'error')
+        if (!data.success) {
+          $('toggleMatches').checked   = true
+          $('toggleReminders').checked = true
+          $('toggleMarketing').checked = true
+        }
       } catch(e) {
         showStatus('Unable to save. Please try again.', 'error')
+        $('toggleMatches').checked   = true
+        $('toggleReminders').checked = true
+        $('toggleMarketing').checked = true
       }
       btn.disabled = false; btn.textContent = 'Unsubscribe from all emails'
     }
