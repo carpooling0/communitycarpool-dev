@@ -120,32 +120,6 @@ export async function sendInitialPinEmail(
               <p style="margin:0 0 12px;font-size:13px;color:#6B7280;">Closed the window? Click below to verify instantly:</p>
               <a href="${verifyLink}" style="display:inline-block;padding:11px 28px;background:#1B5C3A;color:#FFFFFF;border-radius:50px;text-decoration:none;font-size:14px;font-weight:700;font-family:Montserrat,Inter,sans-serif;">Confirm My Journey &rarr;</a>
 
-              <!-- Journey Tracker — Step 1 active -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;"><tr><td style="border-top:1px solid #E5E7EB;padding-bottom:16px;"></td></tr></table>
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
-                <tr>
-                  <td align="center" width="20%">
-                    <div style="width:28px;height:28px;border-radius:50%;background:#B4E035;color:#1B5C3A;font-size:12px;font-weight:900;line-height:28px;margin:0 auto 4px;border:2px solid #1B5C3A;">1</div>
-                    <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;">Joined the Pool</div>
-                  </td>
-                  <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
-                  <td align="center" width="20%">
-                    <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">2</div>
-                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Matched</div>
-                  </td>
-                  <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
-                  <td align="center" width="20%">
-                    <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">3</div>
-                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Connected</div>
-                  </td>
-                  <td style="padding-bottom:16px;"><div style="height:2px;background:#E5E7EB;"></div></td>
-                  <td align="center" width="20%">
-                    <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">4</div>
-                    <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">Carpooling!</div>
-                  </td>
-                </tr>
-              </table>
-
             </td>
           </tr>
         </table>
@@ -244,38 +218,6 @@ export async function sendResendPinEmail(
             </td>
           </tr>
         </table>
-      </td>
-    </tr>
-
-    <tr>
-      <td style="padding-top:16px;">
-        <!-- Journey Tracker — Step 1 active -->
-        <div style="background:#FFFFFF;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
-          <div style="font-size:11px;font-weight:700;color:#1B5C3A;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;">Your Carpool Status</div>
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;">
-            <tr>
-              <td align="center" width="20%">
-                <div style="width:28px;height:28px;border-radius:50%;background:#B4E035;color:#1B5C3A;font-size:12px;font-weight:900;line-height:28px;margin:0 auto 4px;border:2px solid #1B5C3A;">1</div>
-                <div style="font-size:9px;color:#1B5C3A;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;line-height:1.3;word-break:break-word;">Joined the Pool</div>
-              </td>
-              <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
-              <td align="center" width="20%">
-                <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">2</div>
-                <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Matched</div>
-              </td>
-              <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
-              <td align="center" width="20%">
-                <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">3</div>
-                <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Connected</div>
-              </td>
-              <td style="padding-bottom:16px;width:8%;"><div style="height:2px;background:#E5E7EB;"></div></td>
-              <td align="center" width="20%">
-                <div style="width:28px;height:28px;border-radius:50%;background:#F3F4F6;color:#9CA3AF;font-size:12px;font-weight:600;line-height:28px;margin:0 auto 4px;">4</div>
-                <div style="font-size:9px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;word-break:break-word;">Carpooling!</div>
-              </td>
-            </tr>
-          </table>
-        </div>
       </td>
     </tr>
 
