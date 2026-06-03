@@ -1309,7 +1309,7 @@
     async function fetchFormConfig() {
       try {
         const res = await fetch(SUPABASE_URL + '/functions/v1/get-form-config', {
-          headers: { 'apikey': SUPABASE_ANON_KEY }
+          headers: { 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
         });
         const cfg = await res.json();
         _waEnabled = !!cfg.whatsappVerificationEnabled;
