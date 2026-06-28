@@ -806,16 +806,12 @@
     </div>
 
     <!-- UMAMI ANALYTICS -->
-    <div id="panel-traffic" class="panel hidden">
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:calc(100vh - 120px);gap:16px;text-align:center">
-        <div style="font-size:48px">📊</div>
-        <div style="font-size:18px;font-weight:700;color:var(--text)">Umami Analytics</div>
-        <div style="font-size:13px;color:var(--text-muted);max-width:320px">Web traffic dashboard — opens in a new tab. Umami does not allow embedding.</div>
-        <a href="https://cloud.umami.is/analytics/eu/share/pLzd0HUQsDeDiOCm?unit=day" target="_blank"
-           style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:var(--green-dark);color:white;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none">
-          Open Umami Dashboard ↗
-        </a>
-      </div>
+    <div id="panel-traffic" class="panel hidden" style="padding:0;overflow:hidden">
+      <iframe
+        src="https://cloud.umami.is/analytics/eu/share/pLzd0HUQsDeDiOCm?unit=day"
+        style="width:100%;height:calc(100vh - 56px);border:none;display:block"
+        title="Umami Analytics">
+      </iframe>
     </div>
 
     <!-- ANALYTICS -->
