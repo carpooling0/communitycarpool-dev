@@ -1,8 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const supabase = createClient(
-  Deno.env.get('DB_URL')!,
-  Deno.env.get('DB_SERVICE_KEY')!
+  Deno.env.get('DB_URL') || Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('DB_SERVICE_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 )
 
 const corsHeaders = {
