@@ -47,9 +47,8 @@ async function validateSession(req: Request): Promise<{ admin: any; error?: stri
   console.log('[auth] token prefix:', token?.slice(0, 8), 'len:', token?.length)
   const { data: session, error: sessErr } = await supabase.from('admin_sessions')
     .select('admin_id, expires_at').eq('session_token', token).single()
-  console.log('[auth] session:', session ? 'found' : 'null', 'err:', sessErr?.message, sessErr?.code)
   if (!session || new Date(session.expires_at) < new Date())
-    return { admin: null, error: 'Session expired or invalid', status: 401 }
+    return { admin: null, error: `Session not found. db_url=${(Deno.env.get('DB_URL')||Deno.env.get('SUPABASE_URL')||'').slice(0,40)} key=${(Deno.env.get('DB_SERVICE_KEY')||Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'NONE').slice(0,12)} sess_err=${sessErr?.code}:${sessErr?.message} tok_len=${token?.length}`, status: 401 }
   const { data: admin } = await supabase.from('admin_users')
     .select('admin_id, name, role, is_active, role_expires_at, deletion_pin_hash')
     .eq('admin_id', session.admin_id).single()
