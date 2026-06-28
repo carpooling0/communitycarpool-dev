@@ -44,8 +44,10 @@ async function validateSession(req: Request): Promise<{ admin: any; error?: stri
   const authHeader = req.headers.get('Authorization')
   const token = authHeader?.replace('Bearer ', '').trim()
   if (!token) return { admin: null, error: 'Authorization token required', status: 401 }
-  const { data: session } = await supabase.from('admin_sessions')
+  console.log('[auth] token prefix:', token?.slice(0, 8), 'len:', token?.length)
+  const { data: session, error: sessErr } = await supabase.from('admin_sessions')
     .select('admin_id, expires_at').eq('session_token', token).single()
+  console.log('[auth] session:', session ? 'found' : 'null', 'err:', sessErr?.message, sessErr?.code)
   if (!session || new Date(session.expires_at) < new Date())
     return { admin: null, error: 'Session expired or invalid', status: 401 }
   const { data: admin } = await supabase.from('admin_users')
