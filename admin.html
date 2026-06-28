@@ -3228,7 +3228,7 @@ function getArchiveRange() {
 function mergeBreakdown(arrays) {
   const map = {}
   for (const arr of arrays) {
-    for (const item of (arr || [])) {
+    for (const item of (Array.isArray(arr) ? arr : [])) {
       const k = item.x || ''
       map[k] = (map[k] || 0) + (item.y || 0)
     }
