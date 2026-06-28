@@ -16,10 +16,13 @@ serve(async (req) => {
     const body = await req.json()
     const { date, token, secret } = body
 
-    // Auth: admin token OR cron secret
+    // Auth: cron secret OR service role key (for internal admin-api calls) OR admin session token
     const cronSecret = Deno.env.get('SYNC_SECRET')
+    const serviceKey = Deno.env.get('DB_SERVICE_KEY')
     let authed = false
     if (secret && cronSecret && secret === cronSecret) {
+      authed = true
+    } else if (secret && serviceKey && secret === serviceKey) {
       authed = true
     } else if (token) {
       const supabaseUrl = Deno.env.get('DB_URL')!

@@ -467,6 +467,20 @@ Deno.serve(async (req) => {
       return json({ success: true, links: data })
     }
 
+    if (action === 'analytics.sync') {
+      const { date } = body
+      if (!date) return json({ error: 'date required' }, 400)
+      const serviceKey = Deno.env.get('DB_SERVICE_KEY')!
+      const supabaseUrl = Deno.env.get('DB_URL')!
+      const res = await fetch(`${supabaseUrl}/functions/v1/sync-analytics`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: serviceKey, date }),
+      })
+      const data = await res.json()
+      return json(data)
+    }
+
     if (action === 'analytics.archive') {
       const { date, fromDate, toDate } = body
       if (date) {
