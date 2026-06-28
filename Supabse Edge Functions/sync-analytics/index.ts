@@ -18,14 +18,14 @@ serve(async (req) => {
 
     // Auth: cron secret OR service role key (for internal admin-api calls) OR admin session token
     const cronSecret = Deno.env.get('SYNC_SECRET')
-    const serviceKey = Deno.env.get('DB_SERVICE_KEY')
+    const serviceKey = Deno.env.get('DB_SERVICE_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     let authed = false
     if (secret && cronSecret && secret === cronSecret) {
       authed = true
     } else if (secret && serviceKey && secret === serviceKey) {
       authed = true
     } else if (token) {
-      const supabaseUrl = Deno.env.get('DB_URL')!
+      const supabaseUrl = Deno.env.get('DB_URL') || Deno.env.get('SUPABASE_URL')!
       const authRes = await fetch(`${supabaseUrl}/functions/v1/admin-auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -117,8 +117,8 @@ serve(async (req) => {
     }))
 
     const supabase = createClient(
-      Deno.env.get('DB_URL')!,
-      Deno.env.get('DB_SERVICE_KEY')!
+      Deno.env.get('DB_URL') || Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('DB_SERVICE_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
     const { error } = await supabase.from('analytics_daily').upsert({
