@@ -5,7 +5,7 @@ const CORS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const UMAMI_BASE = 'https://api.umami.is/v1'
+const UMAMI_BASE = 'https://api.umami.is/v1/eu'
 const UMAMI_WEBSITE_ID = '95b6c0b0-6a71-42ea-8f2d-56ec5eb5e55a'
 
 serve(async (req) => {
