@@ -139,7 +139,7 @@ serve(async (req) => {
     if (error) throw error
 
     return new Response(
-      JSON.stringify({ success: true, date: dateStr, pageviews: pvCount, visitors, visits, _raw_stats: stats }),
+      JSON.stringify({ success: true, date: dateStr, pageviews: pvCount, visitors, visits }),
       { headers: { ...CORS, 'Content-Type': 'application/json' } }
     )
   } catch (err) {
