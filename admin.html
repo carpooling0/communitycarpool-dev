@@ -808,7 +808,7 @@
     <!-- UMAMI ANALYTICS -->
     <div id="panel-traffic" class="panel hidden" style="padding:0;overflow:hidden">
       <iframe
-        src="https://cloud.umami.is/analytics/eu/share/pLzd0HUQsDeDiOCm?unit=day"
+        id="umami-frame"
         style="width:100%;height:calc(100vh - 56px);border:none;display:block"
         title="Umami Analytics">
       </iframe>
@@ -1392,6 +1392,10 @@ function switchPanel(panel) {
   document.getElementById(`panel-${panel}`)?.classList.remove('hidden')
   document.querySelectorAll('.nav-item[data-panel]').forEach(b => b.classList.toggle('active', b.dataset.panel === panel))
   document.getElementById('topbarTitle').textContent = PANEL_TITLES[panel] || panel
+  if (panel === 'traffic') {
+    const f = document.getElementById('umami-frame')
+    if (f && !f.src) f.src = 'https://cloud.umami.is/analytics/eu/share/pLzd0HUQsDeDiOCm?unit=day'
+  }
   if (panel === 'analytics') { initSyncDate(); loadAnalytics() }
   if (panel === 'tickets')   loadTickets()
   if (panel === 'deletions') loadDeletions()
