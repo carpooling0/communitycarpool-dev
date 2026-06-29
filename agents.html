@@ -122,6 +122,20 @@ const API_URL  = `${SUPABASE_URL}/functions/v1/admin-api`
 const TOKEN_KEY = 'ccp_admin_token'
 let currentFilter = 'pending'
 
+const SUBREDDITS = [
+  'carpool','commuting','rideshare',
+  'sustainability','environment','climate','zerowaste','Anticonsumption',
+  'fuckcars','urbanplanning','notjustbikes','15minutecity','cities',
+  'dubai','UAE','DubaiExpats','DubaiLife','abudhabi','sharjah',
+  'india','mumbai','delhi','bangalore','hyderabad','Chennai','kolkata','pune','Ahmedabad',
+  'Kerala','trivandrum','Kochi','trichy','Coimbatore',
+  'Noida','Chandigarh','Jaipur','rajasthan','lucknow','Indore','bhopal','Nagpur',
+  'Visakhapatnam','Vijayawada','Bhubaneswar','Guwahati',
+  'Surat','Vadodara','Amritsar','Patna',
+  'expats','Frugal','personalfinance'
+]
+const MAX_AGE_HOURS = 36
+
 async function checkAuth() {
   const tok = localStorage.getItem(TOKEN_KEY)
   if (!tok) { window.location.href = 'admin.html'; return }
@@ -237,17 +251,37 @@ function setFilter(filter, btn) {
 async function runFetch() {
   const btn = document.getElementById('runBtn')
   btn.disabled = true
-  btn.textContent = '⏳ Running…'
+  const now = Date.now()
   try {
+    // Step 1: fetch Reddit from the browser (bypasses cloud IP block)
+    btn.textContent = '⏳ Fetching Reddit…'
+    const candidates = []
+    for (const sub of SUBREDDITS) {
+      try {
+        const r = await fetch(`https://www.reddit.com/r/${sub}/new.json?limit=25`)
+        if (!r.ok) continue
+        const json = await r.json()
+        const posts = json.data?.children?.map(c => c.data) || []
+        for (const p of posts) {
+          const ageH = (now - p.created_utc * 1000) / 3600000
+          if (ageH > MAX_AGE_HOURS || p.score < 1 || p.is_video || p.post_hint === 'image' || p.stickied) continue
+          candidates.push({ subreddit: sub, post: p })
+        }
+      } catch(_) {}
+      await new Promise(r => setTimeout(r, 100))
+    }
+
+    // Step 2: send to edge function for Bedrock analysis + DB insert
+    btn.textContent = `⏳ Analysing ${candidates.length} posts…`
     const r = await fetch(`${SUPABASE_URL}/functions/v1/fetch-reddit-posts`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
-      body: '{}'
+      body: JSON.stringify({ posts: candidates })
     })
     const data = await r.json()
     if (data.success) {
       const parts = [`${data.inserted} new`]
-      if (data.processed != null) parts.push(`${data.processed} processed`)
+      if (data.processed != null) parts.push(`${data.processed} sent`)
       if (data.skippedLowRelevance) parts.push(`${data.skippedLowRelevance} low-relevance`)
       if (data.bedrockError) parts.push(`Bedrock: ${data.bedrockError}`)
       btn.textContent = `✓ Done (${parts.join(', ')})`
@@ -258,7 +292,7 @@ async function runFetch() {
   } catch(e) {
     btn.textContent = `✗ Error: ${e.message}`
   }
-  setTimeout(() => { btn.disabled = false; btn.textContent = '▶ Run Now' }, 8000)
+  setTimeout(() => { btn.disabled = false; btn.textContent = '▶ Run Now' }, 10000)
 }
 
 function copyReply(btn, encoded) {
