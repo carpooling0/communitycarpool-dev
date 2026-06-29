@@ -150,8 +150,8 @@ async function apiPost(action, body = {}) {
   const tok = localStorage.getItem(TOKEN_KEY)
   const r = await fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, token: tok, ...body })
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tok}` },
+    body: JSON.stringify({ action, ...body })
   })
   return r.json()
 }
